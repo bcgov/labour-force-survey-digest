@@ -17,16 +17,21 @@ library(dplyr)
 
 ## get StatsCanada Cansim Tables -----------------------------------------------
 
-lf_character <- get_cansim("14-10-0287-03")
-reasons_not_working <- get_cansim("14-10-0127-01")
-employment_by_class <- get_cansim("14-10-0288-01")
+# lf_character <- get_cansim("14-10-0287-03")
+# reasons_not_working <- get_cansim("14-10-0127-01")
+# employment_by_class <- get_cansim("14-10-0288-01")
+#
+#
+# #cache data to /tmp
+# saveRDS(lf_character, "tmp/lf_character.rds")
+# saveRDS(reasons_not_working, "tmp/reasons_not_working.rds")
+# saveRDS(employment_by_class, "tmp/employment_by_class.rds")
 
-#cache data to /tmp
-saveRDS(lf_character, "tmp/lf_character.rds")
-saveRDS(reasons_not_working, "tmp/reasons_not_working.rds")
-saveRDS(employment_by_class, "tmp/employment_by_class.rds")
 
-#load cached .rds data files
+#load cached /tmp/*.rds data files
 lf_character <- readRDS("tmp/lf_character.rds")
 reasons_not_working <- readRDS("tmp/reasons_not_working.rds")
 employment_by_class <- readRDS("tmp/employment_by_class.rds")
+
+
+## tidy StatsCanada Cansim Tables ----------------------------------------------
