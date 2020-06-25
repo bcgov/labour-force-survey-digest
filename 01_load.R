@@ -10,28 +10,37 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-## libraries
+
+## libraries  ------------------------------------------------------------------
 library(cansim)
 library(dplyr)
 
 
-## get StatsCanada Cansim Tables -----------------------------------------------
+## get Statistics Canada Cansim Tables -----------------------------------------
 
-# lf_character <- get_cansim("14-10-0287-03")
-# reasons_not_working <- get_cansim("14-10-0127-01")
-# employment_by_class <- get_cansim("14-10-0288-01")
-#
-#
+#list of all cansim tables
+# list_cansim_tables(refresh = FALSE)
+
+#get tables
+lf_character <- get_cansim("14-10-0287-03") %>% normalize_cansim_values()
+reasons_not_working <- get_cansim("14-10-0127-01") %>% normalize_cansim_values()
+employment_by_class <- get_cansim("14-10-0288-01") %>% normalize_cansim_values()
+
+
 # #cache data to /tmp
 # saveRDS(lf_character, "tmp/lf_character.rds")
 # saveRDS(reasons_not_working, "tmp/reasons_not_working.rds")
 # saveRDS(employment_by_class, "tmp/employment_by_class.rds")
+#
+#
+# #load cached /tmp/*.rds data files
+# lf_character <- readRDS("tmp/lf_character.rds")
+# reasons_not_working <- readRDS("tmp/reasons_not_working.rds")
+# employment_by_class <- readRDS("tmp/employment_by_class.rds")
+
+# get_cansim_vector_for_latest_periods("v2067017", periods = 3) %>%
+#   normalize_cansim_values()
 
 
-#load cached /tmp/*.rds data files
-lf_character <- readRDS("tmp/lf_character.rds")
-reasons_not_working <- readRDS("tmp/reasons_not_working.rds")
-employment_by_class <- readRDS("tmp/employment_by_class.rds")
 
 
-## tidy StatsCanada Cansim Tables ----------------------------------------------
