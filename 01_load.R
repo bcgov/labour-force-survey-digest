@@ -38,8 +38,7 @@ employment_by_class <- get_cansim("14-10-0288-01") %>% normalize_cansim_values()
 # reasons_not_working <- readRDS("tmp/reasons_not_working.rds")
 # employment_by_class <- readRDS("tmp/employment_by_class.rds")
 
-# get_cansim_vector_for_latest_periods("v2067017", periods = 3) %>%
-#   normalize_cansim_values()
+
 
 
 
