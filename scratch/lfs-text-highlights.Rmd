@@ -26,8 +26,8 @@ library(scales)
 
 ## v2064701 (British Columbia, Employment, Both sexes, 15 years and over, Estimate, Seasonally adjusted)
 ## v2064728 (British Columbia, Employment, Both sexes, 15 to 24 years, Estimate, Seasonally adjusted)
-## v2064836 (British Columbia, Employment, Both sexes, 	25 to 54 years, Estimate, Seasonally adjusted)
-## v2064818 (British Columbia, Employment, Males, 	25 years and over, Estimate, Seasonally adjusted)
+## v2064836 (British Columbia, Employment, Both sexes, 25 to 54 years, Estimate, Seasonally adjusted)
+## v2064818 (British Columbia, Employment, Males, 25 years and over, Estimate, Seasonally adjusted)
 ## v2064827 (British Columbia, Employment, Females, 25 years and over, Estimate, Seasonally adjusted)
 
 vectors <- c(
@@ -135,3 +135,8 @@ df3_month_over_month_changes <- df3 %>%
 ```
 
 • Those not in the labour force decreased in `r month(Sys.Date() %m-% months(1), label = TRUE, abbr = FALSE)` by `r df3_month_over_month_changes %>% filter(vector == "v54536377", year(date) == year(Sys.Date()), month(date) == month(Sys.Date()) - 1) %>% pull(month_change) %>% comma()`, including those who did not want to work or who were not available (`r df3_month_over_month_changes %>% filter(vector == "v54536545", year(date) == year(Sys.Date()), month(date) == month(Sys.Date()) - 1) %>% pull(month_change) %>% comma()`, or `r df3_month_over_month_changes %>% filter(vector == "v54536545", year(date) == year(Sys.Date()), month(date) == month(Sys.Date()) - 1) %>% pull(month_change_percent)`%) and those who wanted work (`r df3_month_over_month_changes %>% filter(vector == "v54536398", year(date) == year(Sys.Date()), month(date) == month(Sys.Date()) - 1) %>% pull(month_change) %>% comma()`, or `r df3_month_over_month_changes %>% filter(vector == "v54536398", year(date) == year(Sys.Date()), month(date) == month(Sys.Date()) - 1) %>% pull(month_change_percent)`%).
+
+
+
+
+
