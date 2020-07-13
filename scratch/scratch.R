@@ -19,6 +19,12 @@ library(janitor)
 library(lubridate)
 
 
+rmarkdown::render(input = here::here("scratch/lfs-text-highlights.Rmd"),
+                  output_file = paste0("lfs-text-highlights_",
+                                       Sys.Date(),
+                                      ".pdf"),
+                  output_dir = here::here("scratch"))
+
 ## Exploratory visualizations --------------------------------------------------
 
 ## load cached /tmp/*.rds data files
