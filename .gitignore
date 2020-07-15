@@ -5,3 +5,4 @@
 /tmp
 *.pdf
 *.log
+.DS_Store
