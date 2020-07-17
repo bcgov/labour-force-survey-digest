@@ -34,12 +34,40 @@ saveRDS(employment_by_class, "tmp/employment_by_class.rds")
 
 
 #load cached /tmp/*.rds data files
-lf_character <- readRDS("tmp/lf_character.rds")
-reasons_not_working <- readRDS("tmp/reasons_not_working.rds")
-employment_by_class <- readRDS("tmp/employment_by_class.rds")
+# lf_character <- readRDS("tmp/lf_character.rds")
+# reasons_not_working <- readRDS("tmp/reasons_not_working.rds")
+# employment_by_class <- readRDS("tmp/employment_by_class.rds")
 
+lfc_tidy <- lf_character %>%
+  clean_names() %>%
+  filter(
+    labour_force_characteristics %in% c(
+      "Unemployment",
+      "Unemployment rate",
+      "Employment rate",
+      "Employment"
+    ),
+    data_type == "Seasonally adjusted",
+    statistics %in% c("Estimate")
+  ) %>%
+  select(
+    "date",
+    "geo",
+    "labour_force_characteristics",
+    "sex",
+    "age_group",
+    "statistics",
+    "vector",
+    "value"
+  ) %>%
+  filter(date >  Sys.Date() - months(12)) %>%
+  group_by(vector) %>%
+  mutate(
+    month_change = value - lag(value),
+    month_change_percent = value / lag(value) - 1
+  )
 
-
-
+#cache data to /tmp
+saveRDS(lfc_tidy, "tmp/lfc_tidy.rds")
 
 
