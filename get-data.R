@@ -11,52 +11,52 @@
 # See the License for the specific language governing permissions and limitations under the License.
 
 
-## libraries  ------------------------------------------------------------------
-library(flexdashboard)
-library(lubridate)
-library(cansim)
-library(janitor)
-library(dplyr)
-library(scales)
-library(signs)
-library(ggplot2)
-library(tidyr)
+## load libraries in setup.R   -------------------------------------------------
+source("setup.R")
 
 
-## get Statistics Canada Cansim Tables -----------------------------------------
+## get raw Statistics Canada Tables --------------------------------------------
 
-# #list of all cansim tables
-# list_cansim_tables(refresh = FALSE)
+#list of all cansim tables
+# sc_tables <- list_cansim_tables(refresh = FALSE)
 
-# #get tables
-# lf_character <- get_cansim("14-10-0287-03") %>% normalize_cansim_values()
-# reasons_not_working <- get_cansim("14-10-0127-01") %>% normalize_cansim_values()
-# employment_by_class <- get_cansim("14-10-0288-01") %>% normalize_cansim_values()
-
-# Labour force characteristics by economic region, three-month moving average, unadjusted for seasonality
-# Table: 14-10-0293-02
+#get tables
+# lfc_province_raw <- get_cansim("14-10-0287-03") %>% normalize_cansim_values()
+# lfc_region_raw <- get_cansim("14-10-0293-02") %>% normalize_cansim_values()
+# employment_by_class_raw <- get_cansim("14-10-0288-01") %>% normalize_cansim_values()
+# reasons_not_working_raw <- get_cansim("14-10-0127-01") %>% normalize_cansim_values()
 
 
-# #cache data to /tmp
-# saveRDS(lf_character, "tmp/lf_character.rds")
-# saveRDS(reasons_not_working, "tmp/reasons_not_working.rds")
-# saveRDS(employment_by_class, "tmp/employment_by_class.rds")
+## cache raw Statistics Canada Tables to /tmp ----------------------------------
 
+#cache data to /tmp
+# saveRDS(lfc_province_raw, "tmp/lfc_province_raw.rds")
+# saveRDS(lfc_region_raw, "tmp/lfc_region_raw.rds")
+# saveRDS(employment_by_class_raw, "tmp/employment_by_class_raw.rds")
+# saveRDS(reasons_not_working_raw, "tmp/reasons_not_working_raw.rds")
+
+
+## tidy Statistics Canada Tables -----------------------------------------------
 
 #load & tidy cached /tmp/*.rds data files
+lfc_province_raw <- readRDS("tmp/lfc_province_raw.rds")
+lfc_region_raw <- readRDS("tmp/lfc_region_raw.rds")
+employment_by_class_raw <- readRDS("tmp/employment_by_class_raw.rds")
+# reasons_not_working_raw <- readRDS("tmp/reasons_not_working_raw.rds")
 
-# reasons_not_working <- readRDS("tmp/reasons_not_working.rds")
-# employment_by_class <- readRDS("tmp/employment_by_class.rds")
-lf_character <- readRDS("tmp/lf_character.rds")
 
-lfc_tidy <- lf_character %>%
+#labour force characteristics by province, month & season
+lfc_province_tidy <- lfc_province_raw %>%
   clean_names() %>%
   filter(
     labour_force_characteristics %in% c(
+      "Population",
       "Unemployment",
       "Unemployment rate",
       "Employment rate",
-      "Employment"
+      "Employment",
+      "Full-time employment",
+      "Part-time employment"
     ),
     data_type == "Seasonally adjusted",
     statistics %in% c("Estimate")
@@ -71,14 +71,89 @@ lfc_tidy <- lf_character %>%
     "vector",
     "value"
   ) %>%
-  filter(date >  Sys.Date() - months(12)) %>%
+  filter(date >  Sys.Date() - months(14)) %>%
   group_by(vector) %>%
   mutate(
     month_change = value - lag(value),
     month_change_percent = value / lag(value) - 1
   )
 
-#cache data to /tmp
-saveRDS(lfc_tidy, "tmp/lfc_tidy.rds")
+
+#get regional spatial data from the B.C. Data Catalogue
+# https://catalogue.data.gov.bc.ca/dataset/1aebc451-a41c-496f-8b18-6f414cde93b7
+economic_regions <- bcdc_get_data("1aebc451-a41c-496f-8b18-6f414cde93b7") %>%
+  clean_names()
+
+economic_regions_tidy <- economic_regions %>%
+mutate(group_var = case_when(economic_region_id %in% c("5960", "5970") ~ "5960-70",
+                             TRUE ~ economic_region_id)) %>%
+  group_by(group_var) %>%
+  summarise()
 
 
+#labour force characteristics by economic region
+lfc_region_tidy <- lfc_region_raw %>%
+  clean_names() %>%
+  filter(
+    str_detect(geo, "British Columbia"),
+    labour_force_characteristics %in% c(
+      "Population",
+      "Unemployment",
+      "Unemployment rate",
+      "Employment rate",
+      "Employment"
+    ),
+    statistics %in% c("Estimate")
+  ) %>%
+  select(
+    "date",
+    "geo",
+    "labour_force_characteristics",
+    "statistics",
+    "vector",
+    "value",
+    "geo_uid"
+  ) %>%
+  filter(date >  Sys.Date() - months(14)) %>%
+  group_by(vector) %>%
+  mutate(
+    month_change = value - lag(value),
+    month_change_percent = value / lag(value) - 1,
+    polygon_code = ifelse(
+      geo == "North Coast and Nechako, British Columbia",
+      "5960-70",
+      geo_uid
+    )
+  ) %>%
+  ungroup() %>%
+  left_join(economic_regions_tidy,
+            by = c("polygon_code" = "group_var"))
+
+#employment by class of worker
+employment_by_class_tidy <- employment_by_class_raw %>%
+ clean_names() %>%
+  filter(
+    geo == "British Columbia",
+    data_type == "Seasonally adjusted",
+    statistics %in% c("Estimate")
+  ) %>%
+  select(
+    "date",
+    "geo",
+    "class_of_worker",
+    "sex",
+    "statistics",
+    "vector",
+    "value"
+  ) %>%
+  filter(date >  Sys.Date() - months(14)) %>%
+  group_by(vector) %>%
+  mutate(
+    month_change = value - lag(value),
+    month_change_percent = value / lag(value) - 1
+  )
+
+#cache tidy data to /tmp  ------------------------------------------------------
+saveRDS(lfc_province_tidy, "tmp/lfc_province_tidy.rds")
+saveRDS(lfc_region_tidy, "tmp/lfc_region_tidy.rds")
+saveRDS(employment_by_class_tidy, "tmp/employment_by_class_tidy.rds")
