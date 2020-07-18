@@ -8,6 +8,7 @@ output:
     source_code: https://github.com/bcgov/labour-force-survey-digest
 ---
 
+
 <!--
 Copyright 2020 Province of British Columbia
 
@@ -22,17 +23,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
 -->
 
+
 ```{r setup, include=FALSE, cache=TRUE}
-#libraries
-library(flexdashboard)
-library(lubridate)
-library(cansim)
-library(janitor)
-library(dplyr)
-library(scales)
-library(signs)
-library(ggplot2)
-library(tidyr)
+#load libraries in setup.R
+source("setup.R")
+
+#source data
+# source("get-data.R")
+lfc_province_tidy <- readRDS("tmp/lfc_province_tidy.rds")
+lfc_region_tidy <- readRDS("tmp/lfc_region_tidy.rds")
+employment_by_class_tidy <- readRDS("tmp/employment_by_class_tidy.rds")
 
 #report month
 report_month <- month(Sys.Date() %m-% months(1),
@@ -40,12 +40,13 @@ report_month <- month(Sys.Date() %m-% months(1),
 
 #report year
 report_year <- year(Sys.Date())
+previous_year <- year(Sys.Date()) - 1
 
 #common chart themes
 theme_vert_bar <- theme(
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank(),
-    axis.line = element_line(),
+    axis.line = element_line(colour = "grey50"),
     axis.text = element_text(size = 11),
     # legend.position = "top",
     # legend.direction = "horizontal",
@@ -54,85 +55,61 @@ theme_vert_bar <- theme(
 theme_horiz_bar <- theme(
     panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank(),
-    axis.line = element_line(),
+    axis.line = element_line(colour = "grey50"),
     axis.text = element_text(size = 11),
     # legend.position = "top",
     # legend.direction = "horizontal",
     legend.text = element_text(size = 11))
 
-lfc_tidy <- readRDS("tmp/lfc_tidy.rds")
-```
+theme_facet_bar <- theme(
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.line = element_line(colour = "grey50"),
+    axis.text.y = element_text(size = 11),
+    axis.text.x = element_text(size = 9),
+    strip.text = element_text(size = 11))
 
+recent_month_change_employment <- lfc_province_tidy %>%
+  filter(vector == "v2064701",
+         date == max(date)) 
 
-```{r data, include=FALSE, cache=TRUE}
-# #load labour force characteristics table from /tmp
-# lf_character <- get_cansim("14-10-0287-03") %>% normalize_cansim_values()
-# lf_character <- readRDS("tmp/lf_character.rds")
-# 
-# #tidy table
-# lfc_tidy <- lf_character %>%
-#   clean_names() %>%
-#   filter(
-#     labour_force_characteristics %in% c(
-#       "Unemployment",
-#       "Unemployment rate",
-#       "Employment rate",
-#       "Employment"
-#     ),
-#     data_type == "Seasonally adjusted",
-#     statistics %in% c("Estimate")
-#   ) %>%
-#   select(
-#     "date",
-#     "geo",
-#     "labour_force_characteristics",
-#     "sex",
-#     "age_group",
-#     "statistics",
-#     "vector",
-#     "value"
-#   ) %>%
-#   filter(date >  Sys.Date() - months(12)) %>%
-#   group_by(vector) %>%
-#   mutate(
-#     month_change = value - lag(value),
-#     month_change_percent = value / lag(value) - 1
-#   )
+year_change_employment <- lfc_province_tidy %>%
+  filter(vector == "v2064701",
+         date %in% c(min(date), max(date))) %>% 
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>% 
+  filter(date == max(date))
 ```
 
 
 Employment
 ======================================================================
 
+
 Column {data-width=30}
 -----------------------------------------------------------------------
 
-### Reference Date {.value-box data-height=75}
 
-```{r month}
+### Reference Date {.value-box}
+
+```{r}
 #LFS month-year
 valueBox(value = paste(report_month, report_year),
 icon = "fa-calendar")
 ```
 
-
-```{r}
-#recent monthly change in employment
-recent_month_change_employment <- lfc_tidy %>%
-  filter(vector == "v2064701",
-         date == max(date)) 
-```
-
 ### Month Change in Employment {.value-box}
 
 ```{r}
+#recent monthly change in employment
 valueBox(value = recent_month_change_employment %>% 
   pull(month_change) %>%
   signs(format = comma, add_plusses = TRUE),
          icon = "fa-users-cog",
-         caption = paste("Change in Employment for ", report_month))
+         caption = paste("Change in Employment for", report_month))
 ```
-
 
 ### % Month Change in Employment {.value-box}
 
@@ -141,17 +118,39 @@ valueBox(value = recent_month_change_employment %>%
   pull(month_change_percent) %>%
   signs(format = percent, add_plusses = TRUE, accuracy = 0.1),
          icon = "fa-users-cog",
-         caption = paste("% Change in Employment for ", report_month))
+         caption = paste("% Change in Employment for", report_month))
+```
+
+### Year Change in Employment {.value-box}
+
+```{r}
+#year over year change employment
+valueBox(value = year_change_employment %>% 
+  pull(year_change) %>%
+  signs(format = comma, ),
+         icon = "fa-users-cog",
+         caption = paste("Change in Employment Since", report_month, previous_year))
+```
+
+### % Year Change in Employment {.value-box}
+
+```{r}
+#year over year change employment
+valueBox(value = year_change_employment %>% 
+  pull(year_change_percent) %>%
+  signs(format = percent, add_plusses = TRUE, accuracy = 0.1),
+         icon = "fa-users-cog",
+         caption = paste("% Change in Employment Since", report_month, previous_year))
 ```
 
 
 Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Monthly Changes in Employment for British Columbia (`r report_year`) 
+### `r report_year` Monthly Change in Employment
 
 ```{r}
-lfc_tidy %>% 
+lfc_province_tidy %>% 
   filter(vector == "v2064701",
          date > "2019-12-01" ) %>%
   ggplot(aes(x = date, y = month_change)) +
@@ -172,7 +171,7 @@ lfc_tidy %>%
 
 ```{r}
 lim <- c(0,
-         lfc_tidy %>%
+         lfc_province_tidy %>%
   ungroup() %>% 
   filter(labour_force_characteristics == "Employment",
          sex == "Both sexes",
@@ -183,7 +182,7 @@ lim <- c(0,
   pull(month_change) + 50000
 )
 
-lfc_tidy %>% 
+lfc_province_tidy %>% 
   filter(labour_force_characteristics == "Employment",
          sex == "Both sexes",
          age_group == "15 years and over",
@@ -205,29 +204,76 @@ lfc_tidy %>%
                      expand = c(0, 0),
                      limits = lim) +
   scale_fill_manual(guide = FALSE,
-                    values = c(bc = "#1d91c0",
-                               other = "#7fcdbb")) +
+                    values = c(bc = "#FDE725FF",
+                               other = "#365C8DFF")) +
   theme_minimal() +
   theme_horiz_bar
 ```
 
 
 
-Column {data-width=300} {.tabset}
+Column {data-width=500}
 -----------------------------------------------------------------------
 
-### Changes in Employment for `r report_month` Across B.C. 
+### `r report_year` % Monthly Change in Employment by Age & Gender
 
 ```{r}
-
+lfc_province_tidy %>% 
+  filter(date > "2019-12-01",
+         geo == "British Columbia",
+         labour_force_characteristics == "Employment",
+         age_group %in% c("15 to 24 years",
+                          "25 to 54 years",
+                          "55 years and over")) %>%
+  mutate(sex = recode(sex, "Both sexes" = "All")) %>% 
+  filter(sex != "All") %>% 
+  ggplot(aes(x = date, y = month_change_percent)) +
+  geom_col(fill = "#1d91c0", alpha = 0.6) +
+  facet_grid(sex ~ age_group) +
+  # geom_text(aes(label = signs(month_change_percent,
+  #                             format = percent,
+  #                             add_plusses = TRUE,
+  #                             accuracy = 0.1)),
+  #           nudge_y = 13000, colour = "grey30", size = 2) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = percent) +
+  theme_minimal() +
+  theme_facet_bar
 ```
 
-
-### Changes in Employment for `r report_month` by Age & Gender in B.C.
+### Changes in Employment for `r report_month` by Economic Region 
 
 ```{r}
-
+lfc_region_tidy %>%
+  filter(
+    geo != "British Columbia",
+    labour_force_characteristics == "Employment",
+    date == max(date)) %>% 
+  mutate(geo_label = str_wrap(str_extract(geo, "^([^,])+"), width = 10)) %>%
+  st_as_sf() %>%
+  rmapshaper::ms_clip(bcmaps::bc_bound(class = "sf")) %>% 
+  ggplot() +
+  geom_sf(aes(fill = month_change), colour = "white") +
+  geom_sf_text(aes(label = geo_label),
+               size = 2.5,
+               colour = "white") +
+  coord_sf(datum = NA) +
+  labs(x = NULL, y = NULL,
+       caption = "(3-month-moving-avg, seasonally unadjusted)") +
+  scale_fill_viridis(name = paste("Change in\nEmployment\nfor", report_month),
+                     direction = -1,
+                     label = scales::comma) +
+  theme_minimal() +
+  theme(legend.title = element_text(size = 10),
+        plot.caption = element_text(size = 8,
+                                    colour = "grey60",
+                                    face = "italic",
+                                    hjust = 1.3))
+  
+# plotly::ggplotly(p) 
 ```
+
 
 Unemployment
 ======================================================================
@@ -272,18 +318,12 @@ recent_month_perc_change_unemploymt <- all_month_change_unemploymt %>%
   signs(format = percent, add_plusses = TRUE, accuracy = 0.1)
 ```
 
-Column
------------------------------------------------------------------------
-
 ### Month Change in Unemployment {.value-box}
 
 ```{r}
 valueBox(value = recent_month_value_change_unemploymt,
          icon = "fa-users-cog")
 ```
-
-Column
------------------------------------------------------------------------
 
 ### % Month Change in Unemployment {.value-box}
 
@@ -296,6 +336,8 @@ valueBox(value = recent_month_perc_change_unemploymt,
 
 
 
+
+
 About
 ======================================================================
 
@@ -303,12 +345,16 @@ Data are sourced from the [Statistics Canada Labour Force Survey (LFS)](https://
   
 Statistics Canada data are released under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/eng/reference/licence).
   
-Labour Force Survey Tables: 
+Statistics Canada Labour Force Survey Tables: 
 
  - [Statistics Canada Table **14-10-0287-03**: Labour force characteristics by province, monthly, seasonally adjusted](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028703)
+ - [Statistics Canada Table **14-10-0293-02**: Labour force characteristics by economic region, three-month moving average, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410029302)
  - [Statistics Canada Table **14-10-0288-01**: Employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028801)
  - [Statistics Canada Table **14-10-0127-01**: Reason for not looking for work, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410012701&pickMembers%5B0%5D=1.11&pickMembers%5B1%5D=3.1&pickMembers%5B2%5D=4.1)
+ 
+B.C. Data Catalogue:
+ - [Current Census Economic Regions](https://catalogue.data.gov.bc.ca/dataset/1aebc451-a41c-496f-8b18-6f414cde93b7)
 
-This report is built with the [`flexdashboard` R package](https://rmarkdown.rstudio.com/flexdashboard/), sourcing the Statistics Canada Labour Force Survey data using the [`cansim` R package](https://mountainmath.github.io/cansim/index.html). 
+This report is built with the [`flexdashboard` R package](https://rmarkdown.rstudio.com/flexdashboard/), sourcing the Statistics Canada Labour Force Survey data using the [`cansim` R package](https://mountainmath.github.io/cansim/index.html), and the British Columbia economic geospatial data using the [`bcdata` R package](https://bcgov.github.io/bcdata/). 
   
 The [R](https://www.r-project.org/) code is available in bcgov GitHub [here](https://github.com/bcgov/labour-force-survey-digest), available under the [Apache 2.0 licence](https://github.com/bcgov/labour-force-survey-digest/blob/master/LICENSE).
