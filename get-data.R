@@ -59,7 +59,7 @@ lfc_province_tidy <- lfc_province_raw %>%
       "Part-time employment"
     ),
     data_type == "Seasonally adjusted",
-    statistics %in% c("Estimate")
+    statistics == "Estimate"
   ) %>%
   select(
     "date",
@@ -71,7 +71,7 @@ lfc_province_tidy <- lfc_province_raw %>%
     "vector",
     "value"
   ) %>%
-  filter(date >  Sys.Date() - months(14)) %>%
+  # filter(date >  Sys.Date() - months(14)) %>%
   group_by(vector) %>%
   mutate(
     month_change = value - lag(value),
@@ -129,6 +129,7 @@ lfc_region_tidy <- lfc_region_raw %>%
   left_join(economic_regions_tidy,
             by = c("polygon_code" = "group_var"))
 
+
 #employment by class of worker
 employment_by_class_tidy <- employment_by_class_raw %>%
  clean_names() %>%
@@ -146,12 +147,13 @@ employment_by_class_tidy <- employment_by_class_raw %>%
     "vector",
     "value"
   ) %>%
-  filter(date >  Sys.Date() - months(14)) %>%
+  filter(date > Sys.Date() - months(14)) %>%
   group_by(vector) %>%
   mutate(
     month_change = value - lag(value),
     month_change_percent = value / lag(value) - 1
   )
+
 
 #cache tidy data to /tmp  ------------------------------------------------------
 saveRDS(lfc_province_tidy, "tmp/lfc_province_tidy.rds")
