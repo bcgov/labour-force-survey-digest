@@ -25,4 +25,5 @@ library(bcdata)
 library(sf)
 library(bcmaps)
 library(viridis)
+library(plotly)
 
