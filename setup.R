@@ -26,4 +26,7 @@ library(sf)
 library(bcmaps)
 library(viridis)
 library(plotly)
+library(cancensus)
+
+
 
