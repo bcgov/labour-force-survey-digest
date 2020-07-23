@@ -39,9 +39,20 @@ can_provinces <- cancensus::get_census(
 # sc_tables <- list_cansim_tables(refresh = FALSE)
 
 #get tables
+
+## labour force characteristics by province, monthly, seasonally adjusted
 # lfc_province_raw <- get_cansim("14-10-0287-03") %>% normalize_cansim_values()
+#
+## labour force characteristics by territory, three-month moving average, seasonally adjusted
+# lfc_territories_raw <- get_cansim("14-10-0292-02") %>% normalize_cansim_values()
+#
+## labour force characteristics by economic region, three-month moving average, unadjusted for seasonality
 # lfc_region_raw <- get_cansim("14-10-0293-02") %>% normalize_cansim_values()
+#
+## employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months
 # employment_by_class_raw <- get_cansim("14-10-0288-01") %>% normalize_cansim_values()
+#
+## reason for not looking for work, monthly, unadjusted for seasonality
 # reasons_not_working_raw <- get_cansim("14-10-0127-01") %>% normalize_cansim_values()
 
 
@@ -96,6 +107,9 @@ lfc_province_tidy <- lfc_province_raw %>%
     month_change_percent = value / lag(value) - 1
   )
 
+
+#labour force characteristics by province, month & season
+lfc_territories_raw
 
 #labour force characteristics by economic region
 lfc_region_tabular_tidy <- lfc_region_raw %>%
