@@ -15,6 +15,24 @@
 source("setup.R")
 
 
+## get spatial data ------------------------------------------------------------
+
+#economic regions spatial data from the B.C. Data Catalogue using the bcdata package
+# https://catalogue.data.gov.bc.ca/dataset/1aebc451-a41c-496f-8b18-6f414cde93b7
+economic_regions <-
+  bcdc_get_data("1aebc451-a41c-496f-8b18-6f414cde93b7") %>%
+  clean_names()
+
+
+#get Canadian & Province/Territory spatial data using the cancensus package
+can_provinces <- cancensus::get_census(
+    "CA16",
+    regions = list(C = "01"),
+    level = "PR",
+    geo_format = "sf"
+  )
+
+
 ## get raw Statistics Canada Tables --------------------------------------------
 
 #list of all cansim tables
@@ -79,20 +97,8 @@ lfc_province_tidy <- lfc_province_raw %>%
   )
 
 
-#get regional spatial data from the B.C. Data Catalogue
-# https://catalogue.data.gov.bc.ca/dataset/1aebc451-a41c-496f-8b18-6f414cde93b7
-economic_regions <- bcdc_get_data("1aebc451-a41c-496f-8b18-6f414cde93b7") %>%
-  clean_names()
-
-economic_regions_tidy <- economic_regions %>%
-mutate(group_var = case_when(economic_region_id %in% c("5960", "5970") ~ "5960-70",
-                             TRUE ~ economic_region_id)) %>%
-  group_by(group_var) %>%
-  summarise()
-
-
 #labour force characteristics by economic region
-lfc_region_tidy <- lfc_region_raw %>%
+lfc_region_tabular_tidy <- lfc_region_raw %>%
   clean_names() %>%
   filter(
     str_detect(geo, "British Columbia"),
@@ -124,10 +130,21 @@ lfc_region_tidy <- lfc_region_raw %>%
       "5960-70",
       geo_uid
     )
-  ) %>%
-  ungroup() %>%
-  left_join(economic_regions_tidy,
-            by = c("polygon_code" = "group_var"))
+  )
+
+economic_regions_tidy <- economic_regions %>%
+  mutate(group_var = case_when(
+    economic_region_id %in% c("5960", "5970") ~ "5960-70",
+    TRUE ~ economic_region_id
+  )) %>%
+  group_by(group_var) %>%
+  summarise() %>%
+  rmapshaper::ms_clip(bcmaps::bc_bound(class = "sf"))
+
+
+lfc_region_tidy <- economic_regions_tidy %>%
+  left_join(lfc_region_tabular_tidy,
+            by = c("group_var" = "polygon_code"))
 
 
 #employment by class of worker
@@ -159,3 +176,4 @@ employment_by_class_tidy <- employment_by_class_raw %>%
 saveRDS(lfc_province_tidy, "tmp/lfc_province_tidy.rds")
 saveRDS(lfc_region_tidy, "tmp/lfc_region_tidy.rds")
 saveRDS(employment_by_class_tidy, "tmp/employment_by_class_tidy.rds")
+saveRDS(can_provinces, "tmp/can_provinces.rds")
