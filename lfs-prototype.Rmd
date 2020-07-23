@@ -33,6 +33,7 @@ source("setup.R")
 lfc_province_tidy <- readRDS("tmp/lfc_province_tidy.rds")
 lfc_region_tidy <- readRDS("tmp/lfc_region_tidy.rds")
 employment_by_class_tidy <- readRDS("tmp/employment_by_class_tidy.rds")
+can_provinces <- readRDS("tmp/can_provinces.rds")
 
 #report month
 report_month <- month(Sys.Date() %m-% months(1),
@@ -185,7 +186,7 @@ ggplotly(p1, tooltip = c("text"))
 ### Monthly Change in B.C. Employment by Sector in `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
-p4 <- employment_by_class_tidy %>%
+p2 <- employment_by_class_tidy %>%
   filter(
     class_of_worker %in% c(
       "Public sector employees",
@@ -195,6 +196,7 @@ p4 <- employment_by_class_tidy %>%
     date > "2019-12-01"
   ) %>%
   mutate(class_of_worker = str_remove(class_of_worker, " employees")) %>%
+  ungroup() %>% 
   ggplot(aes(
     x = date,
     y = month_change,
@@ -239,7 +241,7 @@ p4 <- employment_by_class_tidy %>%
   theme_minimal() +
   theme_facet_bar
 
-ggplotly(p4, tooltip = c("text"))
+ggplotly(p2, tooltip = c("text"))
 ```
 
 
@@ -250,7 +252,7 @@ Row
 ### Monthly Change in B.C. Employment by Age & Gender in `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
-p2 <- lfc_province_tidy %>%
+p3 <- lfc_province_tidy %>%
   filter(
     date > "2019-12-01",
     geo == "British Columbia",
@@ -303,14 +305,14 @@ p2 <- lfc_province_tidy %>%
   theme_facet_bar
 # theme(strip.text.y = element_text(angle = 0))
 
-ggplotly(p2, tooltip = c("text"))
+ggplotly(p3, tooltip = c("text"))
 ```
 
 
 ### Monthly Change in B.C. Employment by Job Type in `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
-p3 <- lfc_province_tidy %>%
+p4 <- lfc_province_tidy %>%
   filter(
     date > "2019-12-01",
     geo == "British Columbia",
@@ -365,7 +367,7 @@ p3 <- lfc_province_tidy %>%
   theme_minimal() +
   theme_facet_bar
 
-ggplotly(p3, tooltip = c("text"))
+ggplotly(p4, tooltip = c("text"))
 ```
 
 
@@ -515,7 +517,7 @@ ggplotly(p5, tooltip = c("text"))
 
 
 ```{r, fig.width=7, fig.height=5}
-p7 <- lfc_province_tidy %>%
+p6 <- lfc_province_tidy %>%
   filter(vector == "v2064705") %>%
   ggplot(aes(x = date,
              y = value
@@ -540,7 +542,7 @@ p7 <- lfc_province_tidy %>%
   theme_minimal() +
   theme_vert_bar
 
-ggplotly(p7, tooltip = c("text"))
+ggplotly(p6, tooltip = c("text"))
 ```
 
 
@@ -550,8 +552,8 @@ Row
 
 ### Unemployment Rates for `r report_month` by B.C. Economic Region 
 
-```{r, fig.width=7, fig.height=5}
-# p6 <- 
+```{r}
+p7 <-
 lfc_region_tidy %>%
   filter(
     geo != "British Columbia",
@@ -559,16 +561,26 @@ lfc_region_tidy %>%
     date == max(date)
   ) %>%
   mutate(geo_label = str_wrap(str_extract(geo, "^([^,])+"), width = 10)) %>%
-  st_as_sf() %>%
-  rmapshaper::ms_clip(bcmaps::bc_bound(class = "sf")) %>%
   ggplot() +
-  geom_sf(aes(fill = value),
+  geom_sf(aes(fill = value,
+              text = paste( 
+                "Region:",
+                geo_label,
+                  "<br>",
+      "Date:",
+      date,
+      "<br>",
+    "Unemployment Rate:",
+    signs(value,
+          format = percent,
+          accuracy = 0.1)
+  )),
           colour = "white",
           lwd = .2) +
   geom_sf_text(aes(label = geo_label),
                size = 3.5,
                colour = "grey10") +
-  coord_sf(datum = NA) +
+  # coord_sf(datum = NA) +
   labs(x = NULL, y = NULL,
        caption = "(3-month-moving-avg, seasonally unadjusted)") +
   scale_fill_viridis(
@@ -589,10 +601,12 @@ lfc_region_tidy %>%
       colour = "grey60",
       face = "italic",
       hjust = 1.3
-    )
+    ),
+    panel.grid.major = element_line(colour = "transparent"),
+    axis.text = element_blank()
   )
 
-# plotly::ggplotly(p6) 
+ggplotly(p7, tooltip = c("text"))
 ```
 
 
@@ -731,7 +745,6 @@ can_recent_month_unemployment_rate <- lfc_province_tidy %>%
   filter(vector == "v2062815",
          date == max(date))
 
-
 valueBox(
   value = can_recent_month_unemployment_rate %>%
     pull(value) %>%
@@ -764,7 +777,7 @@ lim <- c(
     pull(month_change) + 50000
 )
 
-lfc_province_tidy %>%
+p9 <- lfc_province_tidy %>%
   filter(
     labour_force_characteristics == "Employment",
     sex == "Both sexes",
@@ -775,7 +788,22 @@ lfc_province_tidy %>%
          geo != "Canada") %>%
   mutate(fill_col = ifelse(geo == "British Columbia", "bc", "other")) %>%
   ggplot(aes(x = reorder(geo, -month_change), y = month_change)) +
-  geom_col(aes(fill = fill_col), alpha = 0.6) +
+  geom_col(aes(fill = fill_col,
+              text = paste(
+      "Month-Over-Month Change:",
+      signs(
+       month_change,
+       format = comma,
+       add_plusses = TRUE),
+      "<br>",
+      "% Month-Over-Month Change:",
+      signs(
+        month_change_percent,
+        format = percent,
+        add_plusses = TRUE,
+        accuracy = 0.1
+      )
+    )), alpha = 0.6) +
   coord_flip() +
   geom_text(
     aes(
@@ -786,7 +814,7 @@ lfc_province_tidy %>%
         accuracy = 0.1
       )
     ),
-    nudge_y = 13000,
+    nudge_y = 15000,
     colour = "grey20",
     size = 2.5
   ) +
@@ -802,67 +830,86 @@ lfc_province_tidy %>%
                     values = c(bc = "#440154FF",
                                other = main_col)) +
   theme_minimal() +
-  theme_horiz_bar
+  theme_horiz_bar +
+  theme(legend.position = "none")
+
+ggplotly(p9, tooltip = c("text"))
 ```
 
 
 ### Unemployment Rates by Province in `r report_month`
 
 ```{r, fig.width=7, fig.height=5}
-lim_ue_rate <- c(
-  0,
-  lfc_province_tidy %>%
-    ungroup() %>%
-    filter(
-      labour_force_characteristics == "Unemployment rate",
-      sex == "Both sexes",
-      age_group == "15 years and over",
-      date == max(date),
-      geo != "Canada"
-    ) %>%
-    slice_max(month_change, n = 1) %>%
-    pull(value) + .08
-)
+# lim_ue_rate <- c(
+#   0,
+#   lfc_province_tidy %>%
+#     ungroup() %>%
+#     filter(
+#       labour_force_characteristics == "Unemployment rate",
+#       sex == "Both sexes",
+#       age_group == "15 years and over",
+#       date == max(date),
+#       geo != "Canada"
+#     ) %>%
+#     slice_max(month_change, n = 1) %>%
+#     pull(value) + .08
+# )
+# 
+# lfc_province_tidy %>%
+#   filter(
+#     labour_force_characteristics == "Unemployment rate",
+#     sex == "Both sexes",
+#     age_group == "15 years and over",
+#     date > "2019-12-01"
+#   ) %>%
+#   filter(date == max(date),
+#          geo != "Canada") %>%
+#   mutate(fill_col = ifelse(geo == "British Columbia", "bc", "other")) %>%
+#   ggplot(aes(x = reorder(geo, -value), y = value)) +
+#   geom_col(aes(fill = fill_col), alpha = 0.6) +
+#   coord_flip() +
+#   geom_text(
+#     aes(
+#       label = signs(
+#         value,
+#         format = percent,
+#         # add_plusses = TRUE,
+#         accuracy = 0.1
+#       )
+#     ),
+#     nudge_y = .007,
+#     colour = "grey20",
+#     size = 2.5
+#   ) +
+#   labs(x = NULL,
+#        y = NULL) +
+#   scale_y_continuous(
+#     labels = percent,
+#     expand = c(0, 0),
+#     limits = lim_ue_rate,
+#     breaks = breaks_pretty(n = 6)
+#   ) +
+#   scale_fill_manual(guide = FALSE,
+#                     values = c(bc = "#440154FF",
+#                                other = main_col)) +
+#   theme_minimal() +
+#   theme_horiz_bar
 
-lfc_province_tidy %>%
-  filter(
-    labour_force_characteristics == "Unemployment rate",
-    sex == "Both sexes",
-    age_group == "15 years and over",
-    date > "2019-12-01"
-  ) %>%
-  filter(date == max(date),
-         geo != "Canada") %>%
-  mutate(fill_col = ifelse(geo == "British Columbia", "bc", "other")) %>%
-  ggplot(aes(x = reorder(geo, -value), y = value)) +
-  geom_col(aes(fill = fill_col), alpha = 0.6) +
-  coord_flip() +
-  geom_text(
-    aes(
-      label = signs(
-        value,
-        format = percent,
-        # add_plusses = TRUE,
-        accuracy = 0.1
-      )
-    ),
-    nudge_y = .007,
-    colour = "grey20",
-    size = 2.5
-  ) +
-  labs(x = NULL,
-       y = NULL) +
-  scale_y_continuous(
-    labels = percent,
-    expand = c(0, 0),
-    limits = lim_ue_rate,
-    breaks = breaks_pretty(n = 6)
-  ) +
-  scale_fill_manual(guide = FALSE,
-                    values = c(bc = "#440154FF",
-                               other = main_col)) +
-  theme_minimal() +
-  theme_horiz_bar
+# foo <- lfc_province_tidy %>%
+#   filter(
+#     labour_force_characteristics == "Unemployment rate",
+#     sex == "Both sexes",
+#     age_group == "15 years and over",
+#     date > "2019-12-01",
+#     date == max(date),
+#     geo != "Canada") 
+# 
+# foo2 <- can_provinces %>% 
+#     left_join(foo,
+#             by = c("name" = "geo")) 
+# foo2 %>% 
+#   ggplot() +
+#   geom_sf(aes(fill = "Population"))
 ```
 
 
