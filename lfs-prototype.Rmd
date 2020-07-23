@@ -5,6 +5,7 @@ output:
     theme: yeti
     orientation: rows
     vertical_layout: scroll
+    social: menu
     source_code: https://github.com/bcgov/labour-force-survey-digest
 ---
 
@@ -552,8 +553,8 @@ Row
 
 ### Unemployment Rates for `r report_month` by B.C. Economic Region 
 
-```{r}
-p7 <-
+```{r, fig.width=7, fig.height=5}
+# p7 <-
 lfc_region_tidy %>%
   filter(
     geo != "British Columbia",
@@ -579,14 +580,14 @@ lfc_region_tidy %>%
           lwd = .2) +
   geom_sf_text(aes(label = geo_label),
                size = 3.5,
-               colour = "grey10") +
+               colour = "grey20") +
   # coord_sf(datum = NA) +
   labs(x = NULL, y = NULL,
        caption = "(3-month-moving-avg, seasonally unadjusted)") +
   scale_fill_viridis(
-    name = paste("Unemployment Rate\nfor",
-                 report_month,
-                 report_year),
+    name = paste(report_month,
+                 report_year,
+                 "\nUnemployment\nRate"),
     direction = -1,
     begin = 0.3,
     end = 1,
@@ -595,7 +596,10 @@ lfc_region_tidy %>%
   ) +
   theme_minimal() +
   theme(
-    legend.title = element_text(size = 11, colour = "grey20"),
+    legend.title = element_text(size = 11, 
+                                colour = "grey20"),
+    legend.text = element_text(size = 10,
+                               colour = "grey20"),
     plot.caption = element_text(
       size = 8,
       colour = "grey60",
@@ -606,7 +610,7 @@ lfc_region_tidy %>%
     axis.text = element_blank()
   )
 
-ggplotly(p7, tooltip = c("text"))
+# ggplotly(p7, tooltip = c("text")) 
 ```
 
 
@@ -837,79 +841,46 @@ ggplotly(p9, tooltip = c("text"))
 ```
 
 
-### Unemployment Rates by Province in `r report_month`
+### Monthly Change in Unemployment Rates by Province in `r report_year`
+
 
 ```{r, fig.width=7, fig.height=5}
-# lim_ue_rate <- c(
-#   0,
-#   lfc_province_tidy %>%
-#     ungroup() %>%
-#     filter(
-#       labour_force_characteristics == "Unemployment rate",
-#       sex == "Both sexes",
-#       age_group == "15 years and over",
-#       date == max(date),
-#       geo != "Canada"
-#     ) %>%
-#     slice_max(month_change, n = 1) %>%
-#     pull(value) + .08
-# )
-# 
-# lfc_province_tidy %>%
-#   filter(
-#     labour_force_characteristics == "Unemployment rate",
-#     sex == "Both sexes",
-#     age_group == "15 years and over",
-#     date > "2019-12-01"
-#   ) %>%
-#   filter(date == max(date),
-#          geo != "Canada") %>%
-#   mutate(fill_col = ifelse(geo == "British Columbia", "bc", "other")) %>%
-#   ggplot(aes(x = reorder(geo, -value), y = value)) +
-#   geom_col(aes(fill = fill_col), alpha = 0.6) +
-#   coord_flip() +
-#   geom_text(
-#     aes(
-#       label = signs(
-#         value,
-#         format = percent,
-#         # add_plusses = TRUE,
-#         accuracy = 0.1
-#       )
-#     ),
-#     nudge_y = .007,
-#     colour = "grey20",
-#     size = 2.5
-#   ) +
-#   labs(x = NULL,
-#        y = NULL) +
-#   scale_y_continuous(
-#     labels = percent,
-#     expand = c(0, 0),
-#     limits = lim_ue_rate,
-#     breaks = breaks_pretty(n = 6)
-#   ) +
-#   scale_fill_manual(guide = FALSE,
-#                     values = c(bc = "#440154FF",
-#                                other = main_col)) +
-#   theme_minimal() +
-#   theme_horiz_bar
+p10 <- lfc_province_tidy %>%
+  filter(
+    labour_force_characteristics == "Unemployment rate",
+    sex == "Both sexes",
+    age_group == "15 years and over",
+    geo != "Canada",
+    date > "2019-12-01"
+) %>% 
+ ggplot(aes(
+    x = date,
+    y = value,
+    colour = geo
+  )) +
+  geom_point(aes(text = paste(
+      "Province:",
+      geo,
+      "<br>",
+      "Date:",
+      date,
+      "<br>",
+      "Unemployment Rate:",
+      signs(value,
+            format = percent,
+            accuracy = 0.1)
+    )),
+    alpha = 0.6) +
+  geom_line(alpha = 0.8) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = percent,
+                     breaks = breaks_pretty(n = 6)) +
+  scale_colour_viridis_d(name = NULL) +
+  theme_minimal() +
+  theme_vert_bar
 
-# foo <- lfc_province_tidy %>%
-#   filter(
-#     labour_force_characteristics == "Unemployment rate",
-#     sex == "Both sexes",
-#     age_group == "15 years and over",
-#     date > "2019-12-01",
-#     date == max(date),
-#     geo != "Canada") 
-# 
-# foo2 <- can_provinces %>% 
-#     left_join(foo,
-#             by = c("name" = "geo")) 
-# foo2 %>% 
-#   ggplot() +
-#   geom_sf(aes(fill = "Population"))
+ggplotly(p10, tooltip = c("text"))
 ```
 
 
@@ -979,8 +950,11 @@ Statistics Canada Labour Force Survey Tables:
 
  - [Statistics Canada Table **14-10-0287-03**: Labour force characteristics by province, monthly, seasonally adjusted](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028703)
  - [Statistics Canada Table **14-10-0293-02**: Labour force characteristics by economic region, three-month moving average, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410029302)
- - [Statistics Canada Table **14-10-0288-01**: Employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028801)
- - [Statistics Canada Table **14-10-0127-01**: Reason for not looking for work, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410012701&pickMembers%5B0%5D=1.11&pickMembers%5B1%5D=3.1&pickMembers%5B2%5D=4.1)
+ - [Statistics Canada Table **14-10-0288-01**: Employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028801) 
+ 
+ <!--
+ - [Statistics Canada Table **14-10-0127-01**: Reason for not looking for work, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410012701&pickMembers%5B0%5D=1.11&pickMembers%5B1%5D=3.1&pickMembers%5B2%5D=4.1) 
+ -->
  
 B.C. Data Catalogue:
  - [Current Census Economic Regions](https://catalogue.data.gov.bc.ca/dataset/1aebc451-a41c-496f-8b18-6f414cde93b7)
