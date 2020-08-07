@@ -177,6 +177,7 @@ p1 <- lfc_province_tidy %>%
        y = NULL) +
   scale_y_continuous(labels = comma,
                      breaks = breaks_pretty(n = 8)) +
+  scale_x_date(breaks = breaks_pretty(n = 6)) +
   theme_minimal() +
   theme_vert_bar
 
@@ -239,6 +240,7 @@ p2 <- employment_by_class_tidy %>%
        y = NULL) +
   scale_y_continuous(labels = comma,
                      breaks = breaks_pretty(n = 6)) +
+  scale_x_date(breaks = breaks_pretty(n = 4)) +
   theme_minimal() +
   theme_facet_bar
 
@@ -302,6 +304,7 @@ p3 <- lfc_province_tidy %>%
        y = NULL) +
   scale_y_continuous(labels = comma,
                      breaks = breaks_pretty(5)) +
+  scale_x_date(breaks = breaks_pretty(n = 4)) +
   theme_minimal() +
   theme_facet_bar
 # theme(strip.text.y = element_text(angle = 0))
@@ -365,6 +368,7 @@ p4 <- lfc_province_tidy %>%
        y = NULL) +
   scale_y_continuous(labels = comma,
                      breaks = breaks_pretty(n = 8)) +
+  scale_x_date(breaks = breaks_pretty(n = 6)) +
   theme_minimal() +
   theme_facet_bar
 
@@ -506,6 +510,7 @@ p5 <- lfc_province_tidy %>%
   scale_y_continuous(labels = comma,
                      expand = c(0, 0),
                      breaks = breaks_pretty(n = 6)) +
+  scale_x_date(breaks = breaks_pretty(n = 6)) +
   theme_minimal() +
   theme_vert_bar
 
@@ -651,6 +656,7 @@ p8 <- lfc_province_tidy %>%
        y = NULL) +
   scale_y_continuous(labels = percent,
                      breaks = breaks_pretty(n = 6)) +
+  scale_x_date(breaks = breaks_pretty(n = 6)) +
   scale_colour_viridis_d() +
   theme_minimal() +
   theme_facet_bar
@@ -778,7 +784,7 @@ lim <- c(
       geo != "Canada"
     ) %>%
     slice_max(month_change, n = 1) %>%
-    pull(month_change) + 50000
+    pull(month_change) + 30000
 )
 
 p9 <- lfc_province_tidy %>%
@@ -818,7 +824,7 @@ p9 <- lfc_province_tidy %>%
         accuracy = 0.1
       )
     ),
-    nudge_y = 15000,
+    nudge_y = 8000,
     colour = "grey20",
     size = 2.5
   ) +
@@ -877,6 +883,7 @@ p10 <- lfc_province_tidy %>%
   scale_y_continuous(labels = percent,
                      breaks = breaks_pretty(n = 6)) +
   scale_colour_viridis_d(name = NULL) +
+  scale_x_date(breaks = breaks_pretty(n = 6)) +
   theme_minimal() +
   theme_vert_bar
 
