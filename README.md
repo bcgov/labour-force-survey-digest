@@ -3,27 +3,36 @@
 
 ## labour-force-survey-digest
 
+A mvp/prototype implementation of a summary dashboard for some key [Statistics Canada Labour Force Survey](https://www.statcan.gc.ca/eng/survey/household/3701) measures&mdash;Statistics Canada's Labour Force Survey is a monthly survey which measures the current state of the Canadian labour market. 
+
+
+### Data
+
+**Statistics Canada Labour Force Survey**
+
+Labour Force Survey data are sourced from the [Statistics Canada Labour Force Survey](https://www.statcan.gc.ca/eng/survey/household/3701), released under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/eng/reference/licence), using the [`cansim` R package](https://mountainmath.github.io/cansim/index.html):
+  
+ - [Statistics Canada Table **14-10-0287-03**: Labour force characteristics by province, monthly, seasonally adjusted](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028703)
+ - [Statistics Canada Table **14-10-0293-02**: Labour force characteristics by economic region, three-month moving average, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410029302)
+ - [Statistics Canada Table **14-10-0288-01**: Employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028801) 
+ 
+ <!--
+ - [Statistics Canada Table **14-10-0127-01**: Reason for not looking for work, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410012701&pickMembers%5B0%5D=1.11&pickMembers%5B1%5D=3.1&pickMembers%5B2%5D=4.1) 
+ -->
+ 
+**British Columbia Census Economic Regions**
+
+[Current Census Economic Regions](https://catalogue.data.gov.bc.ca/dataset/1aebc451-a41c-496f-8b18-6f414cde93b7) geospatial data, released under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/eng/reference/licence), are sourced from the B.C. Data Catalogue using the [`bcdata` R package](https://bcgov.github.io/bcdata/),
+
+
 
 ### Usage
 
-Describe data being used (links), and how to run. Eg:
+This report is built with the [`flexdashboard` R package](https://rmarkdown.rstudio.com/flexdashboard/) using the `lfs-prototype.Rmd` script. Data are sourced and tidied in the `get-data.R` script. Required R packages are listed (and loaded) with the `setup.R` script.
 
-There are four core scripts that are required for the analysis, they need to be run in order:
-
--   01\_clean.R
--   02\_analysis.R
--   03\_visualize.R
--   04\_output.R
-
-#### Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-## basic example code
-```
 
 ### Project Status
+In progress
 
 ### Getting Help or Reporting an Issue
 
