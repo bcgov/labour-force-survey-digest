@@ -38,36 +38,39 @@ can_provinces <- cancensus::get_census(
 #list of all cansim tables
 # sc_tables <- list_cansim_tables(refresh = FALSE)
 
-#get tables
+#get all tables
+#labour force characteristics by province, monthly, seasonally adjusted
+lfc_province_raw <- get_cansim("14-10-0287-03") %>% normalize_cansim_values()
 
-## labour force characteristics by province, monthly, seasonally adjusted
-# lfc_province_raw <- get_cansim("14-10-0287-03") %>% normalize_cansim_values()
-#
-## labour force characteristics by territory, three-month moving average, seasonally adjusted
-# lfc_territories_raw <- get_cansim("14-10-0292-02") %>% normalize_cansim_values()
-#
-## labour force characteristics by economic region, three-month moving average, unadjusted for seasonality
-# lfc_region_raw <- get_cansim("14-10-0293-02") %>% normalize_cansim_values()
-#
-## employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months
-# employment_by_class_raw <- get_cansim("14-10-0288-01") %>% normalize_cansim_values()
-#
-## reason for not looking for work, monthly, unadjusted for seasonality
-# reasons_not_working_raw <- get_cansim("14-10-0127-01") %>% normalize_cansim_values()
+#labour force characteristics by territory, three-month moving average, seasonally adjusted
+lfc_territories_raw <- get_cansim("14-10-0292-02") %>% normalize_cansim_values()
+
+#labour force characteristics by economic region, three-month moving average, unadjusted for seasonality
+lfc_region_raw <- get_cansim("14-10-0293-02") %>% normalize_cansim_values()
+
+#employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months
+employment_by_class_raw <- get_cansim("14-10-0288-01") %>% normalize_cansim_values()
+
+#reason for not looking for work, monthly, unadjusted for seasonality
+reasons_not_working_raw <- get_cansim("14-10-0127-01") %>% normalize_cansim_values()
 
 
 ## cache raw Statistics Canada Tables to /tmp ----------------------------------
 
 #cache data to /tmp
-# saveRDS(lfc_province_raw, "tmp/lfc_province_raw.rds")
-# saveRDS(lfc_region_raw, "tmp/lfc_region_raw.rds")
-# saveRDS(employment_by_class_raw, "tmp/employment_by_class_raw.rds")
-# saveRDS(reasons_not_working_raw, "tmp/reasons_not_working_raw.rds")
+saveRDS(economic_regions, "tmp/economic_regions.rds")
+saveRDS(can_provinces, "tmp/can_provinces.rds")
+saveRDS(lfc_province_raw, "tmp/lfc_province_raw.rds")
+saveRDS(lfc_region_raw, "tmp/lfc_region_raw.rds")
+saveRDS(employment_by_class_raw, "tmp/employment_by_class_raw.rds")
+saveRDS(reasons_not_working_raw, "tmp/reasons_not_working_raw.rds")
 
 
 ## tidy Statistics Canada Tables -----------------------------------------------
 
 #load & tidy cached /tmp/*.rds data files
+economic_regions <- readRDS("tmp/economic_regions.rds")
+can_provinces <- readRDS("tmp/can_provinces.rds")
 lfc_province_raw <- readRDS("tmp/lfc_province_raw.rds")
 lfc_region_raw <- readRDS("tmp/lfc_region_raw.rds")
 employment_by_class_raw <- readRDS("tmp/employment_by_class_raw.rds")
@@ -108,8 +111,6 @@ lfc_province_tidy <- lfc_province_raw %>%
   )
 
 
-#labour force characteristics by province, month & season
-lfc_territories_raw
 
 #labour force characteristics by economic region
 lfc_region_tabular_tidy <- lfc_region_raw %>%
@@ -190,4 +191,4 @@ employment_by_class_tidy <- employment_by_class_raw %>%
 saveRDS(lfc_province_tidy, "tmp/lfc_province_tidy.rds")
 saveRDS(lfc_region_tidy, "tmp/lfc_region_tidy.rds")
 saveRDS(employment_by_class_tidy, "tmp/employment_by_class_tidy.rds")
-saveRDS(can_provinces, "tmp/can_provinces.rds")
+
