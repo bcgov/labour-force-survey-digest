@@ -68,6 +68,9 @@ theme_facet_bar <-  theme_vert_bar +
 
 #colours
 main_col <- "#1d91c0"
+
+#custom
+ggplotly_lfs <- function(...) {ggplotly(..., tooltip = c("text"))}
 ```
 
 
@@ -181,7 +184,7 @@ p1 <- lfc_province_tidy %>%
   theme_minimal() +
   theme_vert_bar
 
-ggplotly(p1, tooltip = c("text"))
+ggplotly_lfs(p1)
 ```
 
 
@@ -244,7 +247,7 @@ p2 <- employment_by_class_tidy %>%
   theme_minimal() +
   theme_facet_bar
 
-ggplotly(p2, tooltip = c("text"))
+ggplotly_lfs(p2)
 ```
 
 
@@ -309,7 +312,7 @@ p3 <- lfc_province_tidy %>%
   theme_facet_bar
 # theme(strip.text.y = element_text(angle = 0))
 
-ggplotly(p3, tooltip = c("text"))
+ggplotly_lfs(p3)
 ```
 
 
@@ -372,7 +375,7 @@ p4 <- lfc_province_tidy %>%
   theme_minimal() +
   theme_facet_bar
 
-ggplotly(p4, tooltip = c("text"))
+ggplotly_lfs(p4)
 ```
 
 
@@ -515,7 +518,7 @@ p5 <- lfc_province_tidy %>%
   theme_vert_bar
 
 
-ggplotly(p5, tooltip = c("text"))
+ggplotly_lfs(p5)
 ```
 
 
@@ -548,7 +551,7 @@ p6 <- lfc_province_tidy %>%
   theme_minimal() +
   theme_vert_bar
 
-ggplotly(p6, tooltip = c("text"))
+ggplotly_lfs(p6)
 ```
 
 
@@ -615,7 +618,7 @@ lfc_region_tidy %>%
     axis.text = element_blank()
   )
 
-# ggplotly(p7, tooltip = c("text")) 
+# ggplotly_lfs(p7) 
 ```
 
 
@@ -661,7 +664,7 @@ p8 <- lfc_province_tidy %>%
   theme_minimal() +
   theme_facet_bar
 
-ggplotly(p8, tooltip = c("text")) %>%
+ggplotly_lfs(p8) %>%
   layout(legend = list(
     orientation = "h",
     x = 0.1,
@@ -843,7 +846,7 @@ p9 <- lfc_province_tidy %>%
   theme_horiz_bar +
   theme(legend.position = "none")
 
-ggplotly(p9, tooltip = c("text"))
+ggplotly_lfs(p9)
 ```
 
 
@@ -887,7 +890,7 @@ p10 <- lfc_province_tidy %>%
   theme_minimal() +
   theme_vert_bar
 
-ggplotly(p10, tooltip = c("text"))
+ggplotly_lfs(p10)
 ```
 
 
