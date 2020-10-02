@@ -30,13 +30,13 @@ can_provinces <- cancensus::get_census(
     regions = list(C = "01"),
     level = "PR",
     geo_format = "sf"
-  )
-
+  ) %>%
+  transform_bc_albers()
 
 ## get raw Statistics Canada Tables --------------------------------------------
 
 #list of all cansim tables
-# sc_tables <- list_cansim_tables(refresh = FALSE)
+sc_tables <- list_cansim_tables(refresh = FALSE)
 
 #get all tables
 #labour force characteristics by province, monthly, seasonally adjusted
@@ -51,8 +51,17 @@ lfc_region_raw <- get_cansim("14-10-0293-02") %>% normalize_cansim_values()
 #employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months
 employment_by_class_raw <- get_cansim("14-10-0288-01") %>% normalize_cansim_values()
 
+#employment by industry, monthly, seasonally adjusted
+employment_by_industry_raw <- get_cansim("14-10-0355-02") %>% normalize_cansim_values()
+
+#labour force characteristics by industry, monthly, unadjusted for seasonality
+lfs_industry_unadjusted_raw <- get_cansim("14-10-0022-01") %>% normalize_cansim_values()
+
+#labour force characteristics by immigrant status, three-month moving average, unadjusted for seasonality
+lfs_immigrant_status_raw <- get_cansim("14-10-0082-01") %>% normalize_cansim_values()
+
 #reason for not looking for work, monthly, unadjusted for seasonality
-reasons_not_working_raw <- get_cansim("14-10-0127-01") %>% normalize_cansim_values()
+# reasons_not_working_raw <- get_cansim("14-10-0127-01") %>% normalize_cansim_values()
 
 
 ## cache raw Statistics Canada Tables to /tmp ----------------------------------
@@ -61,9 +70,13 @@ reasons_not_working_raw <- get_cansim("14-10-0127-01") %>% normalize_cansim_valu
 saveRDS(economic_regions, "tmp/economic_regions.rds")
 saveRDS(can_provinces, "tmp/can_provinces.rds")
 saveRDS(lfc_province_raw, "tmp/lfc_province_raw.rds")
+saveRDS(lfc_territories_raw, "tmp/lfc_territories_raw.rds")
 saveRDS(lfc_region_raw, "tmp/lfc_region_raw.rds")
 saveRDS(employment_by_class_raw, "tmp/employment_by_class_raw.rds")
-saveRDS(reasons_not_working_raw, "tmp/reasons_not_working_raw.rds")
+saveRDS(employment_by_industry_raw, "tmp/employment_by_industry_raw.rds")
+saveRDS(lfs_industry_unadjusted_raw, "tmp/lfs_industry_unadjusted_raw.rds")
+saveRDS(lfs_immigrant_status_raw, "tmp/lfs_immigrant_status_raw.rds")
+# saveRDS(reasons_not_working_raw, "tmp/reasons_not_working_raw.rds")
 
 
 ## tidy Statistics Canada Tables -----------------------------------------------
@@ -74,6 +87,9 @@ can_provinces <- readRDS("tmp/can_provinces.rds")
 lfc_province_raw <- readRDS("tmp/lfc_province_raw.rds")
 lfc_region_raw <- readRDS("tmp/lfc_region_raw.rds")
 employment_by_class_raw <- readRDS("tmp/employment_by_class_raw.rds")
+employment_by_industry_raw <- readRDS("tmp/employment_by_industry_raw.rds")
+lfs_industry_unadjusted_raw <- readRDS("tmp/lfs_industry_unadjusted_raw.rds")
+lfs_immigrant_status_raw <- readRDS("tmp/lfs_immigrant_status_raw.rds")
 # reasons_not_working_raw <- readRDS("tmp/reasons_not_working_raw.rds")
 
 
