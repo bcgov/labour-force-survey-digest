@@ -69,3 +69,74 @@ lfc_tidy %>%
         date > "2019-12-01" ) %>%
   mutate(month_change = value - lag(value),
          month_change_percent = round((value/lag(value) - 1) * 100, digits = 1))
+
+
+## ---------------------------------------------------------------------------
+### Monthly Change in B.C. Unemployment in `r report_year`
+
+p5 <- lfc_province_tidy %>%
+  filter(vector == "v2064704",
+         date > "2019-12-01") %>%
+  ggplot(aes(
+    x = date,
+    y = value,
+    text = paste(
+      "Month-Over-Month Change in Unemployment:",
+      signs(month_change,
+            format = comma,
+            add_plusses = TRUE),
+      "<br>",
+      "% Month-Over-Month Change:",
+      signs(
+        month_change_percent,
+        format = percent,
+        add_plusses = TRUE,
+        accuracy = 0.1
+      )
+    )
+  )) +
+  geom_col(fill = main_colour,
+           alpha = 0.6) +
+  geom_text(
+    aes(label = signs(
+      month_change,
+      format = comma,
+      add_plusses = TRUE
+    )),
+    nudge_y = -9000,
+    colour = "grey20",
+    size = 2.5
+  ) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = comma,
+                     expand = c(0, 0),
+                     breaks = breaks_pretty(n = 6)) +
+  scale_x_date(breaks = breaks_pretty(n = 6)) +
+  theme_minimal() +
+  theme_vert_bar
+
+
+ggplotly_lfs(p5)
+
+
+### Year Change in Unemployment {.value-box}
+
+year_change_unemployment <- lfc_province_tidy %>%
+  filter(vector == "v2064704",
+         date %in% c(max(date) - months(12), max(date))) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+#year over year change employment
+valueBox(value = year_change_unemployment %>%
+  pull(year_change) %>%
+  signs(format = comma,
+        add_plusses = TRUE),
+         icon = "fa-users-cog",
+         caption = paste("Year-Over-Year Change in B.C. Unemployment"))
+
+
