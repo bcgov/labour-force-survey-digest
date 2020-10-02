@@ -800,11 +800,17 @@ unemploy_rt_provinces <- lfc_province_tidy %>%
     date == max(date),
     geo != "Canada")
 
-can_provinces %>% 
+unemploy_rt_provinces_map <- can_provinces %>% 
   left_join(unemploy_rt_provinces, by = c("name"= "geo")) %>% 
   # drop_na() %>% 
   ggplot() +
-  geom_sf(aes(fill = value)) +
+  geom_sf(aes(fill = value, 
+              text = paste0(report_month," ",report_year,"\n",
+                            name,"\n","Unemployment Rate: ",
+                            signs(value,
+            format = percent,
+            accuracy = 0.1)
+    ))) +
    labs(x = NULL, y = NULL) +
   scale_fill_viridis(
     name = paste(report_month,
@@ -832,6 +838,9 @@ can_provinces %>%
     panel.grid.major = element_line(colour = "transparent"),
     axis.text = element_blank()
   )
+# unemploy_rt_provinces_map
+
+ggplotly_lfs(unemploy_rt_provinces_map)
 ```
 
 ### Monthly Unemployment Rates by Province in `r report_year`
@@ -936,80 +945,6 @@ valueBox(value = year_change_employment_can %>%
 Row 4
 -----------------------------------------------------------------------
 
-### Month-Over-Month Change in Number of Jobs by Province in `r report_month`
-
-```{r, fig.width=7, fig.height=5}
-# lim_mom_jobs_can <- c(
-#   0,
-#   lfc_province_tidy %>%
-#     ungroup() %>%
-#     filter(
-#       labour_force_characteristics == "Employment",
-#       sex == "Both sexes",
-#       age_group == "15 years and over",
-#       date == max(date),
-#       geo != "Canada"
-#     ) %>%
-#     slice_max(month_change, n = 1) %>%
-#     pull(month_change) + 30000
-# )
-
-mom_change_employment_provinces <- lfc_province_tidy %>%
-  filter(
-    labour_force_characteristics == "Employment",
-    sex == "Both sexes",
-    age_group == "15 years and over",
-    date == max(date),
-    geo != "Canada") %>%
-  mutate(fill_col = ifelse(geo == "British Columbia", "bc", "other")) %>%
-  ggplot(aes(x = reorder(geo, -month_change), y = month_change)) +
-  geom_col(aes(fill = fill_col,
-              text = paste(
-      "Month-Over-Month Change:",
-      signs(
-       month_change,
-       format = comma,
-       add_plusses = TRUE),
-      "<br>",
-      "% Month-Over-Month Change:",
-      signs(
-        month_change_percent,
-        format = percent,
-        add_plusses = TRUE,
-        accuracy = 0.1
-      )
-    )), alpha = 0.6) +
-  coord_flip() +
-  geom_text(
-    aes(
-      label = signs(
-        month_change_percent,
-        format = percent,
-        add_plusses = TRUE,
-        accuracy = 0.1
-      )
-    ),
-    nudge_y = 8000,
-    colour = "grey20",
-    size = 2.5
-  ) +
-  labs(x = NULL,
-       y = NULL) +
-  scale_y_continuous(
-    labels = comma,
-    expand = c(0, 0),
-    # limits = lim_mom_jobs_can,
-    breaks = breaks_pretty(n = 6)
-  ) +
-  scale_fill_manual(guide = FALSE,
-                    values = c(bc = "#440154FF",
-                               other = main_colour)) +
-  theme_minimal() +
-  theme_horiz_bar +
-  theme(legend.position = "none")
-
-ggplotly_lfs(mom_change_employment_provinces)
-```
 
 ### Month-Over-Month Change in Number of Jobs by Province in `r report_year`
 
@@ -1038,9 +973,14 @@ change_employment_provinces <- lfc_province_tidy %>%
     date >= paste0(report_year, "-01-01")
   ) %>%
   mutate(fill_col = ifelse(geo == "British Columbia", "bc", "other")) %>%
-  ggplot(aes(x = date, y = month_change)) +
+  ggplot(aes(x = date, y = month_change_percent)) +
   geom_col(aes(fill = fill_col,
               text = paste(
+      "Number of Jobs:",
+      signs(
+       value,
+       format = comma),
+      "<br>",       
       "Month-Over-Month Change:",
       signs(
        month_change,
@@ -1056,24 +996,25 @@ change_employment_provinces <- lfc_province_tidy %>%
       )
     )), alpha = 0.6) +
   coord_flip() +
-  geom_text(
-    aes(
-      label = signs(
-        month_change_percent,
-        format = percent,
-        add_plusses = TRUE,
-        accuracy = 0.1
-      )
-    ),
-    nudge_y = 8000,
-    colour = "grey20",
-    size = 2.5
-  ) +
-  facet_wrap(~ geo) +
+  # geom_text(
+  #   aes(
+  #     label = signs(
+  #       month_change_percent,
+  #       format = percent,
+  #       add_plusses = TRUE,
+  #       accuracy = 0.1
+  #     )
+  #   ),
+  #   nudge_y = 8000,
+  #   colour = "grey20",
+  #   size = 2.5
+  # ) +
+  facet_wrap(~ geo,
+             ncol = 3) +
   labs(x = NULL,
        y = NULL) +
   scale_y_continuous(
-    labels = comma,
+    labels = percent,
     expand = c(0, 0),
     # limits = lim_mom_jobs_can,
     breaks = breaks_pretty(n = 6)
