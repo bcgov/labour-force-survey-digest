@@ -103,7 +103,7 @@ Labour Force Survey Summary for British Columbia:
 
 <br>
 
-🖱 Click️ or tap on graphs for interactive options:
+🖱 Click️ or tap on graph & maps for interactive options:
 
 ![](images/plotly-options.png){width=90%}
 
