@@ -9,6 +9,7 @@ output:
     source_code: https://github.com/bcgov/labour-force-survey-digest
 ---
 
+
 <!--
 Copyright 2020 Province of British Columbia
 
@@ -22,6 +23,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
 -->
+
 
 ```{r setup, include=FALSE, cache=TRUE}
 ##load libraries in setup.R
@@ -90,6 +92,7 @@ ggplotly_lfs <- function(...) {
 Sidebar {.sidebar}
 =======================================================================
 
+
 ## `r paste(report_month, report_year)`
 
 <br>
@@ -97,13 +100,13 @@ Sidebar {.sidebar}
 Labour Force Survey Summary for British Columbia:
 
  - [Highlights]
- - [Age & Gender]
+ - [Sector]
  - [Industry]
  - [National 🇨🇦]
 
 <br>
 
-🖱 Click️ or tap on graph & maps for interactive options:
+🖱 Click or tap on graphs & maps for interactive options:
 
 ![](images/plotly-options.png){width=90%}
 
@@ -114,6 +117,7 @@ Learn more [About] the Statistics Canada Labour Force Survey.
 
 Highlights
 ======================================================================
+
 
 Row 1
 ----------------------------------------------------------------------
@@ -174,6 +178,7 @@ valueBox(
 )
 ```
 
+
 Row 2
 ----------------------------------------------------------------------
 
@@ -188,7 +193,7 @@ unemployrt_thisyear <- lfc_province_tidy %>%
   filter(vector == "v2064705",
          date >= paste0(report_year, "-01-01"))
 
-unemploy_rt_bc <- ggplot() +
+ggplotly_lfs(ggplot() +
   geom_point(
     data = unemployrt_thisyear,
     aes(
@@ -244,74 +249,77 @@ unemploy_rt_bc <- ggplot() +
                      breaks = breaks_pretty(n = 6)) +
   theme_minimal() +
   theme_vert_bar
-
-ggplotly_lfs(unemploy_rt_bc)
+)
 ```
 
-### Unemployment Rates for `r report_month` by B.C. Economic Region 
+### Unemployment Rates for `r paste(report_month, report_year)` by B.C. Economic Region 
 
 ```{r, fig.width=7, fig.height=5}
-unemploy_rt_bc_regions <- lfc_region_tidy %>%
-  filter(
-    geo != "British Columbia",
-    labour_force_characteristics == "Unemployment rate",
-    date == max(date)
-  ) %>%
-  mutate(geo_label = str_wrap(str_extract(geo, "^([^,])+"), width = 10)) %>%
-  ggplot() +
-  geom_sf(aes(fill = value,
-              text = paste( 
-                "Region:",
-                geo_label,
-                  "<br>",
-      "Date:",
-      date,
-      "<br>",
-    "Unemployment Rate:",
-    signs(value,
-          format = percent,
-          accuracy = 0.1)
-  )),
-          colour = "white",
-          lwd = .2) +
-  geom_sf_text(aes(label = geo_label),
-               size = 3.5,
-               colour = "grey20") +
-  # coord_sf(datum = NA) +
-  labs(x = NULL, y = NULL,
-       caption = "(3-month-moving-avg, seasonally unadjusted)") +
-  scale_fill_viridis(
-    name = paste(report_month,
-                 report_year,
-                 "\nUnemployment\nRate"),
-    direction = -1,
-    begin = 0.3,
-    end = 1,
-    labels = percent_format(accuracy = 1),
-    breaks = breaks_pretty(n = 5)
-  ) +
-  theme_minimal() +
-  theme(
-    legend.title = element_text(size = 11, 
-                                colour = "grey20"),
-    legend.text = element_text(size = 10,
-                               colour = "grey20"),
-    plot.caption = element_text(
-      size = 8,
-      colour = "grey60",
-      face = "italic",
-      hjust = 1.3
-    ),
-    panel.grid.major = element_line(colour = "transparent"),
-    axis.text = element_blank()
-  )
-unemploy_rt_bc_regions
-
-# ggplotly_lfs(unemploy_rt_bc_regions) 
+ggplotly_lfs(
+  lfc_region_tidy %>%
+    filter(
+      geo != "British Columbia",
+      labour_force_characteristics == "Unemployment rate",
+      date == max(date)
+    ) %>%
+    mutate(geo_label = str_wrap(str_extract(geo, "^([^,])+"), width = 10)) %>%
+    ggplot() +
+    geom_sf(
+      aes(
+        fill = value,
+        text = paste0(
+          "Region: ",
+          geo_label,
+          "<br>",
+          "Date: ",
+          date,
+          "<br>",
+          "Unemployment Rate: ",
+          signs(value,
+                format = percent,
+                accuracy = 0.1)
+        )
+      ),
+      colour = "white",
+      lwd = .2
+    ) +
+    geom_sf_text(aes(label = geo_label),
+                 size = 3.5,
+                 colour = "grey20") +
+    # coord_sf(datum = NA) +
+    labs(x = NULL, y = NULL,
+         caption = "(3-month-moving-avg, seasonally unadjusted)") +
+    scale_fill_viridis(
+      name = paste(report_month,
+                   report_year,
+                   "\nUnemployment\nRate"),
+      direction = -1,
+      begin = 0.3,
+      end = 1,
+      labels = percent_format(accuracy = 1),
+      breaks = breaks_pretty(n = 5)
+    ) +
+    theme_minimal() +
+    theme(
+      legend.title = element_text(size = 11,
+                                  colour = "grey20"),
+      legend.text = element_text(size = 10,
+                                 colour = "grey20"),
+      plot.caption = element_text(
+        size = 8,
+        colour = "grey60",
+        face = "italic",
+        hjust = 1.3
+      ),
+      panel.grid.major = element_line(colour = "transparent"),
+      axis.text = element_blank()
+    )
+)
 ```
 
+
 Row 3
-------------------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 ### Number of Jobs in B.C. {.value-box}
 
@@ -374,13 +382,64 @@ valueBox(
 )
 ```
 
+
 Row 4
 ---------------------------------------------------------------------
+
+### Monthly B.C. Unemployment Rates by Age & Sex for Since 1980
+
+```{r, fig.width=7, fig.height=5}
+unemploy_rt_bc_ag <- lfc_province_tidy %>%
+  filter(
+    date > "1979-12-01",
+    geo == "British Columbia",
+    labour_force_characteristics %in% c("Unemployment rate"),
+    age_group %in% c("15 to 24 years",
+                     "25 to 54 years",
+                     "55 years and over"),
+    sex != "Both sexes"
+  ) %>%
+  ggplot(aes(
+    x = date,
+    y = value,
+    colour = age_group
+  )) +
+  geom_point(aes(text = paste(
+      "Date:",
+      date,
+      "<br>",
+      "Age Group:",
+      age_group,
+      "<br>",
+      "Unemployment Rate:",
+      signs(value,
+            format = percent,
+            accuracy = 0.1)
+    )),
+    alpha = 0.6) +
+  geom_line(alpha = 0.8) +
+  facet_wrap(facets = vars(sex)) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = percent,
+                     breaks = breaks_pretty(n = 6)) +
+  scale_x_date(breaks = breaks_pretty(n = 6)) +
+  scale_colour_viridis_d() +
+  theme_minimal() +
+  theme_facet_bar
+
+ggplotly_lfs(unemploy_rt_bc_ag) %>%
+  layout(legend = list(
+    orientation = "h",
+    x = 0.1,
+    y = -0.2
+  ))
+```
 
 ### Month-Over-Month Change in Number of Jobs in B.C. in `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
-mom_change_employment_bc <- lfc_province_tidy %>%
+ggplotly_lfs(lfc_province_tidy %>%
   filter(
     vector == "v2064701",
     date >= paste0(report_year, "-01-01")
@@ -443,14 +502,85 @@ mom_change_employment_bc <- lfc_province_tidy %>%
       theme_minimal() +
       theme_vert_bar
   }
-
-ggplotly_lfs(mom_change_employment_bc)
+)
 ```
+
+
+Row 5
+----------------------------------------------------------------------------
+
+### Month-Over-Month Change in Number of Jobs in B.C. by Age & Gender in `r report_year` 
+
+```{r, fig.width=7, fig.height=5}
+mom_change_employment_ag <- lfc_province_tidy %>%
+  filter(
+    date >= paste0(report_year, "-01-01"),
+    geo == "British Columbia",
+    labour_force_characteristics == "Employment",
+    age_group %in% c("15 to 24 years",
+                     "25 to 54 years",
+                     "55 years and over")
+  ) %>%
+  mutate(sex = recode(sex, "Both sexes" = "All")) %>%
+  filter(sex != "All") %>%
+  ggplot(aes(
+    x = date,
+    y = month_change,
+    text = paste(
+      "Month-Over-Month Change:",
+      signs(month_change,
+            format = comma,
+            add_plusses = TRUE),
+      "<br>",
+      "% Month-Over-Month Change:",
+      signs(
+        month_change_percent,
+        format = percent,
+        add_plusses = TRUE,
+        accuracy = 0.1
+      )
+    )
+  )) +
+  geom_col(fill = main_colour,
+           alpha = 0.6) +
+  facet_grid(sex ~ age_group) +
+  geom_text(
+    aes(
+      label = signs(
+        month_change_percent,
+        format = percent,
+        add_plusses = TRUE,
+        accuracy = 0.1
+      )
+    ),
+    nudge_y = -5000,
+    colour = "grey20",
+    size = 2
+  ) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = comma,
+                     breaks = breaks_pretty(5)) +
+  scale_x_date(breaks = breaks_pretty(n = 4)) +
+  theme_minimal() +
+  theme_facet_bar
+# theme(strip.text.y = element_text(angle = 0))
+
+ggplotly_lfs(mom_change_employment_ag)
+```
+
+
+Sector
+====================================================================
+
+
+Row 1
+---------------------------------------------------------------------
 
 ### Month-Over-Month Change in Number of Jobs in B.C. by Job Type in `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
-mom_change_employment_bc_jobtype<- lfc_province_tidy %>%
+ggplotly(lfc_province_tidy %>%
   filter(
     date >= paste0(report_year, "-01-01"),
     geo == "British Columbia",
@@ -517,17 +647,16 @@ mom_change_employment_bc_jobtype<- lfc_province_tidy %>%
   theme_minimal() +
   theme_facet_bar +
   theme(panel.spacing = unit(1, "lines"))
-                                                   }
-ggplotly_lfs(mom_change_employment_bc_jobtype)
+})
 ```
 
-Row 5
----------------------------------------------------------------------------
+Row 2
+-----------------------------------------------------------------------
 
 ### Month-Over-Month Change in Number of Jobs in B.C. by Sector in `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
-mom_change_employment_bc_sector <- employment_by_class_tidy %>%
+ggplotly(employment_by_class_tidy %>%
   filter(
     class_of_worker %in% c(
       "Public sector employees",
@@ -593,134 +722,13 @@ mom_change_employment_bc_sector <- employment_by_class_tidy %>%
   scale_x_date(breaks = breaks_pretty(n = 4)) +
   theme_minimal() +
   theme_facet_bar
-}
-
-ggplotly_lfs(mom_change_employment_bc_sector)
-```
-
-
-Age & Gender
-======================================================================
-
-Row 1
------------------------------------------------------------------------
-
-### Month-Over-Month Change in Number of Jobs in B.C. by Age & Gender in `r report_year` 
-
-```{r, fig.width=7, fig.height=5}
-mom_change_employment_ag <- lfc_province_tidy %>%
-  filter(
-    date >= paste0(report_year, "-01-01"),
-    geo == "British Columbia",
-    labour_force_characteristics == "Employment",
-    age_group %in% c("15 to 24 years",
-                     "25 to 54 years",
-                     "55 years and over")
-  ) %>%
-  mutate(sex = recode(sex, "Both sexes" = "All")) %>%
-  filter(sex != "All") %>%
-  ggplot(aes(
-    x = date,
-    y = month_change,
-    text = paste(
-      "Month-Over-Month Change:",
-      signs(month_change,
-            format = comma,
-            add_plusses = TRUE),
-      "<br>",
-      "% Month-Over-Month Change:",
-      signs(
-        month_change_percent,
-        format = percent,
-        add_plusses = TRUE,
-        accuracy = 0.1
-      )
-    )
-  )) +
-  geom_col(fill = main_colour,
-           alpha = 0.6) +
-  facet_grid(sex ~ age_group) +
-  geom_text(
-    aes(
-      label = signs(
-        month_change_percent,
-        format = percent,
-        add_plusses = TRUE,
-        accuracy = 0.1
-      )
-    ),
-    nudge_y = -5000,
-    colour = "grey20",
-    size = 2
-  ) +
-  labs(x = NULL,
-       y = NULL) +
-  scale_y_continuous(labels = comma,
-                     breaks = breaks_pretty(5)) +
-  scale_x_date(breaks = breaks_pretty(n = 4)) +
-  theme_minimal() +
-  theme_facet_bar
-# theme(strip.text.y = element_text(angle = 0))
-
-ggplotly_lfs(mom_change_employment_ag)
-```
-
-Row 2
------------------------------------------------------------------------
-
-### Monthly B.C. Unemployment Rates by Age & Sex for Since 1980
-
-```{r, fig.width=7, fig.height=5}
-unemploy_rt_bc_ag <- lfc_province_tidy %>%
-  filter(
-    date > "1979-12-01",
-    geo == "British Columbia",
-    labour_force_characteristics %in% c("Unemployment rate"),
-    age_group %in% c("15 to 24 years",
-                     "25 to 54 years",
-                     "55 years and over"),
-    sex != "Both sexes"
-  ) %>%
-  ggplot(aes(
-    x = date,
-    y = value,
-    colour = age_group
-  )) +
-  geom_point(aes(text = paste(
-      "Date:",
-      date,
-      "<br>",
-      "Age Group:",
-      age_group,
-      "<br>",
-      "Unemployment Rate:",
-      signs(value,
-            format = percent,
-            accuracy = 0.1)
-    )),
-    alpha = 0.6) +
-  geom_line(alpha = 0.8) +
-  facet_wrap(facets = vars(sex)) +
-  labs(x = NULL,
-       y = NULL) +
-  scale_y_continuous(labels = percent,
-                     breaks = breaks_pretty(n = 6)) +
-  scale_x_date(breaks = breaks_pretty(n = 6)) +
-  scale_colour_viridis_d() +
-  theme_minimal() +
-  theme_facet_bar
-
-ggplotly_lfs(unemploy_rt_bc_ag) %>%
-  layout(legend = list(
-    orientation = "h",
-    x = 0.1,
-    y = -0.2
-  ))
+})
 ```
 
 
 Industry
 ======================================================================
+
 
 Row 1
 -----------------------------------------------------------------------
@@ -728,6 +736,7 @@ Row 1
 
 National 🇨🇦 
 ======================================================================
+
 
 Row 1
 -----------------------------------------------------------------------
@@ -786,12 +795,55 @@ valueBox(
 )
 ```
 
+
 Row 2
 ---------------------------------------------------------------------------
 
-### Unemployment Rate for `r report_month` by Province
+### Monthly Unemployment Rates by Province in `r report_year`
 
-```{r}
+```{r, fig.width=7, fig.height=5}
+ggplotly_lfs(lfc_province_tidy %>%
+  filter(
+    labour_force_characteristics == "Unemployment rate",
+    sex == "Both sexes",
+    age_group == "15 years and over",
+    geo != "Canada",
+    date >= paste0(report_year, "-01-01")
+) %>% 
+ ggplot(aes(
+    x = date,
+    y = value,
+    colour = geo
+  )) +
+  geom_point(aes(text = paste(
+      "Province:",
+      geo,
+      "<br>",
+      "Date:",
+      date,
+      "<br>",
+      "Unemployment Rate:",
+      signs(value,
+            format = percent,
+            accuracy = 0.1)
+    )),
+    alpha = 0.6) +
+  geom_line(alpha = 0.8) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = percent,
+                     breaks = breaks_pretty(n = 6)) +
+  scale_colour_viridis_d(name = NULL) +
+  scale_x_date(breaks = breaks_pretty(n = 6)) +
+  theme_minimal() +
+  theme_vert_bar
+)
+```
+
+
+### Unemployment Rate for `r paste(report_month, report_year)` by Province
+
+```{r, fig.width=7, fig.height=5}
 unemploy_rt_provinces <- lfc_province_tidy %>%
   filter(
     labour_force_characteristics == "Unemployment rate",
@@ -800,7 +852,8 @@ unemploy_rt_provinces <- lfc_province_tidy %>%
     date == max(date),
     geo != "Canada")
 
-unemploy_rt_provinces_map <- can_provinces %>% 
+# ggplotly_lfs(
+  can_provinces %>% 
   left_join(unemploy_rt_provinces, by = c("name"= "geo")) %>% 
   # drop_na() %>% 
   ggplot() +
@@ -838,52 +891,9 @@ unemploy_rt_provinces_map <- can_provinces %>%
     panel.grid.major = element_line(colour = "transparent"),
     axis.text = element_blank()
   )
-# unemploy_rt_provinces_map
-
-ggplotly_lfs(unemploy_rt_provinces_map)
+  # )
 ```
 
-### Monthly Unemployment Rates by Province in `r report_year`
-
-```{r, fig.width=7, fig.height=5}
-unemploy_rt_provinces_timeseries <- lfc_province_tidy %>%
-  filter(
-    labour_force_characteristics == "Unemployment rate",
-    sex == "Both sexes",
-    age_group == "15 years and over",
-    geo != "Canada",
-    date >= paste0(report_year, "-01-01")
-) %>% 
- ggplot(aes(
-    x = date,
-    y = value,
-    colour = geo
-  )) +
-  geom_point(aes(text = paste(
-      "Province:",
-      geo,
-      "<br>",
-      "Date:",
-      date,
-      "<br>",
-      "Unemployment Rate:",
-      signs(value,
-            format = percent,
-            accuracy = 0.1)
-    )),
-    alpha = 0.6) +
-  geom_line(alpha = 0.8) +
-  labs(x = NULL,
-       y = NULL) +
-  scale_y_continuous(labels = percent,
-                     breaks = breaks_pretty(n = 6)) +
-  scale_colour_viridis_d(name = NULL) +
-  scale_x_date(breaks = breaks_pretty(n = 6)) +
-  theme_minimal() +
-  theme_vert_bar
-
-ggplotly_lfs(unemploy_rt_provinces_timeseries)
-```
 
 Row 3
 ----------------------------------------------------------------------------
@@ -942,29 +952,16 @@ valueBox(value = year_change_employment_can %>%
          caption = paste("Year-Over-Year Change in Number of Jobs in Canada"))
 ```
 
+
 Row 4
 -----------------------------------------------------------------------
 
 
-### Month-Over-Month Change in Number of Jobs by Province in `r report_year`
+### Percent Month-Over-Month Change in Number of Jobs by Province in `r report_year`
 
-```{r, fig.width=7, fig.height=5}
-# lim_mom_jobs_can <- c(
-#   0,
-#   lfc_province_tidy %>%
-#     ungroup() %>%
-#     filter(
-#       labour_force_characteristics == "Employment",
-#       sex == "Both sexes",
-#       age_group == "15 years and over",
-#       date == max(date),
-#       geo != "Canada"
-#     ) %>%
-#     slice_max(month_change, n = 1) %>%
-#     pull(month_change) + 30000
-# )
-
-change_employment_provinces <- lfc_province_tidy %>%
+```{r}
+ggplotly_lfs(
+  lfc_province_tidy %>%
   filter(
     labour_force_characteristics == "Employment",
     sex == "Both sexes",
@@ -1016,7 +1013,6 @@ change_employment_provinces <- lfc_province_tidy %>%
   scale_y_continuous(
     labels = percent,
     expand = c(0, 0),
-    # limits = lim_mom_jobs_can,
     breaks = breaks_pretty(n = 6)
   ) +
   scale_fill_manual(guide = FALSE,
@@ -1025,12 +1021,13 @@ change_employment_provinces <- lfc_province_tidy %>%
   theme_minimal() +
   theme_horiz_bar +
   theme(legend.position = "none")
-
-ggplotly_lfs(change_employment_provinces)
+)
 ```
+
 
 About {data-orientation=columns}
 ======================================================================
+
 
 Column
 -----------------------------------------------------------------------
