@@ -106,7 +106,7 @@ Labour Force Survey Summary for British Columbia:
 
 <br>
 
-🖱 Click or tap on graphs & maps for interactive options:
+🖱 Click or tap on graphs for interactive options:
 
 ![](images/plotly-options.png){width=90%}
 
@@ -255,7 +255,7 @@ ggplotly_lfs(ggplot() +
 ### Unemployment Rates for `r paste(report_month, report_year)` by B.C. Economic Region 
 
 ```{r, fig.width=7, fig.height=5}
-ggplotly_lfs(
+# ggplotly_lfs(
   lfc_region_tidy %>%
     filter(
       geo != "British Columbia",
@@ -314,7 +314,7 @@ ggplotly_lfs(
       panel.grid.major = element_line(colour = "transparent"),
       axis.text = element_blank()
     )
-)
+# )
 ```
 
 
@@ -852,11 +852,11 @@ unemploy_rt_provinces <- lfc_province_tidy %>%
     date == max(date),
     geo != "Canada")
 
-# ggplotly_lfs(
-  can_provinces %>% 
-  left_join(unemploy_rt_provinces, by = c("name"= "geo")) %>% 
-  # drop_na() %>% 
-  ggplot() +
+unemploy_rt_provinces_spatial <-  can_provinces %>% 
+  left_join(unemploy_rt_provinces, by = c("name"= "geo"))
+
+ # ggplotly_lfs(
+  ggplot(unemploy_rt_provinces_spatial) +
   geom_sf(aes(fill = value, 
               text = paste0(report_month," ",report_year,"\n",
                             name,"\n","Unemployment Rate: ",
