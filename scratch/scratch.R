@@ -213,3 +213,58 @@ mom_change_employment_provinces <- lfc_province_tidy %>%
 
 ggplotly_lfs(mom_change_employment_provinces)
 
+# mom_change_employment_ag <- lfc_province_tidy %>%
+#   filter(
+#     date >= paste0(report_year, "-01-01"),
+#     geo == "British Columbia",
+#     labour_force_characteristics == "Employment",
+#     age_group %in% c("15 to 24 years",
+#                      "25 to 54 years",
+#                      "55 years and over")
+#   ) %>%
+#   mutate(sex = recode(sex, "Both sexes" = "All")) %>%
+#   filter(sex != "All") %>%
+#   ggplot(aes(
+#     x = date,
+#     y = month_change,
+#     text = paste(
+#       "Month-Over-Month Change:",
+#       signs(month_change,
+#             format = comma,
+#             add_plusses = TRUE),
+#       "<br>",
+#       "% Month-Over-Month Change:",
+#       signs(
+#         month_change_percent,
+#         format = percent,
+#         add_plusses = TRUE,
+#         accuracy = 0.1
+#       )
+#     )
+#   )) +
+#   geom_col(fill = main_colour,
+#            alpha = 0.6) +
+#   facet_grid(sex ~ age_group) +
+#   geom_text(
+#     aes(
+#       label = signs(
+#         month_change_percent,
+#         format = percent,
+#         add_plusses = TRUE,
+#         accuracy = 0.1
+#       )
+#     ),
+#     nudge_y = -5000,
+#     colour = "grey20",
+#     size = 2
+#   ) +
+#   labs(x = NULL,
+#        y = NULL) +
+#   scale_y_continuous(labels = comma,
+#                      breaks = breaks_pretty(5)) +
+#   scale_x_date(breaks = breaks_pretty(n = 4)) +
+#   theme_minimal() +
+#   theme_facet_bar
+# # theme(strip.text.y = element_text(angle = 0))
+#
+# ggplotly_lfs(mom_change_employment_ag)
