@@ -29,9 +29,9 @@ can_provinces <- cancensus::get_census(
     "CA16",
     regions = list(C = "01"),
     level = "PR",
+    use_cache = FALSE,
     geo_format = "sf"
-  ) %>%
-  transform_bc_albers()
+  )
 
 ## get raw Statistics Canada Tables --------------------------------------------
 
