@@ -50,7 +50,9 @@ report_year <- lfc_province_tidy %>%
   pull(date) %>%
   year()
 
+##previous report year
 previous_year <- report_year - 1
+
 
 ##common chart themes
 theme_bar <- theme(
@@ -84,9 +86,9 @@ main_colour <- "#1d91c0"
 
 ##labels
 gender_labels <-  c("Males" = "Men",
-                    "Females" = "Woman")
+                    "Females" = "Women")
 
-##custom
+##custom ggplotly
 ggplotly_lfs <- function(...) {
   ggplotly(..., tooltip = c("text"))
 }
@@ -105,10 +107,10 @@ Labour Force Survey Summary for British Columbia:
 
  - [Highlights]
  - [Demographics]
- - [Sector]
+ - [Sector & Job Type]
  - [Industry]
- - [National 🇨🇦]
- - [COVID-19]
+ - [National]
+ - [COVID-19 Recovery]
 
 <br>
 
@@ -128,10 +130,10 @@ Highlights
 Row 1
 ----------------------------------------------------------------------
 
-### B.C. Unemployment Rate (%) for Recent Month {.value-box}
+### B.C. Unemployment Rate for Recent Month {.value-box}
 
 ```{r}
-##recent monthly change in unemployment
+##recent month unemployment rate
 recent_month_unemployment_rate_bc <- lfc_province_tidy %>%
   filter(
     vector == "v2064705",
@@ -147,7 +149,7 @@ valueBox(
 )
 ```
 
-### Month-Over-Month Change in Recent B.C. Unemployment Rate (%) {.value-box}
+### Month-Over-Month Change in B.C. Unemployment Rate {.value-box}
 
 ```{r}
 valueBox(
@@ -159,7 +161,7 @@ valueBox(
 )
 ```
 
-### Year-Over-Year Change in Recent B.C. Unemployment Rate (%) {.value-box}
+### Year-Over-Year Change in B.C. Unemployment Rate {.value-box}
 
 ```{r}
 ##year over year change unemployment rate
@@ -199,7 +201,8 @@ unemployrt_thisyear <- lfc_province_tidy %>%
   filter(vector == "v2064705",
          date >= paste0(report_year, "-01-01"))
 
-ggplotly_lfs(ggplot() +
+ggplotly_lfs(
+  ggplot() +
   geom_point(
     data = unemployrt_thisyear,
     aes(
@@ -330,15 +333,15 @@ Row 3
 ### Number of Jobs in B.C. {.value-box}
 
 ```{r}
-# recent monthly change in employment
-recent_month_change_employment_bc <- lfc_province_tidy %>%
+# recent month employment
+recent_month_employment_bc <- lfc_province_tidy %>%
   filter(
     vector == "v2064701",
     date == max(date)
   )
 
 valueBox(
-  value = recent_month_change_employment_bc %>%
+  value = recent_month_employment_bc %>%
     pull(value) %>%
     signs(format = comma),
   # icon = "fa-users-cog",
@@ -350,7 +353,7 @@ valueBox(
 
 ```{r}
 valueBox(
-  value = recent_month_change_employment_bc %>%
+  value = recent_month_employment_bc %>%
     pull(month_change) %>%
     signs(
       format = comma,
@@ -395,7 +398,8 @@ Row 4
 ### Month-Over-Month Change in Number of Jobs in B.C. for `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
-ggplotly_lfs(lfc_province_tidy %>%
+ggplotly_lfs(
+  lfc_province_tidy %>%
   filter(
     vector == "v2064701",
     date >= paste0(report_year, "-01-01")
@@ -513,49 +517,134 @@ ggplotly_lfs(lfc_province_tidy %>%
 # )
 ```
 
+
 Demographics
 =========================================================================
 
 Row 1
 ----------------------------------------------------------------------------
 
-### B.C. Unemployment Rate for Woman Aged 25 Years & Over {.value-box}
+
+### Women B.C. Unemployment Rate (Aged 25 Years & Over) {.value-box}
 
 ```{r}
-#month bc unemployment rate - females
-valueBox(
-  value = lfc_province_tidy %>%
-  filter(
-    vector == "v2064831",
-    date == max(date)) %>%
+#bc unemployment rate - females
+recent_month_unemployment_rate_bc_female <- lfc_province_tidy %>%
+  filter(vector == "v2064831",
+         date == max(date))
+
+valueBox(paste0("Women: ",
+  value = recent_month_unemployment_rate_bc_female %>%
     pull(value) %>%
+    signs(format = percent, accuracy = 0.1)),
+  # icon = "fa-users-cog",
+  caption = paste("B.C. Unemployment Rate for Women (25 Years & Over) for", report_month, report_year)
+)
+```
+
+### Women Month-Over-Month Change in Recent B.C. Unemployment Rate {.value-box}
+
+```{r}
+valueBox(
+  value = recent_month_unemployment_rate_bc_female %>%
+    pull(month_change) %>%
     signs(format = percent, accuracy = 0.1),
   # icon = "fa-users-cog",
-  caption = paste("B.C. Unemployment Rate for Woman Aged 25 Years & Over for", report_month, report_year)
+  caption = "Month-Over-Month Change in B.C. Unemployment Rate for Women"
 )
 ```
 
 
-### B.C. Unemployment Rate for Men Aged 25 Years & Over {.value-box}
+### Women Year-Over-Year Change in Recent B.C. Unemployment Rate {.value-box}
 
 ```{r}
-#month bc unemployment rate - males
+##year over year change unemployment rate female
+year_change_unemployment_rate_bc_female <- lfc_province_tidy %>%
+  filter(vector == "v2064831",
+         date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(year_change = value - lag(value)) %>%
+  filter(date == max(date))
+
 valueBox(
-  value = lfc_province_tidy %>%
-  filter(
-    vector == "v2064822",
-    date == max(date)) %>%
-    pull(value) %>%
-    signs(format = percent, accuracy = 0.1),
+  value = year_change_unemployment_rate_bc_female %>%
+    pull(year_change) %>%
+    signs(
+      format = percent,
+      add_plusses = TRUE,
+      accuracy = 0.1
+    ),
   # icon = "fa-users-cog",
-  caption = paste("B.C. Unemployment Rate for Men Aged 25 Years & Over for", report_month, report_year)
+  caption = paste("Year-Over-Year Change in B.C. Unemployment Rate for Women")
 )
 ```
+
 
 Row 2
+----------------------------------------------------------------
+
+
+### Men B.C. Unemployment Rate (Aged 25 Years & Over) {.value-box}
+
+```{r}
+#unemployment rate - males
+recent_month_unemployment_rate_bc_male <- lfc_province_tidy %>%
+  filter(vector == "v2064822",
+         date == max(date))
+
+valueBox(
+  value = paste0("Men: ",
+                 recent_month_unemployment_rate_bc_male %>%
+    pull(value) %>%
+    signs(format = percent, accuracy = 0.1)),
+  # icon = "fa-users-cog",
+  caption = paste("B.C. Unemployment Rate for Men (25 Years & Over) for", report_month, report_year)
+)
+```
+
+
+### Men Month-Over-Month Change in Recent B.C. Unemployment Rate {.value-box}
+
+```{r}
+valueBox(
+  value = recent_month_unemployment_rate_bc_male %>%
+    pull(month_change) %>%
+    signs(format = percent, accuracy = 0.1),
+  # icon = "fa-users-cog",
+  caption = "Month-Over-Month Change in B.C. Unemployment Rate for Men"
+)
+```
+
+### Men Year-Over-Year Change in Recent B.C. Unemployment Rate {.value-box}
+
+```{r}
+##year over year change unemployment rate bc males
+year_change_unemployment_rate_bc_male <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064822",
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(year_change = value - lag(value)) %>%
+  filter(date == max(date))
+
+valueBox(
+  value = year_change_unemployment_rate_bc_male %>%
+    pull(year_change) %>%
+    signs(
+      format = percent,
+      add_plusses = TRUE,
+      accuracy = 0.1
+    ),
+  # icon = "fa-users-cog",
+  caption = paste("Year-Over-Year Change in B.C. Unemployment Rate for Men")
+)
+```
+
+
+Row 3
 -----------------------------------------------------------------------
 
-### Monthly B.C. Unemployment Rates by Gender & Age Since 2000
+### Monthly B.C. Unemployment Rates by Gender (Ages 25 Years & Over) Since 2000
 
 ```{r, fig.width=7, fig.height=5}
 ggplotly_lfs(
@@ -564,15 +653,19 @@ lfc_province_tidy %>%
     date > "1999-12-01",
     geo == "British Columbia",
     labour_force_characteristics %in% c("Unemployment rate"),
-    age_group %in% c("15 to 24 years",
-                     "25 to 54 years",
-                     "55 years and over"),
+    age_group %in% c("25 years and over"
+                     # "15 to 24 years",
+                     # "25 to 54 years",
+                     # "55 years and over"
+                     ),
     sex != "Both sexes"
-  ) %>%
+  ) %>% 
+  mutate(highlight = case_when(date >= paste0(report_year, "-01-01") ~ "thisyear",
+                               TRUE ~ "preyears")) %>% 
   ggplot(aes(
     x = date,
     y = value,
-    colour = age_group
+    colour = highlight
   )) +
   geom_point(aes(text = paste(
       "Date:",
@@ -594,41 +687,56 @@ lfc_province_tidy %>%
        y = NULL) +
   scale_y_continuous(labels = percent,
                      breaks = breaks_pretty(n = 6)) +
+  scale_colour_manual(guide = FALSE,
+                  values = c(preyears = "grey50",
+                               thisyear = main_colour)) +
   scale_x_date(breaks = breaks_pretty(n = 6)) +
-  scale_colour_viridis_d(name = NULL) +
   theme_minimal() +
-  theme_facet_bar
-) %>%
-  layout(legend = list(
-    orientation = "h",
-    x = 0.3,
-    y = -0.2
-  ))
-```
-
-Row 3
--------------------------------------------------------------------
-
-### Number of Jobs for Woman Aged 25 Years & Over in B.C. {.value-box}
-
-```{r}
-#recent monthly change in employment females
-valueBox(
-  value = lfc_province_tidy %>%
-  filter(
-    vector == "v2064827",
-    date == max(date)) %>%
-    pull(value) %>%
-    signs(format = comma),
-  # icon = "fa-users-cog",
-  caption = paste("Number of Jobs for Woman in B.C. for", report_month, report_year, "(Aged 25 Years & Over)")
+  theme_facet_bar +
+  theme(legend.position = "none")
 )
 ```
 
-### Year-Over-Year Change in Number of Jobs for Woman Aged 25 Years & Over in B.C. {.value-box}
+Row 4
+-------------------------------------------------------------------
+
+### Women Number of Jobs (Aged 25 Years & Over) in B.C. {.value-box}
 
 ```{r}
-year_change_employment_bc_woman <- lfc_province_tidy %>%
+recent_month_employment_bc_female <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064827",
+    date == max(date)) 
+
+valueBox(
+  value = paste0("Women: ",
+                 recent_month_employment_bc_female %>%
+    pull(value) %>%
+    signs(format = comma)),
+  # icon = "fa-users-cog",
+  caption = paste("Number of Jobs for Women (25 Years & Over) in B.C. for", report_month, report_year)
+)
+```
+
+
+### Women Month-Over-Month Change in Number of Jobs (Aged 25 Years & Over) in B.C. {.value-box}
+
+```{r}
+valueBox(
+  value = recent_month_employment_bc_female %>%
+    pull(month_change) %>%
+    signs(format = comma,
+            add_plusses = TRUE),
+  # icon = "fa-users-cog",
+  caption = "Month-Over-Month Change in Number of Jobs for Women in B.C."
+)
+```
+
+
+### Women Year-Over-Year Change in Number of Jobs (Aged 25 Years & Over) in B.C. {.value-box}
+
+```{r}
+year_change_employment_bc_female <- lfc_province_tidy %>%
   filter(
     vector == "v2064827",
     date %in% c(max(date) - months(12), max(date))
@@ -641,38 +749,56 @@ year_change_employment_bc_woman <- lfc_province_tidy %>%
 
 # year over year change employment
 valueBox(
-  value = year_change_employment_bc_woman %>%
+  value = year_change_employment_bc_female %>%
     pull(year_change) %>%
     signs(
       format = comma,
       add_plusses = TRUE
     ),
   # icon = "fa-users-cog",
-  caption = paste("Year-Over-Year Change in Number of Jobs for Woman in B.C.")
+  caption = paste("Year-Over-Year Change in Number of Jobs for Women in B.C.")
 )
 ```
 
+Row 5
+----------------------------------------------------------------------
 
-### Number of Jobs for Men Aged 25 Years & Over in B.C. {.value-box}}
+### Men Number of Jobs for (Aged 25 Years & Over) in B.C. {.value-box}}
 
 ```{r}
-#recent monthly change in employment males
+#recent month employment males
+recent_month_employment_bc_male <- lfc_province_tidy %>%
+  filter(vector == "v2064818",
+    date == max(date))
+
 valueBox(
-  value = lfc_province_tidy %>%
-  filter(
-    vector == "v2064818",
-    date == max(date)) %>%
+  value = paste0("Men: ",
+                 recent_month_employment_bc_male %>%
     pull(value) %>%
-    signs(format = comma),
+    signs(format = comma)),
   # icon = "fa-users-cog",
-  caption = paste("Number of Jobs for Men in B.C. for", report_month, report_year, "(Aged 25 Years & Over)")
+  caption = paste("Number of Jobs for Men (25 Years & Over) in B.C. for", report_month, report_year)
 )
 ```
 
-### Year-Over-Year Change in Number of Jobs for Men Aged 25 Years & Over in B.C. {.value-box}
+
+### Men Month-Over-Month Change in Number of Jobs in B.C. (Aged 25 Years & Over) in B.C. {.value-box}
 
 ```{r}
-year_change_employment_bc_men <- lfc_province_tidy %>%
+valueBox(
+  value = recent_month_employment_bc_male %>%
+    pull(month_change) %>%
+    signs(format = comma,
+            add_plusses = TRUE),
+  # icon = "fa-users-cog",
+  caption = "Month-Over-Month Change in Number of Jobs for Men in B.C."
+)
+```
+
+### Men Year-Over-Year Change in Number of Jobs (Aged 25 Years & Over) in B.C. {.value-box}
+
+```{r}
+year_change_employment_bc_male <- lfc_province_tidy %>%
   filter(
     vector == "v2064818",
     date %in% c(max(date) - months(12), max(date))
@@ -685,7 +811,7 @@ year_change_employment_bc_men <- lfc_province_tidy %>%
 
 # year over year change employment
 valueBox(
-  value = year_change_employment_bc_men %>%
+  value = year_change_employment_bc_male %>%
     pull(year_change) %>%
     signs(
       format = comma,
@@ -697,10 +823,10 @@ valueBox(
 ```
 
 
-Row 4
+Row 6
 ----------------------------------------------------------------------------
 
-### Month-Over-Month Percent Change in Number of Jobs in B.C. by Gender for in `r report_year` (Ages 25 Years & Over)
+### Month-Over-Month Change in Number of Jobs in B.C. by Gender (Ages 25 Years & Over) for `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
 ggplotly_lfs(
@@ -716,7 +842,7 @@ ggplotly_lfs(
   ggplot(data = .,
          aes(
     x = date,
-    y = month_change_percent,
+    y = month_change,
     text = paste0(
       "Number of Jobs: ",
       signs(value,
@@ -743,20 +869,19 @@ ggplotly_lfs(
   geom_text(
     aes(
       label = signs(
-        month_change_percent,
-        format = percent,
-        add_plusses = TRUE,
-        accuracy = 0.1
+        month_change,
+        format = comma,
+        add_plusses = TRUE
       )
     ),
-    nudge_y = ifelse(.$month_change_percent > 0, .003, -.003),
+    nudge_y = ifelse(.$month_change > 0, 3000, -3000),
     colour = "grey20",
     size = 2
   ) +
   labs(x = NULL,
        y = NULL) +
-  scale_y_continuous(labels = percent,
-                     breaks = breaks_pretty(5)) +
+  scale_y_continuous(labels = comma,
+                     breaks = breaks_pretty(8)) +
   scale_x_date(breaks = breaks_pretty(n = 4)) +
   theme_minimal() +
   theme_facet_bar
@@ -766,30 +891,154 @@ ggplotly_lfs(
 ```
 
 
-
-
-Row 5
+Row 7
 -----------------------------------------------------------------------------
 
-### Month-Over-Month Percent Change in Number of Jobs in B.C. by Age in `r report_year` 
+
+### Youth B.C. Unemployment Rate (Aged 15 to 25 Years) {.value-box}
+
+```{r}
+#monthly unemployment rate - youth
+valueBox(
+  value = paste0("Youth: ",
+                 lfc_province_tidy %>%
+  filter(vector == "v2064732",
+         date == max(date)) %>%
+    pull(value) %>%
+    signs(format = percent, accuracy = 0.1)),
+  # icon = "fa-users-cog",
+  caption = paste("B.C. Unemployment Rate for Youth (Aged 15 to 24 Years) for", report_month, report_year)
+)
+```
+
+	
+
+
+### youth Month-Over-Month Change in Number of Jobs (Aged 15 to 24 Years) in B.C.   {.value-box}
+
+```{r}
+valueBox(
+  value = lfc_province_tidy %>%
+  filter(vector == "v2064728",
+         date == max(date)) %>%
+    pull(month_change) %>%
+    signs(format = comma,
+            add_plusses = TRUE),
+  # icon = "fa-users-cog",
+  caption = "Month-Over-Month Change in Number of Jobs for Youth in B.C."
+)
+```
+
+
+### Youth Year-Over-Year Change in Number of Jobs (Aged 15 to 24 Years) in B.C. {.value-box}
+
+```{r}
+year_change_employment_bc_youth <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064728",
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+# year over year change employment
+valueBox(
+  value = year_change_employment_bc_youth %>%
+    pull(year_change) %>%
+    signs(
+      format = comma,
+      add_plusses = TRUE
+    ),
+  # icon = "fa-users-cog",
+  caption = paste("Year-Over-Year Change in Number of Jobs for Youth in B.C.")
+)
+```
+
+
+Row 8
+-----------------------------------------------------------------------------
+
+### Monthly B.C. Unemployment Rates by Age & Gender for `r report_year`
 
 ```{r, fig.width=7, fig.height=5}
+ggplotly_lfs(
+lfc_province_tidy %>%
+  filter(
+    date > "2019-12-01",
+    geo == "British Columbia",
+    labour_force_characteristics %in% c("Unemployment rate"),
+    age_group %in% c(
+                     "15 to 24 years",
+                     "25 to 54 years",
+                     "55 years and over"
+                     ),
+    sex != "Both sexes"
+  ) %>% 
+  ggplot(aes(
+    x = date,
+    y = value,
+    colour = age_group
+  )) +
+  geom_point(aes(text = paste0(
+      "Date: ",
+      date,
+      "<br>",
+      "Gender: ",
+      sex,
+      "<br>",
+      "Age Group: ",
+      age_group,
+      "<br>",
+      "Unemployment Rate: ",
+      signs(value,
+            format = percent,
+            accuracy = 0.1)
+    )),
+    alpha = 0.6) +
+  geom_line(alpha = 0.8) +
+  facet_wrap(facets = vars(sex),
+             labeller = as_labeller(gender_labels)) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = percent,
+                     breaks = breaks_pretty(n = 6)) +
+  scale_colour_viridis_d(name = NULL) +
+  scale_x_date(breaks = breaks_pretty(n = 6)) +
+  theme_minimal() +
+  theme_facet_bar 
+) %>%
+  layout(legend = list(
+    orientation = "h",
+    x = 0.15,
+    y = -0.2
+  ))
+
+```
+
+### Youth Month-Over-Month Change in Number of Jobs in B.C. (Ages 15 to 24 Years) by Gender in `r report_year` 
+
+```{r, fig.width=7, fig.height=5}
+
+##labels
+gender_labels_youth <-  c("Males" = "Youth: Men",
+                          "Females" = "Youth: Women")
 ggplotly_lfs(
   lfc_province_tidy %>%
   filter(
     date >= paste0(report_year, "-01-01"),
     geo == "British Columbia",
     labour_force_characteristics == "Employment",
-    age_group %in% c("15 to 24 years",
-                      "25 to 54 years",
-                      "55 years and over"),
-    sex == "Both sexes"
+    age_group == "15 to 24 years",
+    sex != "Both sexes"
   ) %>%
     {
   ggplot(data = .,
          aes(
     x = date,
-    y = month_change_percent,
+    y = month_change,
    text = paste0(
       "Number of Jobs: ",
       signs(value,
@@ -811,17 +1060,17 @@ ggplotly_lfs(
   )) +
   geom_col(fill = main_colour,
            alpha = 0.6) +
-  facet_wrap(~age_group) +
+  facet_wrap(facets = vars(sex),
+             labeller = as_labeller(gender_labels_youth)) +
   geom_text(
     aes(
       label = signs(
-        month_change_percent,
-        format = percent,
-        add_plusses = TRUE,
-        accuracy = 0.1
+        month_change,
+        format = comma,
+        add_plusses = TRUE
       )
     ),
-    nudge_y = ifelse(.$month_change_percent > 0, .01, -.01),
+    nudge_y = ifelse(.$month_change > 0, 1500, -1500),
     colour = "grey20",
     size = 2
   ) +
@@ -836,90 +1085,72 @@ ggplotly_lfs(
 )
 ```
 
-
-
-Sector
-====================================================================
-
+Sector & Job Type
+===================================================================
 
 Row 1
----------------------------------------------------------------------
+------------------------------------------------------------------
 
-### Month-Over-Month Change in Number of Jobs in B.C. by Job Type in `r report_year` 
+### Private Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
 
-```{r, fig.width=7, fig.height=5}
-ggplotly(lfc_province_tidy %>%
+```{r}
+month_employment_bc_jobtype <- employment_by_class_tidy %>%
   filter(
-    date >= paste0(report_year, "-01-01"),
-    geo == "British Columbia",
-    labour_force_characteristics %in% c("Full-time employment",
-                                        "Part-time employment"),
-    sex == "Both sexes",
-    age_group == "15 years and over"
-  ) %>%
-  mutate(labour_force_characteristics = to_upper_camel_case(str_extract(
-    labour_force_characteristics,
-    "^([^,])+ "
-  ), sep_out = "-")) %>% {
-    ggplot(data = ., 
-         aes(
-    x = date,
-    y = month_change,
-    text = paste(
-    "Number of Jobs:",
-          signs(
-            value,
-            format = comma
-          ),
-          "<br>",
-          "Month-Over-Month Change:",
-          signs(
-            month_change,
-            format = comma,
-            add_plusses = TRUE
-          ),
-          "<br>",
-          "% Month-Over-Month Change:",
-          signs(
-            month_change_percent,
-            format = percent,
-            add_plusses = TRUE,
-            accuracy = 0.1
-      )
-    )
-  )) +
-  geom_col(fill = main_colour,
-           alpha = 0.6) +
-  facet_wrap(
-    facets = vars(labour_force_characteristics),
-    nrow = 2
-    # labeller = labeller(labour_force_characteristics = label_wrap_gen(width = 10))
-  ) +
-  geom_text(
-    aes(
-      label = signs(
-        month_change,
-        format = comma,
-        add_plusses = TRUE
-      )
+    class_of_worker %in% c(
+      "Public sector employees",
+      "Private sector employees",
+      "Self-employed"
     ),
-    nudge_y = ifelse(.$month_change > 0, 16000, -16000),
-    colour = "grey20",
-    size = 2.5
-  ) +
-  labs(x = NULL,
-       y = NULL) +
-  scale_y_continuous(labels = comma,
-                     breaks = breaks_pretty(n = 8)) +
-  scale_x_date(breaks = breaks_pretty(n = 6)) +
-  theme_minimal() +
-  theme_facet_bar +
-  theme(panel.spacing = unit(1, "lines"))
-})
+   date == max(date)
+  ) %>%
+  mutate(class_of_worker = recode(class_of_worker,
+                                  "Public sector employees" = "Public Sector",
+                                  "Private sector employees" = "Private Sector",
+                                  "Self-employed" = "Self-employed"))
+
+valueBox(
+  value = paste0("Private Sector: ",
+                 month_employment_bc_jobtype %>%
+                   filter(class_of_worker == "Private Sector") %>% 
+    pull(month_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = paste("Month-Over-Month Change in Number of Private Sector Jobs in B.C. for", report_month, report_year)
+)
 ```
 
+
+### Public Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
+
+```{r}
+valueBox(
+  value = paste0("Public Sector: ",
+                 month_employment_bc_jobtype %>%
+                   filter(class_of_worker == "Public Sector") %>% 
+    pull(month_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = paste("Month-Over-Month Change in Number of Public Sector Jobs in B.C. for", report_month, report_year)
+)
+```
+
+### Self-employed Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
+
+```{r}
+valueBox(
+  value = paste0("Self-employed: ",
+                 month_employment_bc_jobtype %>%
+                   filter(class_of_worker == "Self-employed") %>% 
+    pull(month_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = paste("Month-Over-Month Change in Number of Self-employed Jobs in B.C. for", report_month, report_year)
+)
+```
+
+
 Row 2
------------------------------------------------------------------------
+----------------------------------------------------------------
 
 ### Month-Over-Month Change in Number of Jobs in B.C. by Sector in `r report_year` 
 
@@ -935,8 +1166,7 @@ ggplotly(employment_by_class_tidy %>%
   ) %>%
   mutate(class_of_worker = recode(class_of_worker,
                                   "Public sector employees" = "Public Sector",
-                                  "Private sector employees" = "Private Sector",
-                                  "Self-employed" = "Self-Employed")) %>% {
+                                  "Private sector employees" = "Private Sector")) %>% {
   ggplot(data = .,
          aes(
     x = date,
@@ -994,15 +1224,232 @@ ggplotly(employment_by_class_tidy %>%
 ```
 
 
-Industry
-======================================================================
+Row 3
+------------------------------------------------------------------
 
+### Number of Full-time Jobs in B.C. {.value-box}
+
+```{r}
+
+valueBox(
+  value = paste0("Full-time: ",
+                 lfc_province_tidy %>%
+  filter(
+    vector == "v2064702",
+    date == max(date)
+  ) %>%
+    pull(value) %>%
+    signs(format = comma)),
+  # icon = "fa-users-cog",
+  caption = paste("Number of Full-time Jobs in B.C. for", report_month, report_year)
+)
+```
+
+### Month-Over-Month Change in Number of Full-time Jobs in B.C. {.value-box}
+
+```{r}
+valueBox(
+  value = lfc_province_tidy %>%
+  filter(
+    vector == "v2064702",
+    date == max(date)
+  ) %>%
+    pull(month_change) %>%
+    signs(
+      format = comma,
+      add_plusses = TRUE
+    ),
+  # icon = "fa-users-cog",
+  caption = "Month-Over-Month Change in Number of Full-time Jobs in B.C."
+)
+```
+
+### Year-Over-Year Change in Number of Full-time Jobs in B.C. {.value-box}
+
+```{r}
+year_change_employment_bc_ft <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064702",
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+# year over year change 
+valueBox(
+  value = year_change_employment_bc_ft %>%
+    pull(year_change) %>%
+    signs(
+      format = comma,
+      add_plusses = TRUE
+    ),
+  # icon = "fa-users-cog",
+  caption = paste("Year-Over-Year Change in Number of Full-time Jobs in B.C.")
+)
+```
+
+
+Row 4
+---------------------------------------------------------------------
+
+### Month-Over-Month Change in Number of Jobs in B.C. by Job Type in `r report_year` 
+
+```{r, fig.width=7, fig.height=5}
+ggplotly_lfs(
+  lfc_province_tidy %>%
+  filter(
+    date >= paste0(report_year, "-01-01"),
+    geo == "British Columbia",
+    labour_force_characteristics %in% c("Full-time employment",
+                                        "Part-time employment"),
+    sex == "Both sexes",
+    age_group == "15 years and over"
+  ) %>%
+  mutate(labour_force_characteristics = str_extract(
+    labour_force_characteristics,
+    "^([^,])+ "
+  ), sep_out = "-") %>% {
+    ggplot(data = ., 
+         aes(
+    x = date,
+    y = month_change,
+    text = paste(
+    "Number of Jobs:",
+          signs(
+            value,
+            format = comma
+          ),
+          "<br>",
+          "Month-Over-Month Change:",
+          signs(
+            month_change,
+            format = comma,
+            add_plusses = TRUE
+          ),
+          "<br>",
+          "% Month-Over-Month Change:",
+          signs(
+            month_change_percent,
+            format = percent,
+            add_plusses = TRUE,
+            accuracy = 0.1
+      )
+    )
+  )) +
+  geom_col(fill = main_colour,
+           alpha = 0.6) +
+  facet_wrap(
+    facets = vars(labour_force_characteristics),
+    ncol = 2
+    # labeller = labeller(labour_force_characteristics = label_wrap_gen(width = 10))
+  ) +
+  geom_text(
+    aes(
+      label = signs(
+        month_change,
+        format = comma,
+        add_plusses = TRUE
+      )
+    ),
+    nudge_y = ifelse(.$month_change > 0, 8000, -8000),
+    colour = "grey20",
+    size = 2.5
+  ) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = comma,
+                     breaks = breaks_pretty(n = 8)) +
+  scale_x_date(breaks = breaks_pretty(n = 6)) +
+  theme_minimal() +
+  theme_facet_bar +
+  theme(panel.spacing = unit(1, "lines"))
+})
+```
+
+
+Row 5
+------------------------------------------------------------------
+
+### Number of Part-Time Jobs in B.C. {.value-box}
+
+```{r}
+valueBox(
+  value = paste0("Part-time: ",
+                lfc_province_tidy %>%
+  filter(
+    vector == "v2064703",
+    date == max(date)
+  ) %>%
+    pull(value) %>%
+    signs(format = comma)),
+  # icon = "fa-users-cog",
+  caption = paste("Number of Part-time Jobs in B.C. for", report_month, report_year)
+)
+```
+
+### Month-Over-Month Change in Number of Part-Time Jobs in B.C. {.value-box}
+
+```{r}
+valueBox(
+  value = lfc_province_tidy %>%
+  filter(
+    vector == "v2064703",
+    date == max(date)
+  ) %>%
+    pull(month_change) %>%
+    signs(
+      format = comma,
+      add_plusses = TRUE
+    ),
+  # icon = "fa-users-cog",
+  caption = "Month-Over-Month Change in Number of Part-Time Jobs in B.C."
+)
+```
+
+### Year-Over-Year Change in Number of Part-Time Jobs in B.C. {.value-box}
+
+```{r}
+year_change_employment_bc_ft <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064703",
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+# year over year change 
+valueBox(
+  value = year_change_employment_bc_ft %>%
+    pull(year_change) %>%
+    signs(
+      format = comma,
+      add_plusses = TRUE
+    ),
+  # icon = "fa-users-cog",
+  caption = paste("Year-Over-Year Change in Number of Part-Time Jobs in B.C.")
+)
+```
+
+
+
+Industry
+====================================================================
 
 Row 1
 -----------------------------------------------------------------------
 
+Row 2
+-----------------------------------------------------------------------
 
-National 🇨🇦 
+
+
+National
 ======================================================================
 
 
@@ -1221,11 +1668,11 @@ valueBox(value = year_change_employment_can %>%
 ```
 
 
-Row 4 {data-height=600 }
+Row 4 {data-height=800 }
 -----------------------------------------------------------------------
 
 
-### Percent Month-Over-Month Change in Number of Jobs by Province in `r report_year`
+### Month-Over-Month Percent Change in Number of Jobs by Province in `r report_year`
 
 ```{r}
 ggplotly_lfs(
@@ -1238,7 +1685,9 @@ ggplotly_lfs(
     date >= paste0(report_year, "-01-01")
   ) %>%
   mutate(fill_col = ifelse(geo == "British Columbia", "bc", "other")) %>%
-  ggplot(aes(x = date, y = month_change_percent)) +
+    {
+  ggplot(data = .,
+         aes(x = date, y = month_change_percent)) +
   geom_col(aes(fill = fill_col,
               text = paste(
       "Number of Jobs:",
@@ -1264,13 +1713,12 @@ ggplotly_lfs(
   # geom_text(
   #   aes(
   #     label = signs(
-  #       month_change_percent,
-  #       format = percent,
-  #       add_plusses = TRUE,
-  #       accuracy = 0.1
+  #       month_change,
+  #       format = comma,
+  #       add_plusses = TRUE
   #     )
   #   ),
-  #   nudge_y = 8000,
+  #    nudge_y = ifelse(.$month_change_percent > 0, .1, -.1),
   #   colour = "grey20",
   #   size = 2.5
   # ) +
@@ -1280,8 +1728,8 @@ ggplotly_lfs(
        y = NULL) +
   scale_y_continuous(
     labels = percent,
-    expand = c(0, 0),
-    breaks = breaks_pretty(n = 6)
+    # expand = c(0, 0),
+    breaks = breaks_pretty(n = 8)
   ) +
   scale_fill_manual(guide = FALSE,
                     values = c(bc = "#440154FF",
@@ -1289,10 +1737,11 @@ ggplotly_lfs(
   theme_minimal() +
   theme_vert_bar +
   theme(legend.position = "none")
+    }
 )
 ```
 
-COVID-19  
+COVID-19 Recovery
 ======================================================================
 
 
