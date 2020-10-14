@@ -341,3 +341,78 @@ ggplotly(
   theme_facet_bar
 })
 ```
+
+
+Row 4 {data-height=800 }
+-----------------------------------------------------------------------
+
+
+### Month-Over-Month Percent Change in Number of Jobs by Province in `r report_year`
+
+```{r}
+ggplotly_lfs(
+  lfc_province_tidy %>%
+  filter(
+    labour_force_characteristics == "Employment",
+    sex == "Both sexes",
+    age_group == "15 years and over",
+    geo != "Canada",
+    date >= paste0(report_year, "-01-01")
+  ) %>%
+  mutate(fill_col = ifelse(geo == "British Columbia", "bc", "other")) %>%
+    {
+  ggplot(data = .,
+         aes(x = date, y = month_change_percent)) +
+  geom_col(aes(fill = fill_col,
+              text = paste(
+      "Number of Jobs:",
+      signs(
+       value,
+       format = comma),
+      "<br>",
+      "Month-Over-Month Change:",
+      signs(
+       month_change,
+       format = comma,
+       add_plusses = TRUE),
+      "<br>",
+      "% Month-Over-Month Change:",
+      signs(
+        month_change_percent,
+        format = percent,
+        add_plusses = TRUE,
+        accuracy = 0.1
+      )
+    )), alpha = 0.6) +
+  # coord_flip() +
+  # geom_text(
+  #   aes(
+  #     label = signs(
+  #       month_change,
+  #       format = comma,
+  #       add_plusses = TRUE
+  #     )
+  #   ),
+  #    nudge_y = ifelse(.$month_change_percent > 0, .1, -.1),
+  #   colour = "grey20",
+  #   size = 2.5
+  # ) +
+  facet_wrap(~ geo,
+             ncol = 3) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(
+    labels = percent,
+    # expand = c(0, 0),
+    breaks = breaks_pretty(n = 8)
+  ) +
+  scale_fill_manual(guide = FALSE,
+                    values = c(bc = "#440154FF",
+                               other = main_colour)) +
+  theme_minimal() +
+  theme_vert_bar +
+  theme(legend.position = "none")
+    }
+)
+```
+
