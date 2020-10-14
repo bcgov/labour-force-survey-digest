@@ -268,3 +268,76 @@ ggplotly_lfs(mom_change_employment_provinces)
 # # theme(strip.text.y = element_text(angle = 0))
 #
 # ggplotly_lfs(mom_change_employment_ag)
+
+
+### Month-Over-Month Change in Number of Jobs in B.C. by Sector in `r report_year`
+
+```{r, fig.width=7, fig.height=5}
+ggplotly(
+  employment_by_class_tidy %>%
+  filter(
+    class_of_worker %in% c(
+      "Public sector employees",
+      "Private sector employees",
+      "Self-employed"
+    ),
+    date >= paste0(report_year, "-01-01")
+  ) %>%
+  mutate(class_of_worker = recode(class_of_worker,
+                                  "Public sector employees" = "Public Sector",
+                                  "Private sector employees" = "Private Sector")) %>% {
+  ggplot(data = .,
+         aes(
+    x = date,
+    y = month_change,
+    text = paste(
+  "Number of Jobs:",
+          signs(
+            value,
+            format = comma
+          ),
+          "<br>",
+          "Month-Over-Month Change:",
+          signs(
+            month_change,
+            format = comma,
+            add_plusses = TRUE
+          ),
+          "<br>",
+          "% Month-Over-Month Change:",
+          signs(
+            month_change_percent,
+            format = percent,
+            add_plusses = TRUE,
+            accuracy = 0.1
+      )
+    )
+  )) +
+  geom_col(fill = main_colour,
+           alpha = 0.6) +
+  facet_wrap(
+    facets = vars(class_of_worker),
+    nrow = 1
+    # labeller = labeller(class_of_worker = label_wrap_gen(width = 15))
+  ) +
+  geom_text(
+    aes(
+      label = signs(
+        month_change,
+        format = comma,
+        add_plusses = TRUE
+      )
+    ),
+    nudge_y = ifelse(.$month_change > 0, 10000, -10000),
+    colour = "grey20",
+    size = 2.5
+  ) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = comma,
+                     breaks = breaks_pretty(n = 6)) +
+  scale_x_date(breaks = breaks_pretty(n = 4)) +
+  theme_minimal() +
+  theme_facet_bar
+})
+```
