@@ -63,19 +63,19 @@ theme_bar <- theme(
   legend.text = element_text(size = 11, colour = "grey20")
 )
 
-theme_vert_bar <- theme_bar +
+theme_vert <- theme_bar +
   theme(
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank()
   )
 
-theme_horiz_bar <- theme_bar +
+theme_horiz <- theme_bar +
   theme(
     panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank()
   )
 
-theme_facet_bar <- theme_vert_bar +
+theme_facet <- theme_vert +
   theme(
     axis.text.y = element_text(size = 9),
     axis.text.x = element_text(size = 8),
@@ -110,7 +110,7 @@ Labour Force Survey Summary for British Columbia:
  - [Highlights]
  - [Demographics]
  - [Job Type]
- - [Sectors & Industry]
+ - [Industry]
  - [COVID-19 Recovery]
 
 <br>
@@ -258,7 +258,7 @@ ggplotly_lfs(
   scale_y_continuous(labels = percent,
                      breaks = breaks_pretty(n = 6)) +
   theme_minimal() +
-  theme_vert_bar
+  theme_vert
 )
 ```
 
@@ -461,7 +461,7 @@ ggplotly_lfs(
       ) +
       scale_x_date(breaks = breaks_pretty(n = 8)) +
       theme_minimal() +
-      theme_vert_bar
+      theme_vert
   }
 )
 ```
@@ -579,7 +579,6 @@ valueBox(
 
 Row 6
 ---------------------------------------------------------------------------
-
 
 ### Unemployment Rate for `r paste(report_month, report_year)` by Province
 
@@ -700,7 +699,7 @@ ggplotly_lfs(
                                other = main_colour)) +
   scale_x_date(breaks = breaks_pretty(n = 8)) +
   theme_minimal() +
-  theme_vert_bar +
+  theme_vert +
   theme(legend.position = "none")
 ) 
 
@@ -936,7 +935,7 @@ lfc_province_tidy %>%
                                thisyear = main_colour)) +
   scale_x_date(breaks = breaks_pretty(n = 6)) +
   theme_minimal() +
-  theme_facet_bar +
+  theme_facet +
   theme(legend.position = "none")
 )
 ```
@@ -1128,7 +1127,7 @@ ggplotly_lfs(
                      breaks = breaks_pretty(8)) +
   scale_x_date(breaks = breaks_pretty(n = 8)) +
   theme_minimal() +
-  theme_facet_bar
+  theme_facet
 # theme(strip.text.y = element_text(angle = 0))
   }
 )
@@ -1252,7 +1251,7 @@ lfc_province_tidy %>%
   scale_colour_viridis_d(name = NULL) +
   scale_x_date(breaks = breaks_pretty(n = 4)) +
   theme_minimal() +
-  theme_facet_bar 
+  theme_facet
 ) %>%
   layout(legend = list(
     orientation = "h",
@@ -1262,7 +1261,7 @@ lfc_province_tidy %>%
 
 ```
 
-### Youth Month-Over-Month Change in Number of Jobs in B.C. (15 to 24 Years) by Gender in `r report_year` 
+### Month-Over-Month Change in Number of Jobs in B.C. for Youth (15 to 24 Years) by Gender in `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
 
@@ -1324,7 +1323,7 @@ ggplotly_lfs(
                      breaks = breaks_pretty(5)) +
   scale_x_date(breaks = breaks_pretty(n = 4)) +
   theme_minimal() +
-  theme_facet_bar
+  theme_facet
 }
 )
 ```
@@ -1541,7 +1540,7 @@ ggplotly_lfs(
                      breaks = breaks_pretty(n = 8)) +
   scale_x_date(breaks = breaks_pretty(n = 8)) +
   theme_minimal() +
-  theme_facet_bar +
+  theme_facet +
   theme(panel.spacing = unit(1, "lines"))
 })
 ```
@@ -1620,7 +1619,7 @@ valueBox(
 Row 5
 ------------------------------------------------------------------------------
 
-### Change in Number of Jobs for Women in B.C. by Job Type & Age for `r report_year`
+### Month-Over-Month Change in Number of Jobs for Women in B.C. by Job Type & Age for `r report_year`
 
 ```{r}
 ggplotly_lfs(
@@ -1678,7 +1677,7 @@ facet_grid(. ~ age_group) +
   scale_x_date(breaks = breaks_pretty(n = 8)) +
    scale_fill_viridis_d(name = NULL) +
   theme_minimal() +
-  theme_facet_bar +
+  theme_facet +
   theme(panel.spacing = unit(1, "lines"))
 ) %>%
   layout(legend = list(
@@ -1761,7 +1760,7 @@ valueBox(
 Row 7
 ------------------------------------------------------------------------------
 
-### Change in Number of Jobs for Men in B.C. by Job Type & Age for `r report_year`
+### Month-Over-Month Change Change in Number of Jobs for Men in B.C. by Job Type & Age for `r report_year`
 
 ```{r}
 ggplotly_lfs(
@@ -1819,7 +1818,7 @@ facet_grid(. ~ age_group) +
   scale_x_date(breaks = breaks_pretty(n = 8)) +
    scale_fill_viridis_d(name = NULL) +
   theme_minimal() +
-  theme_facet_bar +
+  theme_facet +
   theme(panel.spacing = unit(1, "lines"))
 ) %>%
   layout(legend = list(
@@ -1830,7 +1829,7 @@ facet_grid(. ~ age_group) +
 ```
 
 
-Sectors & Industry
+Industry
 ====================================================================
 
 
@@ -1896,59 +1895,82 @@ valueBox(
 ```
 
 
-
 Row 2
------------------------------------------------------------------------
+-----------------------------------------------------------------------------
 
-### Goods-Producing Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
-
+### Private Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
 
 ```{r}
-employment_by_industry_tidy %>% 
-  filter()
+year_employment_bc_jobtype <- employment_by_class_tidy %>%
+  filter(
+    class_of_worker %in% c(
+      "Public sector employees",
+      "Private sector employees",
+      "Self-employed"
+    ),
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  group_by(vector) %>%
+  mutate(
+    class_of_worker = recode(
+      class_of_worker,
+      "Public sector employees" = "Public Sector",
+      "Private sector employees" = "Private Sector",
+      "Self-employed" = "Self-employed"
+    ),
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
 
 valueBox(
-  value = paste0("Goods-producing: ",
-                 month_employment_bc_jobtype %>%
-                   filter(class_of_worker == "Self-employed") %>% 
-    pull(month_change) %>%
-    signs(format = comma,
-          add_plusses = TRUE)),
-  caption = paste("Month-Over-Month Change in Number of Goods-producing Jobs in B.C. for", report_month, report_year)
+  value = paste0(
+    "Private Sector: ",
+    year_employment_bc_jobtype %>%
+      filter(class_of_worker == "Private Sector") %>%
+      pull(year_change) %>%
+      signs(format = comma,
+            add_plusses = TRUE)
+  ),
+  caption = "Year-Over-Year Change in Number of Private Sector Jobs in B.C."
 )
 ```
 
 
-### Goods-Producing Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
-
+### Public Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
 
 ```{r}
-employment_by_industry_tidy
-
+valueBox(
+  value = paste0("Public Sector: ",
+                 year_employment_bc_jobtype %>%
+                   filter(class_of_worker == "Public Sector") %>% 
+    pull(year_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = "Year-Over-Year Change in Number of Public Sector Jobs in B.C."
+)
 ```
 
 
-
-### Services-Producing Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
-
-```{r}
-
-```
-
-
-### Services-Producing Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
-
+### Self-employed Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
 
 ```{r}
-
+valueBox(
+  value = paste0("Self-employed: ",
+                 year_employment_bc_jobtype %>%
+                   filter(class_of_worker == "Self-employed") %>% 
+    pull(year_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = "Year-Over-Year Change in Number of Self-employed Jobs in B.C."
+)
 ```
-
 
 
 Row 3
 ----------------------------------------------------------------
 
-### Change in Number of Jobs in B.C. by Sector for `r report_year` 
+### Number of Jobs in B.C. by Month & Sector for `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
 ggplotly_lfs(
@@ -1996,12 +2018,13 @@ ggplotly_lfs(
   geom_col(alpha = 0.6) +
   labs(x = NULL,
        y = NULL) +
-  scale_y_continuous(labels = comma,
+  scale_y_continuous(expand = c(0, 0),
+                     labels = comma,
                      breaks = breaks_pretty(n = 6)) +
   scale_x_date(breaks = breaks_pretty(n = 8)) +
   scale_fill_viridis_d(name = NULL) +
   theme_minimal() +
-  theme_facet_bar +
+  theme_vert +
     theme(legend.text = element_text(size = 12)) 
 ) %>%
   layout(legend = list(
@@ -2012,9 +2035,169 @@ ggplotly_lfs(
 ```
 
 
-### Change in Number of Goods-producing & Services-producing Jobs in B.C.  for `r report_year` 
+### Month-Over-Month Change in Number of Goods & Services-producing Jobs in B.C. for `r report_year` 
 
 ```{r, fig.width=7, fig.height=5}
+ggplotly_lfs(
+  employment_by_industry_tidy %>%
+  filter(
+    vector %in% c(
+      "v2057794",
+      "v2057800"),
+    date >= paste0(report_year, "-01-01"))  %>% 
+      mutate(naics = recode(naics,
+                             "Goods-producing sector" = "Goods-producing Jobs",
+                             "Services-producing sector" = "Services-producing Jobs")) %>% 
+  ggplot(data = .,
+         aes(
+    x = date,
+    y = month_change,
+    text = paste0(
+      "Sector: ",
+      naics,
+      "<br>",
+          "Month-Over-Month Change: ",
+          signs(
+            month_change,
+            format = comma,
+            add_plusses = TRUE
+          ),
+          "<br>",
+          "% Month-Over-Month Change: ",
+          signs(
+            month_change_percent,
+            format = percent,
+            add_plusses = TRUE,
+            accuracy = 0.1
+      )
+    ))) +
+  geom_col(aes(fill = naics), alpha = 0.6) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = comma,
+                     breaks = breaks_pretty(n = 6)) +
+  scale_x_date(breaks = breaks_pretty(n = 8)) +
+  scale_fill_viridis_d(name = NULL) +
+  theme_minimal() +
+  theme_vert
+  )  %>%
+  layout(legend = list(
+    orientation = "h",
+    x = 0.32,
+    y = -0.2
+  ))
+
+
+ 
+ 
+
+```
+
+
+Row 4
+-----------------------------------------------------------------------
+
+### Goods-Producing Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
+
+
+```{r}
+valueBox(
+  value = paste0("Goods-producing: ",
+                 employment_by_industry_tidy %>% 
+  filter(vector == "v2057794",
+         date == max(date)) %>% 
+    pull(month_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = paste("Month-Over-Month Change in Number of Goods-producing Jobs in B.C. for", report_month, report_year)
+)
+```
+
+
+### Services-Producing Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
+
+```{r}
+valueBox(
+  value = paste0("Services-producing: ",
+                 employment_by_industry_tidy %>% 
+  filter(vector == "v2057800",
+         date == max(date)) %>% 
+    pull(month_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = paste("Month-Over-Month Change in Number of Services-producing Jobs in B.C. for", report_month, report_year)
+)
+```
+
+
+Row 5
+---------------------------------------------------------------------------
+
+### Goods-Producing Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
+
+
+```{r}
+year_change_employment_industry_gp <- employment_by_industry_tidy %>%
+  filter(
+    vector == "v2057794",
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+# year over year change 
+valueBox(
+  value = paste0("Goods-producing: ",
+                 year_change_employment_industry_gp %>%
+    pull(year_change) %>%
+    signs(
+      format = comma,
+      add_plusses = TRUE
+    )),
+  # icon = "fa-users-cog",
+  caption = "Year-Over-Year Change in Number of of Goods-producing Jobs in B.C."
+)
+```
+
+
+### Services-Producing Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
+
+```{r}
+year_change_employment_industry_sp <- employment_by_industry_tidy %>%
+  filter(
+    vector == "v2057800",
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+# year over year change 
+valueBox(
+  value = paste0("Services-producing: ",
+                 year_change_employment_industry_sp %>%
+    pull(year_change) %>%
+    signs(
+      format = comma,
+      add_plusses = TRUE
+    )),
+  # icon = "fa-users-cog",
+  caption = "Year-Over-Year Change in Number of of Services-producing Jobs in B.C."
+)
+```
+
+
+Row 6
+-----------------------------------------------------------------------
+
+###  Changes in Number of Jobs in B.C. by Industry for `r paste(report_month, report_year)`
+
+```{r}
 
 ```
 
