@@ -1255,8 +1255,9 @@ lfc_province_tidy %>%
 ) %>%
   layout(legend = list(
     orientation = "h",
-    x = 0.15,
-    y = -0.2
+    x = 0.5,
+    y = -0.2,
+    xanchor = "center"
   ))
 
 ```
@@ -1682,8 +1683,9 @@ facet_grid(. ~ age_group) +
 ) %>%
   layout(legend = list(
     orientation = "h",
-    x = 0.32,
-    y = -0.2
+    x = 0.5,
+    y = -0.2,
+    xanchor = "center"
   ))
 ```
 
@@ -1823,8 +1825,9 @@ facet_grid(. ~ age_group) +
 ) %>%
   layout(legend = list(
     orientation = "h",
-    x = 0.32,
-    y = -0.2
+    x = 0.5,
+    y = -0.2,
+    xanchor = "center"
   ))
 ```
 
@@ -2029,8 +2032,9 @@ ggplotly_lfs(
 ) %>%
   layout(legend = list(
     orientation = "h",
-    x = 0.25,
-    y = 1.1
+    x = 0.5,
+    y = -0.2,
+    xanchor = "center"
   ))
 ```
 
@@ -2083,8 +2087,9 @@ ggplotly_lfs(
   )  %>%
   layout(legend = list(
     orientation = "h",
-    x = 0.32,
-    y = -0.2
+    x = 0.5,
+    y = -0.2,
+    xanchor = "center"
   ))
 
 
