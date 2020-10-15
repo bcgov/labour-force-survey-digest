@@ -213,7 +213,7 @@ employment_by_industry_tidy <- employment_by_industry_raw %>%
   select(
     "date",
     "geo",
-    "north_american_industry_classification_system_naics",
+    "naics" = "north_american_industry_classification_system_naics",
     "statistics",
     "vector",
     "value"
@@ -233,7 +233,7 @@ lfs_industry_unadjusted_tidy <- lfs_industry_unadjusted_raw %>%
   select(
     "date",
     "geo",
-    "north_american_industry_classification_system_naics",
+    "naics" = "north_american_industry_classification_system_naics",
     "sex",
     "age_group",
     "vector",
