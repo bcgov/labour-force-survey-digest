@@ -661,8 +661,7 @@ unemploy_rt_provinces_report_year <-  lfc_province_tidy %>%
   left_join(prov_acronyms)
 
 
-ggplotly_lfs(
-  unemploy_rt_provinces_report_year %>% 
+p <- unemploy_rt_provinces_report_year %>% 
  ggplot(aes(
     x = date,
     y = value,
@@ -681,7 +680,9 @@ ggplotly_lfs(
             format = percent)
     )),
     alpha = 0.6) +
-  geom_line(aes(colour = fill_col), alpha = 0.8) +
+  geom_line(alpha = 0.8, colour = main_colour) +
+  geom_line(data = unemploy_rt_provinces_report_year %>% filter(acronym == "BC"), 
+            alpha = 0.8, size = 1.5, colour = "#440154FF") +
   geom_text(data = unemploy_rt_provinces_report_year %>% filter(date == max(date)),
             aes(label = acronym,
                 x = date,
@@ -697,11 +698,12 @@ ggplotly_lfs(
                       values = c(bc = "#440154FF",
                                other = main_colour)) +
   scale_x_date(breaks = breaks_pretty(n = 8)) +
+  scale_size(range= c(6, 1)) +
   theme_minimal() +
   theme_vert_bar +
   theme(legend.position = "none")
-) 
 
+ggplotly_lfs(p)
 ```
 
 
