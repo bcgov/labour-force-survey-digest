@@ -581,7 +581,8 @@ Row 6
 
 ### Unemployment Rate for `r paste(report_month, report_year)` by Province
 
-```{r, fig.width=7, fig.height=5}
+
+```{r, fig.width=7, fig.height=5, eval=TRUE}
 unemploy_rt_provinces <- lfc_province_tidy %>%
   filter(
     labour_force_characteristics == "Unemployment rate",
@@ -596,10 +597,9 @@ unemploy_rt_provinces_spatial <-  can_provinces %>%
 
 
 unemploy_rt_provinces_spatial %>% 
-  st_transform(3979) %>% 
-  mutate(Rate = value) %>% 
-  plot_ly(split = ~Rate, 
-          color = ~Rate, 
+  st_transform(3979) %>%
+  plot_ly(split = ~value, 
+          color = ~value, 
           text = ~paste0(
       "Province: ",
       name,
@@ -611,11 +611,9 @@ unemploy_rt_provinces_spatial %>%
           hoveron = "fills",
           hoverinfo = "text",
           showlegend = FALSE) %>% 
-  layout(
-    title = paste(report_month,
+  colorbar(title = paste(report_month,
                   report_year,
-                  "Unemployment Rate")
-  )
+                  "\nUnemployment\nRate"))
 
 
 # # ggplotly_lfs(
