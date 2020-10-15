@@ -2091,11 +2091,6 @@ ggplotly_lfs(
     y = -0.2,
     xanchor = "center"
   ))
-
-
- 
- 
-
 ```
 
 
@@ -2139,7 +2134,6 @@ Row 5
 ---------------------------------------------------------------------------
 
 ### Goods-Producing Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
-
 
 ```{r}
 year_change_employment_industry_gp <- employment_by_industry_tidy %>%
@@ -2203,7 +2197,48 @@ Row 6
 ###  Changes in Number of Jobs in B.C. by Industry for `r paste(report_month, report_year)`
 
 ```{r}
+industries <- c("Agriculture [111-112, 1100, 1151-1152]",
+                "Forestry, fishing, mining, quarrying, oil and gas [21, 113-114, 1153, 2100]",
+                "Utilities [22]",
+                "Construction [23]",
+                "Manufacturing [31-33]",
+                "Wholesale and retail trade [41, 44-45]",
+                "Transportation and warehousing [48-49]",
+                "Finance, insurance, real estate, rental and leasing [52-53]",
+                "Professional, scientific and technical services [54]",
+                "Business, building and other support services [55-56]",
+                "Educational services [61]",
+                "Health care and social assistance [62]",
+                "Information, culture and recreation [51, 71]",
+                "Accommodation and food services [72]",
+                "Other services (except public administration) [81]",
+                "Public administration [91]")    
 
+industry_change <- employment_by_industry_tidy %>% 
+  filter(naics %in% industries,
+         date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date)) %>% 
+  mutate(industry = str_extract(naics, ".+?(?=\\[)")) %>%
+  ungroup() %>% 
+  select(industry, value, month_change,
+         month_change_percent, year_change_percent) %>% 
+  mutate(industry = factor(industry,
+                           ordered = TRUE, 
+                            levels = ))
+
+industry_order <- factor(industry_change$industry, levels = industry_change$industry[order(industry_change$value, decreasing = TRUE)])
+
+
+p1 <- industry_change %>% 
+  filter(metric == "value") %>% 
+    arrange(desc("metric_value")) %>% 
+  ggplot() +
+  geom_col(aes(metric_value, industry))
 ```
 
 
