@@ -111,14 +111,14 @@ lfc_province_tidy <- lfc_province_raw %>%
     statistics == "Estimate"
   ) %>%
   select(
-    "date",
-    "geo",
-    "labour_force_characteristics",
-    "sex",
-    "age_group",
-    "statistics",
-    "vector",
-    "value"
+    date,
+    geo,
+    labour_force_characteristics,
+    sex,
+    age_group,
+    statistics,
+    vector,
+    value
   ) %>%
   group_by(vector) %>%
   mutate(
@@ -144,13 +144,13 @@ lfc_region_tabular_tidy <- lfc_region_raw %>%
     statistics == "Estimate"
   ) %>%
   select(
-    "date",
-    "geo",
-    "labour_force_characteristics",
-    "statistics",
-    "vector",
-    "value",
-    "geo_uid"
+    date,
+    geo,
+    labour_force_characteristics,
+    statistics,
+    vector,
+    value,
+    geo_uid
   ) %>%
   group_by(vector) %>%
   mutate(
@@ -188,13 +188,13 @@ employment_by_class_tidy <- employment_by_class_raw %>%
     statistics == "Estimate"
   ) %>%
   select(
-    "date",
-    "geo",
-    "class_of_worker",
-    "sex",
-    "statistics",
-    "vector",
-    "value"
+    date,
+    geo,
+    class_of_worker,
+    sex,
+    statistics,
+    vector,
+    value
   ) %>%
   group_by(vector) %>%
   mutate(

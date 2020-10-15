@@ -265,8 +265,7 @@ ggplotly_lfs(
 ### Unemployment Rates by B.C. Economic Region for `r paste(report_month, report_year)` 
 
 ```{r, fig.width=7, fig.height=5}
-# ggplotly_lfs(
-  lfc_region_tidy %>%
+lfc_region_tidy %>%
     filter(
       geo != "British Columbia",
       labour_force_characteristics == "Unemployment rate",
@@ -324,7 +323,6 @@ ggplotly_lfs(
       panel.grid.major = element_line(colour = "transparent"),
       axis.text = element_blank()
     )
-# )
 ```
 
 
@@ -470,8 +468,7 @@ ggplotly_lfs(
 ### Month-Over-Month Percent Change in Number of Jobs by B.C. Economic Region for `r paste(report_month, report_year)`
 
 ```{r, fig.width=7, fig.height=5}
-# ggplotly_lfs(
-  lfc_region_tidy %>%
+lfc_region_tidy %>%
     filter(
       geo != "British Columbia",
       labour_force_characteristics == "Employment",
@@ -515,7 +512,7 @@ ggplotly_lfs(
       panel.grid.major = element_line(colour = "transparent"),
       axis.text = element_blank()
     )
-# )
+
 ```
 
 
@@ -582,21 +579,45 @@ Row 6
 
 ### Unemployment Rate for `r paste(report_month, report_year)` by Province
 
-```{r, fig.width=7, fig.height=5}
+
+```{r, fig.width=7, fig.height=5, eval=TRUE}
 unemploy_rt_provinces <- lfc_province_tidy %>%
   filter(
     labour_force_characteristics == "Unemployment rate",
     sex == "Both sexes",
     age_group == "15 years and over",
     date == max(date),
-    geo != "Canada")
+    geo != "Canada") 
 
 unemploy_rt_provinces_spatial <-  can_provinces %>% 
-  left_join(unemploy_rt_provinces, by = c("name" = "geo"))
+  left_join(unemploy_rt_provinces, 
+            by = c("name"= "geo")) 
 
-# ggplotly_lfs(
-  ggplot(unemploy_rt_provinces_spatial) +
-  geom_sf(aes(fill = value, 
+
+# unemploy_rt_provinces_spatial %>% 
+#   st_transform(3979) %>%
+#   plot_ly(split = ~value, 
+#           color = ~value, 
+#           text = ~paste0(
+#       "Province: ",
+#       name,
+#       "<br>",
+#       "Unemployment Rate: ",
+#       signs(value,
+#             format = percent)
+#     ),
+#           hoveron = "fills",
+#           hoverinfo = "text",
+#           showlegend = FALSE) %>% 
+#   colorbar(title = paste(report_month,
+#                   report_year,
+#                   "\nUnemployment\nRate"))
+
+
+unemploy_rt_provinces_spatial %>% 
+  st_transform(3979) %>% 
+  ggplot() +
+  geom_sf(aes(fill = value,
               text = paste0(report_month," ",report_year,"\n",
                             name,"\n","Unemployment Rate: ",
                             signs(value,
@@ -617,7 +638,7 @@ unemploy_rt_provinces_spatial <-  can_provinces %>%
   ) +
   theme_minimal() +
   theme(
-    legend.title = element_text(size = 11, 
+    legend.title = element_text(size = 11,
                                 colour = "grey20"),
     legend.text = element_text(size = 10,
                                colour = "grey20"),
@@ -630,7 +651,6 @@ unemploy_rt_provinces_spatial <-  can_provinces %>%
     panel.grid.major = element_line(colour = "transparent"),
     axis.text = element_blank()
   )
-  # )
 ```
 
 ### Monthly Unemployment Rates by Province for `r report_year`
@@ -662,8 +682,7 @@ unemploy_rt_provinces_report_year <-  lfc_province_tidy %>%
   left_join(prov_acronyms)
 
 
-ggplotly_lfs(
-  unemploy_rt_provinces_report_year %>% 
+p <- unemploy_rt_provinces_report_year %>% 
  ggplot(aes(
     x = date,
     y = value,
@@ -682,7 +701,9 @@ ggplotly_lfs(
             format = percent)
     )),
     alpha = 0.6) +
-  geom_line(aes(colour = fill_col), alpha = 0.8) +
+  geom_line(alpha = 0.8, colour = main_colour) +
+  geom_line(data = unemploy_rt_provinces_report_year %>% filter(acronym == "BC"), 
+            alpha = 0.8, size = 1.5, colour = "#440154FF") +
   geom_text(data = unemploy_rt_provinces_report_year %>% filter(date == max(date)),
             aes(label = acronym,
                 x = date,
@@ -698,11 +719,12 @@ ggplotly_lfs(
                       values = c(bc = "#440154FF",
                                other = main_colour)) +
   scale_x_date(breaks = breaks_pretty(n = 8)) +
+  scale_size(range= c(6, 1)) +
   theme_minimal() +
   theme_vert +
   theme(legend.position = "none")
-) 
 
+ggplotly_lfs(p)
 ```
 
 
