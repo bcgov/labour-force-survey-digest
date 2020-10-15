@@ -16,7 +16,7 @@ library(lubridate)
 library(cansim)
 library(janitor)
 library(dplyr)
-library(tidylog)
+# library(tidylog)
 library(scales)
 library(signs)
 library(ggplot2)
@@ -28,7 +28,7 @@ library(bcmaps)
 library(viridis)
 library(plotly)
 library(cancensus)
-library(snakecase)
+# library(snakecase)
 
 
 
