@@ -207,11 +207,11 @@ ggplotly_lfs(
     aes(
       x = date,
       y = value,
-      text = paste(
-        "Date:",
+      text = paste0(
+        "Date: ",
         date,
         "<br>",
-        "Unemployment Rate:",
+        "Unemployment Rate: ",
         signs(value,
               format = percent,
               accuracy = 0.1)
@@ -260,7 +260,7 @@ ggplotly_lfs(
 )
 ```
 
-### Unemployment Rates for `r paste(report_month, report_year)` by B.C. Economic Region 
+### Unemployment Rates by B.C. Economic Region for `r paste(report_month, report_year)` 
 
 ```{r, fig.width=7, fig.height=5}
 # ggplotly_lfs(
@@ -409,21 +409,21 @@ ggplotly_lfs(
       aes(
         x = date,
         y = month_change,
-        text = paste(
-          "Number of Jobs:",
+        text = paste0(
+          "Number of Jobs: ",
           signs(
             value,
             format = comma
           ),
           "<br>",
-          "Month-Over-Month Change:",
+          "Month-Over-Month Change: ",
           signs(
             month_change,
             format = comma,
             add_plusses = TRUE
           ),
           "<br>",
-          "% Month-Over-Month Change:",
+          "% Month-Over-Month Change: ",
           signs(
             month_change_percent,
             format = percent,
@@ -465,7 +465,7 @@ ggplotly_lfs(
 ```
 
 
-### Month-Over-Month Percent Change in Number of Jobs for `r paste(report_month, report_year)` by B.C. Economic Region 
+### Month-Over-Month Percent Change in Number of Jobs by B.C. Economic Region for `r paste(report_month, report_year)`
 
 ```{r, fig.width=7, fig.height=5}
 # ggplotly_lfs(
@@ -578,53 +578,6 @@ valueBox(
 Row 6
 ---------------------------------------------------------------------------
 
-### Monthly Unemployment Rates by Province in `r report_year`
-
-```{r, fig.width=7, fig.height=5}
-ggplotly_lfs(
-  lfc_province_tidy %>%
-  filter(
-    labour_force_characteristics == "Unemployment rate",
-    sex == "Both sexes",
-    age_group == "15 years and over",
-    geo != "Canada",
-    date >= paste0(report_year, "-01-01")
-) %>% 
- ggplot(aes(
-    x = date,
-    y = value,
-    colour = geo
-  )) +
-  geom_point(aes(text = paste(
-      "Province:",
-      geo,
-      "<br>",
-      "Date:",
-      date,
-      "<br>",
-      "Unemployment Rate:",
-      signs(value,
-            format = percent,
-            accuracy = 0.1)
-    )),
-    alpha = 0.6) +
-  geom_line(alpha = 0.8) +
-  labs(x = NULL,
-       y = NULL) +
-  scale_y_continuous(labels = percent,
-                     breaks = breaks_pretty(n = 6)) +
-  scale_colour_viridis_d(name = NULL) +
-  scale_x_date(breaks = breaks_pretty(n = 8)) +
-  theme_minimal() +
-  theme_vert_bar
-) %>%
-  layout(legend = list(
-    orientation = "h",
-    x = 0.25,
-    y = -0.2
-  ))
-```
-
 
 ### Unemployment Rate for `r paste(report_month, report_year)` by Province
 
@@ -679,13 +632,82 @@ unemploy_rt_provinces_spatial <-  can_provinces %>%
   # )
 ```
 
+### Monthly Unemployment Rates by Province for `r report_year`
 
-Row 7
-----------------------------------------------------------------------------
+```{r, fig.width=7, fig.height=5}
+prov_acronyms <- tribble(
+  ~geo, ~acronym,
+  "British Columbia", "BC",
+  "Alberta", "AB",
+  "Saskatchewan", "SK",
+  "Newfoundland and Labrador", "NL",
+  "Prince Edward Island", "PE",
+  "Nova Scotia", "NS",       
+  "New Brunswick", "NB",       
+  "Quebec", "QC",               
+  "Ontario", "ON",
+  "Manitoba", "MB"
+)
 
+unemploy_rt_provinces_report_year <-  lfc_province_tidy %>%
+  filter(
+    labour_force_characteristics == "Unemployment rate",
+    sex == "Both sexes",
+    age_group == "15 years and over",
+    geo != "Canada",
+    date >= paste0(report_year, "-01-01")
+) %>% 
+ mutate(fill_col = ifelse(geo == "British Columbia", "bc", "other")) %>% 
+  left_join(prov_acronyms)
+
+
+ggplotly_lfs(
+  unemploy_rt_provinces_report_year %>% 
+ ggplot(aes(
+    x = date,
+    y = value,
+    group = geo
+  )) +
+  geom_point(aes(colour = fill_col,
+                 text = paste0(
+      "Province: ",
+      geo,
+      "<br>",
+      "Date: ",
+      date,
+      "<br>",
+      "Unemployment Rate: ",
+      signs(value,
+            format = percent)
+    )),
+    alpha = 0.6) +
+  geom_line(aes(colour = fill_col), alpha = 0.8) +
+  geom_text(data = unemploy_rt_provinces_report_year %>% filter(date == max(date)),
+            aes(label = acronym,
+                x = date,
+                y = value,
+                colour = fill_col),
+                nudge_x = 8
+            ) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = percent,
+                     breaks = breaks_pretty(n = 6)) +
+  scale_colour_manual(guide = FALSE,
+                      values = c(bc = "#440154FF",
+                               other = main_colour)) +
+  scale_x_date(breaks = breaks_pretty(n = 8)) +
+  theme_minimal() +
+  theme_vert_bar +
+  theme(legend.position = "none")
+) 
+
+```
+
+
+```{r, include=FALSE}
 ### Number of Jobs in Canada in August {.value-box}
 
-```{r}
 #recent monthly change in CAN employment
 month_change_employment_can <- lfc_province_tidy %>%
   filter(vector == "v2062811",
@@ -701,9 +723,9 @@ valueBox(
 ```
 
 
+```{r, include=FALSE}
 ### Month-Over-Month Change in Number of Jobs in Canada {.value-box}
 
-```{r}
 #recent monthly change in CAN employment
 valueBox(
   value = month_change_employment_can %>%
@@ -716,9 +738,9 @@ valueBox(
 ```
 
 
+```{r, include=FALSE}
 ### Year-Over-Year Change in Number of Jobs in Canada {.value-box}
 
-```{r}
 year_change_employment_can <- lfc_province_tidy %>%
   filter(vector == "v2062811",
          date %in% c(max(date) - months(12), max(date))) %>% 
@@ -887,14 +909,14 @@ lfc_province_tidy %>%
     y = value,
     colour = highlight
   )) +
-  geom_point(aes(text = paste(
-      "Date:",
+  geom_point(aes(text = paste0(
+      "Date: ",
       date,
       "<br>",
-      "Age Group:",
+      "Age Group: ",
       age_group,
       "<br>",
-      "Unemployment Rate:",
+      "Unemployment Rate: ",
       signs(value,
             format = percent,
             accuracy = 0.1)

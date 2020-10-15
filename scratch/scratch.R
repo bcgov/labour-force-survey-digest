@@ -416,3 +416,47 @@ ggplotly_lfs(
 )
 ```
 
+```{r, fig.width=7, fig.height=5}
+ggplotly_lfs(
+  lfc_province_tidy %>%
+  filter(
+    labour_force_characteristics == "Unemployment rate",
+    sex == "Both sexes",
+    age_group == "15 years and over",
+    geo != "Canada",
+    date >= paste0(report_year, "-01-01")
+) %>%
+ ggplot(aes(
+    x = date,
+    y = value,
+    colour = geo
+  )) +
+  geom_point(aes(text = paste(
+      "Province:",
+      geo,
+      "<br>",
+      "Date:",
+      date,
+      "<br>",
+      "Unemployment Rate:",
+      signs(value,
+            format = percent)
+    )),
+    alpha = 0.6) +
+  geom_line(alpha = 0.8) +
+  labs(x = NULL,
+       y = NULL) +
+  scale_y_continuous(labels = percent,
+                     breaks = breaks_pretty(n = 6)) +
+  scale_colour_brewer(name = NULL,
+                      palette = "Paired") +
+  scale_x_date(breaks = breaks_pretty(n = 8)) +
+  theme_minimal() +
+  theme_vert_bar
+) %>%
+  layout(legend = list(
+    orientation = "h",
+    x = 0.2,
+    y = -0.2
+  ))
+```
