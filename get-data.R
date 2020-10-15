@@ -110,14 +110,14 @@ lfc_province_tidy <- lfc_province_raw %>%
     statistics == "Estimate"
   ) %>%
   select(
-    "date",
-    "geo",
-    "labour_force_characteristics",
-    "sex",
-    "age_group",
-    "statistics",
-    "vector",
-    "value"
+    date,
+    geo,
+    labour_force_characteristics,
+    sex,
+    age_group,
+    statistics,
+    vector,
+    value
   ) %>%
   # filter(date >  Sys.Date() - months(14)) %>%
   group_by(vector) %>%
@@ -143,13 +143,13 @@ lfc_region_tabular_tidy <- lfc_region_raw %>%
     statistics %in% c("Estimate")
   ) %>%
   select(
-    "date",
-    "geo",
-    "labour_force_characteristics",
-    "statistics",
-    "vector",
-    "value",
-    "geo_uid"
+    date,
+    geo,
+    labour_force_characteristics,
+    statistics,
+    vector,
+    value,
+    geo_uid
   ) %>%
   filter(date >  Sys.Date() - months(14)) %>%
   group_by(vector) %>%
@@ -187,13 +187,13 @@ employment_by_class_tidy <- employment_by_class_raw %>%
     statistics %in% c("Estimate")
   ) %>%
   select(
-    "date",
-    "geo",
-    "class_of_worker",
-    "sex",
-    "statistics",
-    "vector",
-    "value"
+    date,
+    geo,
+    class_of_worker,
+    sex,
+    statistics,
+    vector,
+    value
   ) %>%
   filter(date > Sys.Date() - months(14)) %>%
   group_by(vector) %>%
