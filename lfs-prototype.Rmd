@@ -703,7 +703,7 @@ p <- unemploy_rt_provinces_report_year %>%
     alpha = 0.6) +
   geom_line(alpha = 0.8, colour = main_colour) +
   geom_line(data = unemploy_rt_provinces_report_year %>% filter(acronym == "BC"), 
-            alpha = 0.8, size = 1.5, colour = "#440154FF") +
+            alpha = 0.8, size = 1, colour = "#440154FF") +
   geom_text(data = unemploy_rt_provinces_report_year %>% filter(date == max(date)),
             aes(label = acronym,
                 x = date,
@@ -2248,19 +2248,49 @@ industry_change <- employment_by_industry_tidy %>%
   mutate(industry = str_extract(naics, ".+?(?=\\[)")) %>%
   ungroup() %>% 
   select(industry, value, month_change,
-         month_change_percent, year_change_percent) %>% 
-  mutate(industry = factor(industry,
-                           ordered = TRUE, 
-                            levels = ))
+         month_change_percent, year_change_percent) 
 
-industry_order <- factor(industry_change$industry, levels = industry_change$industry[order(industry_change$value, decreasing = TRUE)])
+# industry_order <- factor(industry_change$industry, levels = industry_change$industry[order(industry_change$value, decreasing = TRUE)])
 
 
 p1 <- industry_change %>% 
-  filter(metric == "value") %>% 
-    arrange(desc("metric_value")) %>% 
   ggplot() +
-  geom_col(aes(metric_value, industry))
+  geom_col(aes(value, reorder(industry, -year_change_percent)),
+           fill = main_colour, alpha = 0.6) +
+  geom_text(aes(value,
+                industry,
+                label = signs(
+        value,
+        format = comma
+      )),
+     nudge_x = 17000,
+    colour = "grey20",
+    size = 2) +
+  labs(x = NULL,
+       y = NULL) +
+   scale_x_continuous(expand = c(0, 0)) +
+   expand_limits(x = 400000) +
+  theme_minimal() +
+  theme_horiz +
+  theme(axis.text.x = element_blank())
+
+p2 <- industry_change %>% 
+  ggplot(aes(month_change, reorder(industry, -year_change_percent))) +
+  geom_col(fill = main_colour, alpha = 0.6) +
+  geom_text(aes(label = signs(
+        month_change,
+        format = comma
+      )),
+     # nudge_x = 10000,
+    colour = "grey20",
+    size = 2) +
+  labs(x = NULL,
+       y = NULL) +
+   scale_x_continuous(expand = c(0, 0)) +
+   # expand_limits(x = 400000) +
+  theme_minimal() +
+  theme_horiz +
+  theme(axis.text.x = element_blank())
 ```
 
 
