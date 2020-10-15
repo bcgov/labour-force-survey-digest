@@ -58,7 +58,7 @@ employment_by_industry_raw <- get_cansim("14-10-0355-02") %>% normalize_cansim_v
 lfs_industry_unadjusted_raw <- get_cansim("14-10-0022-01") %>% normalize_cansim_values()
 
 #labour force characteristics by immigrant status, three-month moving average, unadjusted for seasonality
-lfs_immigrant_status_raw <- get_cansim("14-10-0082-01") %>% normalize_cansim_values()
+# lfs_immigrant_status_raw <- get_cansim("14-10-0082-01") %>% normalize_cansim_values()
 
 #reason for not looking for work, monthly, unadjusted for seasonality
 # reasons_not_working_raw <- get_cansim("14-10-0127-01") %>% normalize_cansim_values()
@@ -75,7 +75,7 @@ saveRDS(lfc_region_raw, "tmp/lfc_region_raw.rds")
 saveRDS(employment_by_class_raw, "tmp/employment_by_class_raw.rds")
 saveRDS(employment_by_industry_raw, "tmp/employment_by_industry_raw.rds")
 saveRDS(lfs_industry_unadjusted_raw, "tmp/lfs_industry_unadjusted_raw.rds")
-saveRDS(lfs_immigrant_status_raw, "tmp/lfs_immigrant_status_raw.rds")
+# saveRDS(lfs_immigrant_status_raw, "tmp/lfs_immigrant_status_raw.rds")
 # saveRDS(reasons_not_working_raw, "tmp/reasons_not_working_raw.rds")
 
 
@@ -89,7 +89,7 @@ lfc_region_raw <- readRDS("tmp/lfc_region_raw.rds")
 employment_by_class_raw <- readRDS("tmp/employment_by_class_raw.rds")
 employment_by_industry_raw <- readRDS("tmp/employment_by_industry_raw.rds")
 lfs_industry_unadjusted_raw <- readRDS("tmp/lfs_industry_unadjusted_raw.rds")
-lfs_immigrant_status_raw <- readRDS("tmp/lfs_immigrant_status_raw.rds")
+# lfs_immigrant_status_raw <- readRDS("tmp/lfs_immigrant_status_raw.rds")
 # reasons_not_working_raw <- readRDS("tmp/reasons_not_working_raw.rds")
 
 
