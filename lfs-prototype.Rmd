@@ -109,8 +109,8 @@ Labour Force Survey Summary for British Columbia:
 
  - [Highlights]
  - [Demographics]
- - [Job Type & Sector]
- - [Industry]
+ - [Job Type]
+ - [Sectors & Industry]
  - [COVID-19 Recovery]
 
 <br>
@@ -593,7 +593,7 @@ unemploy_rt_provinces <- lfc_province_tidy %>%
     geo != "Canada")
 
 unemploy_rt_provinces_spatial <-  can_provinces %>% 
-  left_join(unemploy_rt_provinces, by = c("name"= "geo"))
+  left_join(unemploy_rt_provinces, by = c("name" = "geo"))
 
 # ggplotly_lfs(
   ggplot(unemploy_rt_provinces_spatial) +
@@ -1329,7 +1329,7 @@ ggplotly_lfs(
 )
 ```
 
-Job Type & Sector
+Job Type
 ===================================================================
 
 
@@ -1829,7 +1829,12 @@ facet_grid(. ~ age_group) +
   ))
 ```
 
-Row 8
+
+Sectors & Industry
+====================================================================
+
+
+Row 1
 ------------------------------------------------------------------
 
 ### Private Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
@@ -1875,6 +1880,7 @@ valueBox(
 )
 ```
 
+
 ### Self-employed Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
 
 ```{r}
@@ -1890,7 +1896,56 @@ valueBox(
 ```
 
 
-Row 9
+
+Row 2
+-----------------------------------------------------------------------
+
+### Goods-Producing Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
+
+
+```{r}
+employment_by_industry_tidy %>% 
+  filter()
+
+valueBox(
+  value = paste0("Goods-producing: ",
+                 month_employment_bc_jobtype %>%
+                   filter(class_of_worker == "Self-employed") %>% 
+    pull(month_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = paste("Month-Over-Month Change in Number of Goods-producing Jobs in B.C. for", report_month, report_year)
+)
+```
+
+
+### Goods-Producing Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
+
+
+```{r}
+employment_by_industry_tidy
+
+```
+
+
+
+### Services-Producing Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
+
+```{r}
+
+```
+
+
+### Services-Producing Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
+
+
+```{r}
+
+```
+
+
+
+Row 3
 ----------------------------------------------------------------
 
 ### Change in Number of Jobs in B.C. by Sector for `r report_year` 
@@ -1957,19 +2012,11 @@ ggplotly_lfs(
 ```
 
 
-Industry
-====================================================================
+### Change in Number of Goods-producing & Services-producing Jobs in B.C.  for `r report_year` 
 
-Row 1
------------------------------------------------------------------------
-
-### Industry
-
-```{r}
-
+```{r, fig.width=7, fig.height=5}
 
 ```
-
 
 
 COVID-19 Recovery
