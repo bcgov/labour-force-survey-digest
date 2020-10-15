@@ -107,6 +107,7 @@ lfc_province_tidy <- lfc_province_raw %>%
       "Part-time employment"
     ),
     data_type == "Seasonally adjusted",
+    # date >  Sys.Date() - months(14),
     statistics == "Estimate"
   ) %>%
   select(
@@ -119,7 +120,6 @@ lfc_province_tidy <- lfc_province_raw %>%
     "vector",
     "value"
   ) %>%
-  # filter(date >  Sys.Date() - months(14)) %>%
   group_by(vector) %>%
   mutate(
     month_change = value - lag(value),
@@ -140,7 +140,8 @@ lfc_region_tabular_tidy <- lfc_region_raw %>%
       "Employment rate",
       "Employment"
     ),
-    statistics %in% c("Estimate")
+    date > Sys.Date() - months(14),
+    statistics == "Estimate"
   ) %>%
   select(
     "date",
@@ -151,7 +152,6 @@ lfc_region_tabular_tidy <- lfc_region_raw %>%
     "value",
     "geo_uid"
   ) %>%
-  filter(date >  Sys.Date() - months(14)) %>%
   group_by(vector) %>%
   mutate(
     month_change = value - lag(value),
@@ -184,7 +184,8 @@ employment_by_class_tidy <- employment_by_class_raw %>%
   filter(
     geo == "British Columbia",
     data_type == "Seasonally adjusted",
-    statistics %in% c("Estimate")
+    date > Sys.Date() - months(14),
+    statistics == "Estimate"
   ) %>%
   select(
     "date",
@@ -195,7 +196,6 @@ employment_by_class_tidy <- employment_by_class_raw %>%
     "vector",
     "value"
   ) %>%
-  filter(date > Sys.Date() - months(14)) %>%
   group_by(vector) %>%
   mutate(
     month_change = value - lag(value),
@@ -208,17 +208,16 @@ employment_by_industry_tidy <- employment_by_industry_raw %>%
    clean_names() %>%
    filter(geo == "British Columbia",
           statistics == "Estimate",
-          data_type == "Seasonally adjusted") %>%
+          data_type == "Seasonally adjusted",
+          date >  Sys.Date() - months(14)) %>%
   select(
     "date",
     "geo",
     "north_american_industry_classification_system_naics",
     "statistics",
     "vector",
-    "value",
-    "geo_uid"
+    "value"
   ) %>%
-  filter(date >  Sys.Date() - months(14)) %>%
   group_by(vector) %>%
   mutate(
     month_change = value - lag(value),
@@ -228,7 +227,23 @@ employment_by_industry_tidy <- employment_by_industry_raw %>%
 
 #lfs employment by industry unadjusted
 lfs_industry_unadjusted_tidy <- lfs_industry_unadjusted_raw %>%
-   clean_names()
+   clean_names() %>%
+   filter(geo == "British Columbia",
+           date >  Sys.Date() - months(14)) %>%
+  select(
+    "date",
+    "geo",
+    "north_american_industry_classification_system_naics",
+    "sex",
+    "age_group",
+    "vector",
+    "value"
+  ) %>%
+  group_by(vector) %>%
+  mutate(
+    month_change = value - lag(value),
+    month_change_percent = value / lag(value) - 1
+  )
 
 
 
