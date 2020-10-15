@@ -203,8 +203,40 @@ employment_by_class_tidy <- employment_by_class_raw %>%
   )
 
 
+#employment by industry
+employment_by_industry_tidy <- employment_by_industry_raw %>%
+   clean_names() %>%
+   filter(geo == "British Columbia",
+          statistics == "Estimate",
+          data_type == "Seasonally adjusted") %>%
+  select(
+    "date",
+    "geo",
+    "north_american_industry_classification_system_naics",
+    "statistics",
+    "vector",
+    "value",
+    "geo_uid"
+  ) %>%
+  filter(date >  Sys.Date() - months(14)) %>%
+  group_by(vector) %>%
+  mutate(
+    month_change = value - lag(value),
+    month_change_percent = value / lag(value) - 1
+  )
+
+
+#lfs employment by industry unadjusted
+lfs_industry_unadjusted_tidy <- lfs_industry_unadjusted_raw %>%
+   clean_names()
+
+
+
 #cache tidy data to /tmp  ------------------------------------------------------
 saveRDS(lfc_province_tidy, "tmp/lfc_province_tidy.rds")
 saveRDS(lfc_region_tidy, "tmp/lfc_region_tidy.rds")
 saveRDS(employment_by_class_tidy, "tmp/employment_by_class_tidy.rds")
+saveRDS(employment_by_industry_tidy, "tmp/employment_by_industry_tidy.rds")
+saveRDS(lfs_industry_unadjusted_tidy, "tmp/lfs_industry_unadjusted_tidy.rds")
+
 
