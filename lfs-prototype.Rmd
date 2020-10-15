@@ -35,6 +35,8 @@ lfc_province_tidy <- readRDS("tmp/lfc_province_tidy.rds")
 lfc_region_tidy <- readRDS("tmp/lfc_region_tidy.rds")
 employment_by_class_tidy <- readRDS("tmp/employment_by_class_tidy.rds")
 can_provinces <- readRDS("tmp/can_provinces.rds")
+employment_by_industry_tidy <- readRDS("tmp/employment_by_industry_tidy.rds")
+lfs_industry_unadjusted_tidy <- readRDS("tmp/lfs_industry_unadjusted_tidy.rds")
 
 ##report month
 report_month <- lfc_province_tidy %>%
@@ -638,15 +640,15 @@ unemploy_rt_provinces_spatial <-  can_provinces %>%
 prov_acronyms <- tribble(
   ~geo, ~acronym,
   "British Columbia", "BC",
-  "Alberta", "AB",
-  "Saskatchewan", "SK",
+  "Alberta", "Alta",
+  "Saskatchewan", "Sask",
   "Newfoundland and Labrador", "NL",
-  "Prince Edward Island", "PE",
+  "Prince Edward Island", "PEI",
   "Nova Scotia", "NS",       
   "New Brunswick", "NB",       
-  "Quebec", "QC",               
-  "Ontario", "ON",
-  "Manitoba", "MB"
+  "Quebec", "Que",               
+  "Ontario", "Ont",
+  "Manitoba", "Man"
 )
 
 unemploy_rt_provinces_report_year <-  lfc_province_tidy %>%
@@ -1961,8 +1963,13 @@ Industry
 Row 1
 -----------------------------------------------------------------------
 
-Row 2
------------------------------------------------------------------------
+### Industry
+
+```{r}
+
+
+```
+
 
 
 COVID-19 Recovery
@@ -1984,7 +1991,9 @@ Statistics Canada Labour Force Survey Tables:
 
  - [Statistics Canada Table **14-10-0287-03**: Labour force characteristics by province, monthly, seasonally adjusted](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028703)
  - [Statistics Canada Table **14-10-0293-02**: Labour force characteristics by economic region, three-month moving average, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410029302)
- - [Statistics Canada Table **14-10-0288-01**: Employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028801) 
+ - [Statistics Canada Table **14-10-0288-01**: Employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028801)
+  - [Statistics Canada Table **14-10-0355-02**: Employment by industry, monthly, seasonally adjusted](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410035502)
+   - [Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)
  
  <!--
  - [Statistics Canada Table **14-10-0127-01**: Reason for not looking for work, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410012701&pickMembers%5B0%5D=1.11&pickMembers%5B1%5D=3.1&pickMembers%5B2%5D=4.1) 
@@ -1993,6 +2002,6 @@ Statistics Canada Labour Force Survey Tables:
 B.C. Data Catalogue:
  - [Current Census Economic Regions](https://catalogue.data.gov.bc.ca/dataset/1aebc451-a41c-496f-8b18-6f414cde93b7)
 
-This report is built with the [`flexdashboard` R package](https://rmarkdown.rstudio.com/flexdashboard/), sourcing the Statistics Canada Labour Force Survey data using the [`cansim` R package](https://mountainmath.github.io/cansim/index.html), and the British Columbia economic geospatial data using the [`bcdata` R package](https://bcgov.github.io/bcdata/). 
+This report is built with the [`flexdashboard` R package](https://rmarkdown.rstudio.com/flexdashboard/), sourcing the Statistics Canada Labour Force Survey data using the [`cansim` R package](https://mountainmath.github.io/cansim/index.html), the Canadian provincial and territorial boundaries geospatial data using the [`cancensus` R package](https://mountainmath.github.io/cancensus/index.html) and the British Columbia economic region boundaries geospatial data using the [`bcdata` R package](https://bcgov.github.io/bcdata/).
   
 The [R](https://www.r-project.org/) code is available in [bcgov GitHub](https://github.com/bcgov/labour-force-survey-digest), made available under the [Apache 2.0 licence](https://github.com/bcgov/labour-force-survey-digest/blob/master/LICENSE).
