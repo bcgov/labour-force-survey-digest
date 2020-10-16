@@ -2197,7 +2197,7 @@ Row 6
 
 ###  Changes in Number of Jobs in B.C. by Industry for `r paste(report_month, report_year)`
 
-```{r, fig.width=20, fig.height=7}
+```{r, fig.width=12, fig.height=7}
 industries <- c("Agriculture [111-112, 1100, 1151-1152]",
                 "Forestry, fishing, mining, quarrying, oil and gas [21, 113-114, 1153, 2100]",
                 "Utilities [22]",
@@ -2238,13 +2238,13 @@ p1 <- ggplot(industry_change) +
         value,
         format = comma
       )),
-     nudge_x = 33000,
+     nudge_x = 80000,
     colour = "grey20",
     size = 3) +
   labs(x = NULL,
        y = NULL,
         title = "Number of Jobs") +
-   scale_x_continuous(expand = expansion(mult = c(0, .2))) +
+   scale_x_continuous(expand = expansion(mult = c(0, .3))) +
   theme_minimal() +
   theme_horiz +
   theme(axis.text.x = element_blank(),
@@ -2259,10 +2259,10 @@ p2 <- ggplot(industry_change,
         format = comma,
         add_plusses = TRUE
       )),
-     nudge_x = ifelse(industry_change$month_change > 0, 4000, -4000),
+     nudge_x = ifelse(industry_change$month_change > 0, 10000, -10000),
     colour = "grey20",
     size = 3) +
-   scale_x_continuous(expand = expansion(mult = c(.2, .2))) +
+   scale_x_continuous(expand = expansion(mult = c(.3, .3))) +
   labs(x = NULL,
        y = NULL,
        title = "Month-Over-Month Change") +
@@ -2281,10 +2281,10 @@ p3 <- ggplot(industry_change,
         accuracy = 0.1,
         add_plusses = TRUE
       )),
-     nudge_x = ifelse(industry_change$month_change_percent > 0, .027, -.027),
+     nudge_x = ifelse(industry_change$month_change_percent > 0, .07, -.07),
     colour = "grey20",
     size = 3) +
-  scale_x_continuous(expand = expansion(mult = c(.2, .2))) +
+  scale_x_continuous(expand = expansion(mult = c(.3, .3))) +
   labs(x = NULL,
        y = NULL,
        title = "% Month-Over-Month Change") +
@@ -2303,25 +2303,25 @@ p4 <- ggplot(industry_change,
         accuracy = 0.1,
         add_plusses = TRUE
       )),
-     nudge_x = ifelse(industry_change$year_change_percent > 0, .1, -.1),
+     nudge_x = ifelse(industry_change$year_change_percent > 0, .3, -.3),
     colour = "grey20",
     size = 3) +
-   scale_x_continuous(expand = expansion(mult = c(.2, .2))) +
+   scale_x_continuous(expand = expansion(mult = c(.3, .3))) +
   labs(x = NULL,
        y = NULL,
        title = "% Year-Over-Year Change") +
-   # scale_x_continuous(expand = c(0, 0)) +
-   # expand_limits(x = 400000) +
   theme_minimal() +
   theme_horiz +
   theme(axis.text.x = element_blank(),
         axis.text.y = element_blank(),
         plot.title = element_text(size = 11, colour = "grey20"))
 
+
 plot_grid(p1, p2, p3, p4,
                    nrow = 1, ncol = 4,
-                   rel_widths = c(2, 1, 1, 1))
+                   rel_widths = c(2.5, 1, 1,1))
 ```
+
 
 
 COVID-19 Recovery
