@@ -2218,7 +2218,7 @@ Row 6
 
 ###  Changes in Number of Jobs in B.C. by Industry for `r paste(report_month, report_year)`
 
-```{r}
+```{r, fig.width=20, fig.height=7}
 industries <- c("Agriculture [111-112, 1100, 1151-1152]",
                 "Forestry, fishing, mining, quarrying, oil and gas [21, 113-114, 1153, 2100]",
                 "Utilities [22]",
@@ -2250,11 +2250,7 @@ industry_change <- employment_by_industry_tidy %>%
   select(industry, value, month_change,
          month_change_percent, year_change_percent) 
 
-# industry_order <- factor(industry_change$industry, levels = industry_change$industry[order(industry_change$value, decreasing = TRUE)])
-
-
-p1 <- industry_change %>% 
-  ggplot() +
+p1 <- ggplot(industry_change) +
   geom_col(aes(value, reorder(industry, -year_change_percent)),
            fill = main_colour, alpha = 0.6) +
   geom_text(aes(value,
@@ -2263,34 +2259,89 @@ p1 <- industry_change %>%
         value,
         format = comma
       )),
-     nudge_x = 17000,
+     nudge_x = 33000,
     colour = "grey20",
-    size = 2) +
+    size = 3) +
   labs(x = NULL,
-       y = NULL) +
-   scale_x_continuous(expand = c(0, 0)) +
-   expand_limits(x = 400000) +
+       y = NULL,
+        title = "Number of Jobs") +
+   scale_x_continuous(expand = expansion(mult = c(0, .2))) +
   theme_minimal() +
   theme_horiz +
-  theme(axis.text.x = element_blank())
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 11),
+        plot.title = element_text(size = 11, colour = "grey20"))
 
-p2 <- industry_change %>% 
-  ggplot(aes(month_change, reorder(industry, -year_change_percent))) +
+p2 <- ggplot(industry_change, 
+         aes(month_change, reorder(industry, -year_change_percent))) +
   geom_col(fill = main_colour, alpha = 0.6) +
   geom_text(aes(label = signs(
         month_change,
-        format = comma
+        format = comma,
+        add_plusses = TRUE
       )),
-     # nudge_x = 10000,
+     nudge_x = ifelse(industry_change$month_change > 0, 4000, -4000),
     colour = "grey20",
-    size = 2) +
+    size = 3) +
+   scale_x_continuous(expand = expansion(mult = c(.2, .2))) +
   labs(x = NULL,
-       y = NULL) +
-   scale_x_continuous(expand = c(0, 0)) +
+       y = NULL,
+       title = "Month-Over-Month Change") +
+  theme_minimal() +
+  theme_horiz +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        plot.title = element_text(size = 11, colour = "grey20"))
+
+p3 <- ggplot(industry_change, 
+         aes(month_change_percent, reorder(industry, -year_change_percent))) +
+  geom_col(fill = main_colour, alpha = 0.6) +
+  geom_text(aes(label = signs(
+        month_change_percent,
+        format = percent,
+        accuracy = 0.1,
+        add_plusses = TRUE
+      )),
+     nudge_x = ifelse(industry_change$month_change_percent > 0, .027, -.027),
+    colour = "grey20",
+    size = 3) +
+  scale_x_continuous(expand = expansion(mult = c(.2, .2))) +
+  labs(x = NULL,
+       y = NULL,
+       title = "% Month-Over-Month Change") +
+  theme_minimal() +
+  theme_horiz +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        plot.title = element_text(size = 11, colour = "grey20"))
+
+p4 <- ggplot(industry_change, 
+         aes(year_change_percent, reorder(industry, -year_change_percent))) +
+  geom_col(fill = main_colour, alpha = 0.6) +
+  geom_text(aes(label = signs(
+        year_change_percent,
+        format = percent,
+        accuracy = 0.1,
+        add_plusses = TRUE
+      )),
+     nudge_x = ifelse(industry_change$year_change_percent > 0, .1, -.1),
+    colour = "grey20",
+    size = 3) +
+   scale_x_continuous(expand = expansion(mult = c(.2, .2))) +
+  labs(x = NULL,
+       y = NULL,
+       title = "% Year-Over-Year Change") +
+   # scale_x_continuous(expand = c(0, 0)) +
    # expand_limits(x = 400000) +
   theme_minimal() +
   theme_horiz +
-  theme(axis.text.x = element_blank())
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        plot.title = element_text(size = 11, colour = "grey20"))
+
+plot_grid(p1, p2, p3, p4,
+                   nrow = 1, ncol = 4,
+                   rel_widths = c(2, 1, 1, 1))
 ```
 
 
