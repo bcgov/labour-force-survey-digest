@@ -103,6 +103,22 @@ Row
 
 ```{r}
 
+lfs_industry_unadjusted_tidy %>%
+  filter(
+    labour_force_characteristics == "Unemployment rate",
+    age_group != "15 years and over",
+    date %in% c(max(date), "2020-02-01")
+  ) %>%
+  group_by(vector) %>% 
+  mutate(
+    feb_change = value - lag(value),
+    feb_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+
+
+
 industries <- c("Agriculture [111-112, 1100, 1151-1152]",
                 "Forestry, fishing, mining, quarrying, oil and gas [21, 113-114, 1153, 2100]",
                 "Utilities [22]",
@@ -146,112 +162,112 @@ Row
 ## Crosstalk Attempt
 
 ```{r, include=FALSE}
-library(crosstalk)
-library(reactable)
-library(htmltools)
-
-df_tab <- lfc_province_tidy %>%
-  filter(
-    labour_force_characteristics == "Unemployment rate",
-    sex == "Both sexes",
-    age_group == "15 years and over",
-    date >= paste0(report_year, "-01-01"),
-    geo != "Canada")
+# library(crosstalk)
+# library(reactable)
+# library(htmltools)
+# 
+# df_tab <- lfc_province_tidy %>%
+#   filter(
+#     labour_force_characteristics == "Unemployment rate",
+#     sex == "Both sexes",
+#     age_group == "15 years and over",
+#     date >= paste0(report_year, "-01-01"),
+#     geo != "Canada")
 
 # df <- can_provinces %>% 
 #    left_join(df_tab, by = c("name"= "geo"))
 
 
-df_shared <- SharedData$new(df)
-
-bscols(
-
-ggplotly_lfs(ggplot(data = df_shared,
-        aes(
-    x = date,
-    y = value,
-    group = name,
-    colour = name
-  )) +
-  geom_line() +
-  geom_point(aes(text = paste(
-      "Province:",
-      name,
-      "<br>",
-      "Date:",
-      date,
-      "<br>",
-      "Unemployment Rate:",
-      signs(value,
-            format = percent,
-            accuracy = 0.1)
-    )),
-    alpha = 0.6) +
- 
-  labs(x = NULL,
-       y = NULL) +
-  scale_y_continuous(labels = percent,
-                     breaks = breaks_pretty(n = 6)) +
-  scale_colour_viridis_d(name = NULL) +
-  scale_x_date(breaks = breaks_pretty(n = 6)) +
-  theme_minimal() +
-  theme_vert_bar
-),
-
-# ggplotly_lfs(ggplot(data = df_shared) + 
-#       geom_sf(aes(fill = df$value),
-#               # text = paste0(report_month," ",report_year,"\n",
-#               #               name,"\n","Unemployment Rate: ",
-#               #               signs(df$value[date ==max(date), ],
+# df_shared <- SharedData$new(df)
+# 
+# bscols(
+# 
+# ggplotly_lfs(ggplot(data = df_shared,
+#         aes(
+#     x = date,
+#     y = value,
+#     group = name,
+#     colour = name
+#   )) +
+#   geom_line() +
+#   geom_point(aes(text = paste(
+#       "Province:",
+#       name,
+#       "<br>",
+#       "Date:",
+#       date,
+#       "<br>",
+#       "Unemployment Rate:",
+#       signs(value,
 #             format = percent,
 #             accuracy = 0.1)
-#     ))
-# ) +
-#    labs(x = NULL, y = NULL) +
-#   scale_fill_viridis(
-#     name = paste(report_month,
-#                  report_year,
-#                  "\nUnemployment\nRate"),
-#     direction = -1,
-#     begin = 0.3,
-#     end = 1,
-#     labels = percent_format(accuracy = 1),
-#     breaks = breaks_pretty(n = 5),
-#     na.value="white"
-#   ) +
+#     )),
+#     alpha = 0.6) +
+#  
+#   labs(x = NULL,
+#        y = NULL) +
+#   scale_y_continuous(labels = percent,
+#                      breaks = breaks_pretty(n = 6)) +
+#   scale_colour_viridis_d(name = NULL) +
+#   scale_x_date(breaks = breaks_pretty(n = 6)) +
 #   theme_minimal() +
-#   theme(
-#     legend.title = element_text(size = 11, 
-#                                 colour = "grey20"),
-#     legend.text = element_text(size = 10,
-#                                colour = "grey20"),
-#     plot.caption = element_text(
-#       size = 8,
-#       colour = "grey60",
-#       face = "italic",
-#       hjust = 1.3
-#     ),
-#     panel.grid.major = element_line(colour = "transparent"),
-#     axis.text = element_blank()
-#   )
-
-p <- reactable(df,
-                  columns = list(
-                      name = colDef(name = "Province"),
-                      labour_force_characteristics = colDef(name = "Metric"),
-                      value = colDef(name = "foo"),
-                      month_change = colDef(name = "foo2"),
-                      month_change_percent= colDef(name = "foo3")),
-          width = 700,
-height = "100%",
-# pagination = FALSE,
-showPageSizeOptions = TRUE,
-# pageSizeOptions = c(10, 20, 50),
-defaultPageSize = 10,
-minRows = 10,
-highlight = TRUE,
-striped = TRUE)
-p
-)
+#   theme_vert_bar
+# )
+# 
+# # ggplotly_lfs(ggplot(data = df_shared) + 
+# #       geom_sf(aes(fill = df$value),
+# #               # text = paste0(report_month," ",report_year,"\n",
+# #               #               name,"\n","Unemployment Rate: ",
+# #               #               signs(df$value[date ==max(date), ],
+# #             format = percent,
+# #             accuracy = 0.1)
+# #     ))
+# # ) +
+# #    labs(x = NULL, y = NULL) +
+# #   scale_fill_viridis(
+# #     name = paste(report_month,
+# #                  report_year,
+# #                  "\nUnemployment\nRate"),
+# #     direction = -1,
+# #     begin = 0.3,
+# #     end = 1,
+# #     labels = percent_format(accuracy = 1),
+# #     breaks = breaks_pretty(n = 5),
+# #     na.value="white"
+# #   ) +
+# #   theme_minimal() +
+# #   theme(
+# #     legend.title = element_text(size = 11, 
+# #                                 colour = "grey20"),
+# #     legend.text = element_text(size = 10,
+# #                                colour = "grey20"),
+# #     plot.caption = element_text(
+# #       size = 8,
+# #       colour = "grey60",
+# #       face = "italic",
+# #       hjust = 1.3
+# #     ),
+# #     panel.grid.major = element_line(colour = "transparent"),
+# #     axis.text = element_blank()
+# #   )
+# 
+# p <- reactable(df,
+#                   columns = list(
+#                       name = colDef(name = "Province"),
+#                       labour_force_characteristics = colDef(name = "Metric"),
+#                       value = colDef(name = "foo"),
+#                       month_change = colDef(name = "foo2"),
+#                       month_change_percent= colDef(name = "foo3")),
+#           width = 700,
+# height = "100%",
+# # pagination = FALSE,
+# showPageSizeOptions = TRUE,
+# # pageSizeOptions = c(10, 20, 50),
+# defaultPageSize = 10,
+# minRows = 10,
+# highlight = TRUE,
+# striped = TRUE)
+# p
+# )
 ```
 
