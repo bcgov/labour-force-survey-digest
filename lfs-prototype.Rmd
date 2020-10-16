@@ -2224,7 +2224,7 @@ industry_change <- employment_by_industry_tidy %>%
     year_change_percent = value / lag(value) - 1
   ) %>%
   filter(date == max(date)) %>% 
-  mutate(industry = str_extract(naics, ".+?(?=\\[)")) %>%
+  mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
   ungroup() %>% 
   select(industry, value, month_change,
          month_change_percent, year_change_percent) 

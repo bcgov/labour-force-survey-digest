@@ -102,19 +102,31 @@ Row
 -------------------------------------------------------------------------
 
 ```{r}
+nested_naics <- c("Forestry and logging and support activities for forestry [113, 1153]",
+                  "Fishing, hunting and trapping [114]","Mining, quarrying, and oil and gas extraction [21, 2100]",
+                  "Durables [321, 327, 331-339]",
+                  "Non-durables [311-316, 322-326]",
+                  "Wholesale trade [41]",
+                  "Retail trade [44-45]",
+                  "Finance and insurance [52]",
+                  "Real estate and rental and leasing [53]")
 
 lfs_industry_unadjusted_tidy %>%
   filter(
     labour_force_characteristics == "Unemployment rate",
     age_group != "15 years and over",
-    date %in% c(max(date), "2020-02-01")
-  ) %>%
+    date %in% c(max(date), "2020-02-01"),
+    !naics %in% nested_naics) %>%
   group_by(vector) %>% 
   mutate(
     feb_change = value - lag(value),
     feb_change_percent = value / lag(value) - 1
   ) %>%
-  filter(date == max(date))
+  filter(date == max(date)) %>% 
+  mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
+  ungroup() %>% 
+  select(industry, sex, age_group, vector, value, month_change,
+         month_change_percent, feb_change, feb_change_percent) 
 
 
 
