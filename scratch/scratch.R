@@ -25,6 +25,7 @@ rmarkdown::render(input = here::here("scratch/lfs-text-highlights.Rmd"),
                                       ".pdf"),
                   output_dir = here::here("scratch"))
 
+
 ## Exploratory visualizations --------------------------------------------------
 
 ## load cached /tmp/*.rds data files
@@ -272,7 +273,6 @@ ggplotly_lfs(mom_change_employment_provinces)
 
 ### Month-Over-Month Change in Number of Jobs in B.C. by Sector in `r report_year`
 
-```{r, fig.width=7, fig.height=5}
 ggplotly(
   employment_by_class_tidy %>%
   filter(
@@ -340,16 +340,9 @@ ggplotly(
   theme_minimal() +
   theme_facet_bar
 })
-```
-
-
-Row 4 {data-height=800 }
------------------------------------------------------------------------
-
 
 ### Month-Over-Month Percent Change in Number of Jobs by Province in `r report_year`
 
-```{r}
 ggplotly_lfs(
   lfc_province_tidy %>%
   filter(
@@ -414,9 +407,7 @@ ggplotly_lfs(
   theme(legend.position = "none")
     }
 )
-```
 
-```{r, fig.width=7, fig.height=5}
 ggplotly_lfs(
   lfc_province_tidy %>%
   filter(
@@ -459,4 +450,4 @@ ggplotly_lfs(
     x = 0.2,
     y = -0.2
   ))
-```
+

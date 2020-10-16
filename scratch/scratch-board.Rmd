@@ -25,14 +25,16 @@ See the License for the specific language governing permissions and limitations 
 
 ```{r setup, include=FALSE, cache=TRUE}
 ##load libraries in setup.R
-source("../setup.R")
+source("setup.R")
 
 ##source data
 ##source("get-data.R")
-lfc_province_tidy <- readRDS("../tmp/lfc_province_tidy.rds")
-lfc_region_tidy <- readRDS("../tmp/lfc_region_tidy.rds")
-employment_by_class_tidy <- readRDS("../tmp/employment_by_class_tidy.rds")
-can_provinces <- readRDS("../tmp/can_provinces.rds")
+lfc_province_tidy <- readRDS("tmp/lfc_province_tidy.rds")
+lfc_region_tidy <- readRDS("tmp/lfc_region_tidy.rds")
+employment_by_class_tidy <- readRDS("tmp/employment_by_class_tidy.rds")
+can_provinces <- readRDS("tmp/can_provinces.rds")
+employment_by_industry_tidy <- readRDS("tmp/employment_by_industry_tidy.rds")
+lfs_industry_unadjusted_tidy <- readRDS("tmp/lfs_industry_unadjusted_tidy.rds")
 
 ##report month
 report_month <- lfc_province_tidy %>%
@@ -48,7 +50,9 @@ report_year <- lfc_province_tidy %>%
   pull(date) %>%
   year()
 
+##previous report year
 previous_year <- report_year - 1
+
 
 ##common chart themes
 theme_bar <- theme(
@@ -57,19 +61,19 @@ theme_bar <- theme(
   legend.text = element_text(size = 11, colour = "grey20")
 )
 
-theme_vert_bar <- theme_bar +
+theme_vert <- theme_bar +
   theme(
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank()
   )
 
-theme_horiz_bar <- theme_bar +
+theme_horiz <- theme_bar +
   theme(
     panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank()
   )
 
-theme_facet_bar <- theme_vert_bar +
+theme_facet <- theme_vert +
   theme(
     axis.text.y = element_text(size = 9),
     axis.text.x = element_text(size = 8),
@@ -80,11 +84,27 @@ theme_facet_bar <- theme_vert_bar +
 ##colours
 main_colour <- "#1d91c0"
 
-##custom
+##labels
+gender_labels <-  c("Males" = "Men",
+                    "Females" = "Women")
+
+##custom ggplotly
 ggplotly_lfs <- function(...) {
   ggplotly(..., tooltip = c("text"))
 }
 ```
+
+
+February Baseline
+==========================================================================
+
+Row
+-------------------------------------------------------------------------
+
+```{r}
+
+```
+
 
 Crosstalk
 ==========================================================================
@@ -94,7 +114,7 @@ Row
 
 ## Crosstalk Attempt
 
-```{r}
+```{r, include=FALSE}
 library(crosstalk)
 library(reactable)
 library(htmltools)
@@ -199,29 +219,8 @@ showPageSizeOptions = TRUE,
 defaultPageSize = 10,
 minRows = 10,
 highlight = TRUE,
-striped = TRUE) 
+striped = TRUE)
 p
 )
 ```
 
-Row
-------------------------------------------------------------------------------
-
-### B.C. Unemployment Rate (%) for Recent Month {.value-box}
-
-```{r}
-##recent monthly change in unemployment
-recent_month_unemployment_rate_bc <- lfc_province_tidy %>%
-  filter(
-    vector == "v2064705",
-    date == max(date)
-  )
-
-valueBox(
-  value = recent_month_unemployment_rate_bc %>%
-    pull(value) %>%
-    signs(format = percent, accuracy = 0.1),
-  # icon = "fa-users-cog",
-  caption = paste("B.C. Unemployment Rate in", report_month)
-)
-```
