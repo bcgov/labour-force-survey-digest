@@ -233,6 +233,7 @@ lfs_industry_unadjusted_tidy <- lfs_industry_unadjusted_raw %>%
   select(
     "date",
     "geo",
+    "labour_force_characteristics",
     "naics" = "north_american_industry_classification_system_naics",
     "sex",
     "age_group",
