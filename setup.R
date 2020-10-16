@@ -29,6 +29,7 @@ library(viridis)
 library(plotly)
 library(cancensus)
 # library(snakecase)
+library(cowplot)
 
 
 
