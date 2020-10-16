@@ -25,16 +25,16 @@ See the License for the specific language governing permissions and limitations 
 
 ```{r setup, include=FALSE, cache=TRUE}
 ##load libraries in setup.R
-source("setup.R")
+source("../setup.R")
 
 ##source data
 ##source("get-data.R")
-lfc_province_tidy <- readRDS("tmp/lfc_province_tidy.rds")
-lfc_region_tidy <- readRDS("tmp/lfc_region_tidy.rds")
-employment_by_class_tidy <- readRDS("tmp/employment_by_class_tidy.rds")
-can_provinces <- readRDS("tmp/can_provinces.rds")
-employment_by_industry_tidy <- readRDS("tmp/employment_by_industry_tidy.rds")
-lfs_industry_unadjusted_tidy <- readRDS("tmp/lfs_industry_unadjusted_tidy.rds")
+lfc_province_tidy <- readRDS("../tmp/lfc_province_tidy.rds")
+lfc_region_tidy <- readRDS("../tmp/lfc_region_tidy.rds")
+employment_by_class_tidy <- readRDS("../tmp/employment_by_class_tidy.rds")
+can_provinces <- readRDS("../tmp/can_provinces.rds")
+employment_by_industry_tidy <- readRDS("../tmp/employment_by_industry_tidy.rds")
+lfs_industry_unadjusted_tidy <- readRDS("../tmp/lfs_industry_unadjusted_tidy.rds")
 
 ##report month
 report_month <- lfc_province_tidy %>%
@@ -102,6 +102,37 @@ Row
 -------------------------------------------------------------------------
 
 ```{r}
+
+industries <- c("Agriculture [111-112, 1100, 1151-1152]",
+                "Forestry, fishing, mining, quarrying, oil and gas [21, 113-114, 1153, 2100]",
+                "Utilities [22]",
+                "Construction [23]",
+                "Manufacturing [31-33]",
+                "Wholesale and retail trade [41, 44-45]",
+                "Transportation and warehousing [48-49]",
+                "Finance, insurance, real estate, rental and leasing [52-53]",
+                "Professional, scientific and technical services [54]",
+                "Business, building and other support services [55-56]",
+                "Educational services [61]",
+                "Health care and social assistance [62]",
+                "Information, culture and recreation [51, 71]",
+                "Accommodation and food services [72]",
+                "Other services (except public administration) [81]",
+                "Public administration [91]")    
+
+industry_change <- employment_by_industry_tidy %>% 
+  filter(naics %in% industries,
+         date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date)) %>% 
+  mutate(industry = str_extract(naics, ".+?(?=\\[)")) %>%
+  ungroup() %>% 
+  select(industry, value, month_change,
+         month_change_percent, year_change_percent) 
 
 ```
 
