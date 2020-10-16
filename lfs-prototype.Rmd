@@ -830,9 +830,11 @@ Row 2 {data-height=200}
 ----------------------------------------------------------------
 
 ```{r}
-report_prov_date <- format(max(lfc_province_tidy$date), "%b-%Y")
+report_prov_date <- format(max(lfc_province_tidy$date), "%B %Y")
 last_month <- format(max(lfc_province_tidy$date)%m-% months(1), "%b-%Y")
 last_year_same_month <- format(max(lfc_province_tidy$date) %m-% years(1), "%b-%Y")
+up_arrow <- "<span style=\"color:green\">&#9650;</span>"
+down_arrow <- "<span style=\"color:red\">&#9660;</span>"
 ```
 
 ### Women Change in Recent B.C. Unemployment Rate
@@ -841,47 +843,68 @@ last_year_same_month <- format(max(lfc_province_tidy$date) %m-% years(1), "%b-%Y
 
 ##year over year change unemployment rate female
 year_change_unemployment_bc_female <- lfc_province_tidy %>%
-  filter(vector %in% c("v2064831", 'v2064830'),
+  filter(vector %in% c("v2064831"),
          date %in% c(max(date) - months(12), max(date))
   ) %>%
   mutate(year_change = value - lag(value)) %>%
   filter(date == max(date))
 
-year_change_unemployment_bc_female %>% 
-  ungroup() %>% 
-  select(labour_force_characteristics, value, month_change, year_change) %>% 
-  pivot_longer(cols = c(-labour_force_characteristics)) %>% 
-  pivot_wider(names_from = labour_force_characteristics, values_from = value) %>% 
-  mutate(name = case_when(
-    name == "value" ~ report_prov_date,
-    name == "month_change" ~ last_month,
-    name == "year_change"  ~ last_year_same_month,
+year_change_unemployment_bc_female %>%
+  ungroup() %>%
+  select(value, labour_force_characteristics, month_change, year_change) %>%
+  pivot_longer(cols = c(-labour_force_characteristics)) %>%
+  mutate(name_label = case_when(
+    name == "value" ~ toTitleCase(labour_force_characteristics),
+    name == "month_change" ~ "Month-Over-Month",
+    name == "year_change" ~ "Year-Over-Year",
     TRUE ~ "there is a problem"
-  )) %>% 
-  gt() %>% 
-  tab_style(
-    style = cell_fill(color = main_colour),
+  ), .after = name) %>% 
+  gt() %>%
+  fmt_percent("value", decimals = 1) %>%
+  text_transform(
     locations = cells_body(
-      rows = 2:3)
+      columns = "value",
+      rows = name != "value" & value > 0
+    ),
+    fn = function(x) paste(x, up_arrow)
   ) %>%
-  fmt_percent("Unemployment rate", decimals = 1) %>% 
-  fmt_number("Unemployment", decimals = 0) %>% 
+  text_transform(
+    locations = cells_body(
+      columns = "value",
+      rows = name != "value" & value < 0
+    ),
+    fn = function(x) paste(x, down_arrow)
+  ) %>%
   tab_style(
     style = cell_text(
       size = px(12),
       color = "#999",
       transform = "uppercase"
-    ), locations = cells_column_labels(everything())) %>% 
+    ), locations = cells_column_labels(everything())
+  ) %>%
+  tab_style(
+    style = cell_text(size = px(15), weight = "bold", font = "arial"),
+    locations = cells_body(
+      rows = name == "value")
+  ) %>% 
   cols_label(
-    name = "Date"
+    value = report_prov_date,
+    name_label = ""
+  ) %>%
+  cols_hide(
+    columns = vars(name, labour_force_characteristics)
+  ) %>% 
+  cols_width(
+    vars(value) ~ px(350)
   )
+
 ```
 
 ### Men Change in Recent B.C. Unemployment Rate
 ```{r}
 ##year over year change unemployment rate bc males
 year_change_unemployment_bc_male <- lfc_province_tidy %>%
-  filter(vector %in% c("v2064822",'v2064821'),
+  filter(vector %in% c("v2064822"),
          date %in% c(max(date) - months(12), max(date))
   ) %>%
   mutate(year_change = value - lag(value)) %>%
@@ -889,32 +912,52 @@ year_change_unemployment_bc_male <- lfc_province_tidy %>%
 
 
 year_change_unemployment_bc_male %>% 
-  ungroup() %>% 
-  select(labour_force_characteristics, value, month_change, year_change) %>% 
-  pivot_longer(cols = c(-labour_force_characteristics)) %>% 
-  pivot_wider(names_from = labour_force_characteristics, values_from = value) %>% 
-  mutate(name = case_when(
-    name == "value" ~ report_prov_date,
-    name == "month_change" ~ last_month,
-    name == "year_change"  ~ last_year_same_month,
+  ungroup() %>%
+  select(value, labour_force_characteristics, month_change, year_change) %>%
+  pivot_longer(cols = c(-labour_force_characteristics)) %>%
+  mutate(name_label = case_when(
+    name == "value" ~ toTitleCase(labour_force_characteristics),
+    name == "month_change" ~ "Month-Over-Month",
+    name == "year_change" ~ "Year-Over-Year",
     TRUE ~ "there is a problem"
-  )) %>% 
-  gt() %>% 
-  tab_style(
-    style = cell_fill(color = main_colour),
+  ), .after = name) %>% 
+  gt() %>%
+  fmt_percent("value", decimals = 1) %>%
+  text_transform(
     locations = cells_body(
-      rows = 2:3)
+      columns = "value",
+      rows = name != "value" & value > 0
+    ),
+    fn = function(x) paste(x, up_arrow)
   ) %>%
-  fmt_percent("Unemployment rate", decimals = 1) %>% 
-  fmt_number("Unemployment", decimals = 0) %>% 
+  text_transform(
+    locations = cells_body(
+      columns = "value",
+      rows = name != "value" & value < 0
+    ),
+    fn = function(x) paste(x, down_arrow)
+  ) %>%
   tab_style(
     style = cell_text(
       size = px(12),
       color = "#999",
       transform = "uppercase"
-    ), locations = cells_column_labels(everything())) %>% 
+    ), locations = cells_column_labels(everything())
+  ) %>%
+  tab_style(
+    style = cell_text(size = px(15), weight = "bold", font = "arial"),
+    locations = cells_body(
+      rows = name == "value")
+  ) %>% 
   cols_label(
-    name = "Date"
+    value = report_prov_date,
+    name_label = ""
+  ) %>%
+  cols_hide(
+    columns = vars(name, labour_force_characteristics)
+  ) %>% 
+  cols_width(
+    vars(value) ~ px(350)
   )
 ```
 
