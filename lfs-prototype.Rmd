@@ -807,47 +807,6 @@ valueBox(paste0("Women: ",
 )
 ```
 
-### Women Month-Over-Month Change in Recent B.C. Unemployment Rate {.value-box}
-
-```{r}
-valueBox(
-  value = recent_month_unemployment_rate_bc_female %>%
-    pull(month_change) %>%
-    signs(format = percent, accuracy = 0.1),
-  # icon = "fa-users-cog",
-  caption = "Month-Over-Month Change in B.C. Unemployment Rate for Women"
-)
-```
-
-
-### Women Year-Over-Year Change in Recent B.C. Unemployment Rate {.value-box}
-
-```{r}
-##year over year change unemployment rate female
-year_change_unemployment_rate_bc_female <- lfc_province_tidy %>%
-  filter(vector == "v2064831",
-         date %in% c(max(date) - months(12), max(date))
-  ) %>%
-  mutate(year_change = value - lag(value)) %>%
-  filter(date == max(date))
-
-valueBox(
-  value = year_change_unemployment_rate_bc_female %>%
-    pull(year_change) %>%
-    signs(
-      format = percent,
-      add_plusses = TRUE,
-      accuracy = 0.1
-    ),
-  # icon = "fa-users-cog",
-  caption = paste("Year-Over-Year Change in B.C. Unemployment Rate for Women")
-)
-```
-
-
-Row 2
-----------------------------------------------------------------
-
 
 ### Men B.C. Unemployment Rate (Aged 25 Years & Over) {.value-box}
 
@@ -867,43 +826,100 @@ valueBox(
 )
 ```
 
-
-### Men Month-Over-Month Change in Recent B.C. Unemployment Rate {.value-box}
+Row 2 {data-height=200}
+----------------------------------------------------------------
 
 ```{r}
-valueBox(
-  value = recent_month_unemployment_rate_bc_male %>%
-    pull(month_change) %>%
-    signs(format = percent, accuracy = 0.1),
-  # icon = "fa-users-cog",
-  caption = "Month-Over-Month Change in B.C. Unemployment Rate for Men"
-)
+report_prov_date <- format(max(lfc_province_tidy$date), "%b-%Y")
+last_month <- format(max(lfc_province_tidy$date)%m-% months(1), "%b-%Y")
+last_year_same_month <- format(max(lfc_province_tidy$date) %m-% years(1), "%b-%Y")
 ```
 
-### Men Year-Over-Year Change in Recent B.C. Unemployment Rate {.value-box}
+### Women Change in Recent B.C. Unemployment Rate
 
 ```{r}
-##year over year change unemployment rate bc males
-year_change_unemployment_rate_bc_male <- lfc_province_tidy %>%
-  filter(
-    vector == "v2064822",
-    date %in% c(max(date) - months(12), max(date))
+
+##year over year change unemployment rate female
+year_change_unemployment_bc_female <- lfc_province_tidy %>%
+  filter(vector %in% c("v2064831", 'v2064830'),
+         date %in% c(max(date) - months(12), max(date))
   ) %>%
   mutate(year_change = value - lag(value)) %>%
   filter(date == max(date))
 
-valueBox(
-  value = year_change_unemployment_rate_bc_male %>%
-    pull(year_change) %>%
-    signs(
-      format = percent,
-      add_plusses = TRUE,
-      accuracy = 0.1
-    ),
-  # icon = "fa-users-cog",
-  caption = paste("Year-Over-Year Change in B.C. Unemployment Rate for Men")
-)
+year_change_unemployment_bc_female %>% 
+  ungroup() %>% 
+  select(labour_force_characteristics, value, month_change, year_change) %>% 
+  pivot_longer(cols = c(-labour_force_characteristics)) %>% 
+  pivot_wider(names_from = labour_force_characteristics, values_from = value) %>% 
+  mutate(name = case_when(
+    name == "value" ~ report_prov_date,
+    name == "month_change" ~ last_month,
+    name == "year_change"  ~ last_year_same_month,
+    TRUE ~ "there is a problem"
+  )) %>% 
+  gt() %>% 
+  tab_style(
+    style = cell_fill(color = main_colour),
+    locations = cells_body(
+      rows = 2:3)
+  ) %>%
+  fmt_percent("Unemployment rate", decimals = 1) %>% 
+  fmt_number("Unemployment", decimals = 0) %>% 
+  tab_style(
+    style = cell_text(
+      size = px(12),
+      color = "#999",
+      transform = "uppercase"
+    ), locations = cells_column_labels(everything())) %>% 
+  cols_label(
+    name = "Date"
+  )
 ```
+
+### Men Change in Recent B.C. Unemployment Rate
+```{r}
+##year over year change unemployment rate bc males
+year_change_unemployment_bc_male <- lfc_province_tidy %>%
+  filter(vector %in% c("v2064822",'v2064821'),
+         date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(year_change = value - lag(value)) %>%
+  filter(date == max(date))
+
+
+year_change_unemployment_bc_male %>% 
+  ungroup() %>% 
+  select(labour_force_characteristics, value, month_change, year_change) %>% 
+  pivot_longer(cols = c(-labour_force_characteristics)) %>% 
+  pivot_wider(names_from = labour_force_characteristics, values_from = value) %>% 
+  mutate(name = case_when(
+    name == "value" ~ report_prov_date,
+    name == "month_change" ~ last_month,
+    name == "year_change"  ~ last_year_same_month,
+    TRUE ~ "there is a problem"
+  )) %>% 
+  gt() %>% 
+  tab_style(
+    style = cell_fill(color = main_colour),
+    locations = cells_body(
+      rows = 2:3)
+  ) %>%
+  fmt_percent("Unemployment rate", decimals = 1) %>% 
+  fmt_number("Unemployment", decimals = 0) %>% 
+  tab_style(
+    style = cell_text(
+      size = px(12),
+      color = "#999",
+      transform = "uppercase"
+    ), locations = cells_column_labels(everything())) %>% 
+  cols_label(
+    name = "Date"
+  )
+```
+
+
+
 
 
 Row 3
