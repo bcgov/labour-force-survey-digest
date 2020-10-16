@@ -810,7 +810,7 @@ valueBox(paste0("Women: ",
     pull(value) %>%
     signs(format = percent, accuracy = 0.1)),
   # icon = "fa-users-cog",
-  caption = paste("B.C. Unemployment Rate for Women (25 Years & Over) for", report_month, report_year)
+  caption = paste("B.C. Unemployment Rate for Women for", report_month, report_year, " (Ages 25 Years & Over)")
 )
 ```
 
@@ -829,7 +829,7 @@ valueBox(
     pull(value) %>%
     signs(format = percent, accuracy = 0.1)),
   # icon = "fa-users-cog",
-  caption = paste("B.C. Unemployment Rate for Men (25 Years & Over) for", report_month, report_year)
+  caption = paste("B.C. Unemployment Rate for Men for", report_month, report_year, " (Ages 25 Years & Over)")
 )
 ```
 
@@ -888,7 +888,7 @@ gt_lfs <- function(tbl) {
 ```
 
 
-### Women Change in Recent B.C. Unemployment Rate
+### Change in Recent B.C. Unemployment Rate for Women
 
 ```{r}
 
@@ -906,7 +906,8 @@ year_change_unemployment_bc_female %>%
 
 ```
 
-### Men Change in Recent B.C. Unemployment Rate
+### Change in Recent B.C. Unemployment Rate for Men
+
 ```{r}
 ##year over year change unemployment rate bc males
 year_change_unemployment_bc_male <- lfc_province_tidy %>%
@@ -923,13 +924,10 @@ year_change_unemployment_bc_male %>%
 ```
 
 
-
-
-
 Row 3
 -----------------------------------------------------------------------
 
-### Monthly B.C. Unemployment Rates by Gender (Ages 25 Years & Over) Since 2000
+### Monthly B.C. Unemployment Rates by Gender Since 2000 (Ages 25 Years & Over)
 
 ```{r, fig.width=7, fig.height=5}
 ggplotly_lfs(
@@ -985,7 +983,7 @@ lfc_province_tidy %>%
 Row 4
 -------------------------------------------------------------------
 
-### Women Number of Jobs (Aged 25 Years & Over) in B.C. {.value-box}
+### Women Number of Jobs  in B.C. (Aged 25 Years & Over) {.value-box}
 
 ```{r}
 recent_month_employment_bc_female <- lfc_province_tidy %>%
@@ -999,7 +997,7 @@ valueBox(
     pull(value) %>%
     signs(format = comma)),
   # icon = "fa-users-cog",
-  caption = paste("Number of Jobs for Women (25 Years & Over) in B.C. for", report_month, report_year)
+  caption = paste("Number of Jobs for Women in B.C. for", report_month, report_year, "(Ages 25 Years & Over)")
 )
 ```
 
@@ -1017,7 +1015,7 @@ valueBox(
     pull(value) %>%
     signs(format = comma)),
   # icon = "fa-users-cog",
-  caption = paste("Number of Jobs for Men (25 Years & Over) in B.C. for", report_month, report_year)
+  caption = paste("Number of Jobs for Men in B.C. for", report_month, report_year, "(Ages 25 Years & Over)")
 )
 ```
 
@@ -1026,7 +1024,7 @@ valueBox(
 Row 5 {data-height=200}
 ----------------------------------------------------------------------
 
-### Women Year-Over-Year Change in Number of Jobs (Aged 25 Years & Over) in B.C. 
+### Change in Number of Jobs for Women in B.C.
 
 ```{r}
 year_change_employment_bc_female <- lfc_province_tidy %>%
@@ -1047,7 +1045,7 @@ year_change_employment_bc_female %>%
 ```
 
 
-### Men Year-Over-Year Change in Number of Jobs (Aged 25 Years & Over) in B.C. 
+### Change in Number of Jobs for Men in B.C. 
 
 ```{r}
 year_change_employment_bc_male <- lfc_province_tidy %>%
@@ -1070,7 +1068,7 @@ year_change_employment_bc_male %>%
 Row 6
 ----------------------------------------------------------------------------
 
-### Month-Over-Month Change in Number of Jobs in B.C. by Gender (Ages 25 Years & Over) for `r report_year` 
+### Month-Over-Month Change in Number of Jobs in B.C. by Gender for `r report_year` (Ages 25 Years & Over)
 
 ```{r, fig.width=7, fig.height=5}
 ggplotly_lfs(
@@ -1139,7 +1137,7 @@ Row 7
 -----------------------------------------------------------------------------
 
 
-### Youth B.C. Unemployment Rate (Aged 15 to 25 Years) {.value-box}
+### Youth B.C. Unemployment Rate (Ages 15 to 25 Years) {.value-box}
 
 ```{r}
 #monthly unemployment rate - youth
@@ -1158,7 +1156,7 @@ valueBox(
 	
 
 
-### Youth Month-Over-Month Change in Number of Jobs (Aged 15 to 24 Years) in B.C.   {.value-box}
+### Month-Over-Month Change in Number of Jobs for Youth in B.C. (Ages 15 to 24 Years) {.value-box}
 
 ```{r}
 valueBox(
@@ -1174,7 +1172,7 @@ valueBox(
 ```
 
 
-### Youth Year-Over-Year Change in Number of Jobs (Aged 15 to 24 Years) in B.C. {.value-box}
+### Year-Over-Year Change in Number of Jobs for Youth in B.C. (Ages 15 to 24 Years) {.value-box}
 
 ```{r}
 year_change_employment_bc_youth <- lfc_province_tidy %>%
@@ -1263,7 +1261,7 @@ lfc_province_tidy %>%
 
 ```
 
-### Month-Over-Month Change in Number of Jobs in B.C. for Youth (15 to 24 Years) by Gender in `r report_year` 
+### Month-Over-Month Change in Number of Jobs in B.C. for Youth by Gender in `r report_year` (Ages 15 to 24 Years)
 
 ```{r, fig.width=7, fig.height=5}
 
