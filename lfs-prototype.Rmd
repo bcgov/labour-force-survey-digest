@@ -94,6 +94,13 @@ gender_labels <-  c("Males" = "Men",
 ggplotly_lfs <- function(...) {
   ggplotly(..., tooltip = c("text"))
 }
+
+## A formatted date
+report_prov_date <- format(max(lfc_province_tidy$date), "%B %Y")
+
+## Some html objects for tables
+up_arrow <- "<span style=\"color:green\">&#9650;</span>"
+down_arrow <- "<span style=\"color:red\">&#9660;</span>"
 ```
 
 
@@ -828,39 +835,19 @@ valueBox(
 
 Row 2 {data-height=200}
 ----------------------------------------------------------------
-
 ```{r}
-report_prov_date <- format(max(lfc_province_tidy$date), "%B %Y")
-last_month <- format(max(lfc_province_tidy$date)%m-% months(1), "%b-%Y")
-last_year_same_month <- format(max(lfc_province_tidy$date) %m-% years(1), "%b-%Y")
-up_arrow <- "<span style=\"color:green\">&#9650;</span>"
-down_arrow <- "<span style=\"color:red\">&#9660;</span>"
-```
-
-### Women Change in Recent B.C. Unemployment Rate
-
-```{r}
-
-##year over year change unemployment rate female
-year_change_unemployment_bc_female <- lfc_province_tidy %>%
-  filter(vector %in% c("v2064831"),
-         date %in% c(max(date) - months(12), max(date))
-  ) %>%
-  mutate(year_change = value - lag(value)) %>%
-  filter(date == max(date))
-
-year_change_unemployment_bc_female %>%
-  ungroup() %>%
+gt_lfs <- function(tbl) {
+  tbl %>% 
+    ungroup() %>%
   select(value, labour_force_characteristics, month_change, year_change) %>%
   pivot_longer(cols = c(-labour_force_characteristics)) %>%
   mutate(name_label = case_when(
     name == "value" ~ toTitleCase(labour_force_characteristics),
-    name == "month_change" ~ "Month-Over-Month",
-    name == "year_change" ~ "Year-Over-Year",
+    name == "month_change" ~ "Month-Over-Month Change",
+    name == "year_change" ~ "Year-Over-Year Change",
     TRUE ~ "there is a problem"
   ), .after = name) %>% 
   gt() %>%
-  fmt_percent("value", decimals = 1) %>%
   text_transform(
     locations = cells_body(
       columns = "value",
@@ -877,13 +864,13 @@ year_change_unemployment_bc_female %>%
   ) %>%
   tab_style(
     style = cell_text(
-      size = px(12),
+      size = px(13),
       color = "#999",
       transform = "uppercase"
     ), locations = cells_column_labels(everything())
   ) %>%
   tab_style(
-    style = cell_text(size = px(15), weight = "bold", font = "arial"),
+    style = cell_text(weight = "bold"),
     locations = cells_body(
       rows = name == "value")
   ) %>% 
@@ -897,6 +884,25 @@ year_change_unemployment_bc_female %>%
   cols_width(
     vars(value) ~ px(350)
   )
+}
+```
+
+
+### Women Change in Recent B.C. Unemployment Rate
+
+```{r}
+
+##year over year change unemployment rate female
+year_change_unemployment_bc_female <- lfc_province_tidy %>%
+  filter(vector %in% c("v2064831"),
+         date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(year_change = value - lag(value)) %>%
+  filter(date == max(date))
+
+year_change_unemployment_bc_female %>%
+  gt_lfs() %>% 
+  fmt_percent("value", decimals = 1)
 
 ```
 
@@ -912,53 +918,8 @@ year_change_unemployment_bc_male <- lfc_province_tidy %>%
 
 
 year_change_unemployment_bc_male %>% 
-  ungroup() %>%
-  select(value, labour_force_characteristics, month_change, year_change) %>%
-  pivot_longer(cols = c(-labour_force_characteristics)) %>%
-  mutate(name_label = case_when(
-    name == "value" ~ toTitleCase(labour_force_characteristics),
-    name == "month_change" ~ "Month-Over-Month",
-    name == "year_change" ~ "Year-Over-Year",
-    TRUE ~ "there is a problem"
-  ), .after = name) %>% 
-  gt() %>%
-  fmt_percent("value", decimals = 1) %>%
-  text_transform(
-    locations = cells_body(
-      columns = "value",
-      rows = name != "value" & value > 0
-    ),
-    fn = function(x) paste(x, up_arrow)
-  ) %>%
-  text_transform(
-    locations = cells_body(
-      columns = "value",
-      rows = name != "value" & value < 0
-    ),
-    fn = function(x) paste(x, down_arrow)
-  ) %>%
-  tab_style(
-    style = cell_text(
-      size = px(12),
-      color = "#999",
-      transform = "uppercase"
-    ), locations = cells_column_labels(everything())
-  ) %>%
-  tab_style(
-    style = cell_text(size = px(15), weight = "bold", font = "arial"),
-    locations = cells_body(
-      rows = name == "value")
-  ) %>% 
-  cols_label(
-    value = report_prov_date,
-    name_label = ""
-  ) %>%
-  cols_hide(
-    columns = vars(name, labour_force_characteristics)
-  ) %>% 
-  cols_width(
-    vars(value) ~ px(350)
-  )
+  gt_lfs() %>% 
+  fmt_percent("value", decimals = 1)
 ```
 
 
@@ -1042,51 +1003,6 @@ valueBox(
 )
 ```
 
-
-### Women Month-Over-Month Change in Number of Jobs (Aged 25 Years & Over) in B.C. {.value-box}
-
-```{r}
-valueBox(
-  value = recent_month_employment_bc_female %>%
-    pull(month_change) %>%
-    signs(format = comma,
-            add_plusses = TRUE),
-  # icon = "fa-users-cog",
-  caption = "Month-Over-Month Change in Number of Jobs for Women in B.C."
-)
-```
-
-
-### Women Year-Over-Year Change in Number of Jobs (Aged 25 Years & Over) in B.C. {.value-box}
-
-```{r}
-year_change_employment_bc_female <- lfc_province_tidy %>%
-  filter(
-    vector == "v2064827",
-    date %in% c(max(date) - months(12), max(date))
-  ) %>%
-  mutate(
-    year_change = value - lag(value),
-    year_change_percent = value / lag(value) - 1
-  ) %>%
-  filter(date == max(date))
-
-# year over year change employment
-valueBox(
-  value = year_change_employment_bc_female %>%
-    pull(year_change) %>%
-    signs(
-      format = comma,
-      add_plusses = TRUE
-    ),
-  # icon = "fa-users-cog",
-  caption = paste("Year-Over-Year Change in Number of Jobs for Women in B.C.")
-)
-```
-
-Row 5
-----------------------------------------------------------------------
-
 ### Men Number of Jobs for (Aged 25 Years & Over) in B.C. {.value-box}}
 
 ```{r}
@@ -1106,20 +1022,32 @@ valueBox(
 ```
 
 
-### Men Month-Over-Month Change in Number of Jobs in B.C. (Aged 25 Years & Over) in B.C. {.value-box}
+
+Row 5 {data-height=200}
+----------------------------------------------------------------------
+
+### Women Year-Over-Year Change in Number of Jobs (Aged 25 Years & Over) in B.C. 
 
 ```{r}
-valueBox(
-  value = recent_month_employment_bc_male %>%
-    pull(month_change) %>%
-    signs(format = comma,
-            add_plusses = TRUE),
-  # icon = "fa-users-cog",
-  caption = "Month-Over-Month Change in Number of Jobs for Men in B.C."
-)
+year_change_employment_bc_female <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064827",
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+year_change_employment_bc_female %>% 
+  gt_lfs() %>% 
+  fmt_number("value", decimals = 0)
+
 ```
 
-### Men Year-Over-Year Change in Number of Jobs (Aged 25 Years & Over) in B.C. {.value-box}
+
+### Men Year-Over-Year Change in Number of Jobs (Aged 25 Years & Over) in B.C. 
 
 ```{r}
 year_change_employment_bc_male <- lfc_province_tidy %>%
@@ -1133,17 +1061,9 @@ year_change_employment_bc_male <- lfc_province_tidy %>%
   ) %>%
   filter(date == max(date))
 
-# year over year change employment
-valueBox(
-  value = year_change_employment_bc_male %>%
-    pull(year_change) %>%
-    signs(
-      format = comma,
-      add_plusses = TRUE
-    ),
-  # icon = "fa-users-cog",
-  caption = paste("Year-Over-Year Change in Number of Jobs for Men in B.C.")
-)
+year_change_employment_bc_male %>% 
+  gt_lfs() %>% 
+  fmt_number("value", decimals = 0)
 ```
 
 
