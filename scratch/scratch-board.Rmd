@@ -92,6 +92,14 @@ gender_labels <-  c("Males" = "Men",
 ggplotly_lfs <- function(...) {
   ggplotly(..., tooltip = c("text"))
 }
+
+
+## A formatted date
+report_prov_date <- format(max(lfc_province_tidy$date), "%B %Y")
+
+## Some html objects for tables
+up_arrow <- "<span style=\"color:green\">&#9650;</span>"
+down_arrow <- "<span style=\"color:red\">&#9660;</span>"
 ```
 
 
@@ -111,7 +119,19 @@ nested_naics <- c("Forestry and logging and support activities for forestry [113
                   "Finance and insurance [52]",
                   "Real estate and rental and leasing [53]")
 
-lfs_industry_unadjusted_tidy %>%
+
+cols <- c("Both sexes_15 to 24 years",
+    "Females_15 to 24 years",
+    "Males_15 to 24 years",
+    "Both sexes_25 to 54 years",
+    "Females_25 to 54 years",
+    "Males_25 to 54 years",
+    "Both sexes_55 years and over",
+    "Females_55 years and over",
+    "Males_55 years and over")
+
+
+industry_df <- lfs_industry_unadjusted_tidy %>%
   filter(
     labour_force_characteristics == "Unemployment rate",
     age_group != "15 years and over",
@@ -119,48 +139,58 @@ lfs_industry_unadjusted_tidy %>%
     !naics %in% nested_naics) %>%
   group_by(vector) %>% 
   mutate(
-    feb_change = value - lag(value),
-    feb_change_percent = value / lag(value) - 1
+    feb_change = value - lag(value)
   ) %>%
   filter(date == max(date)) %>% 
   mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
   ungroup() %>% 
-  select(industry, sex, age_group, vector, value, month_change,
-         month_change_percent, feb_change, feb_change_percent) 
-
-
-
-
-industries <- c("Agriculture [111-112, 1100, 1151-1152]",
-                "Forestry, fishing, mining, quarrying, oil and gas [21, 113-114, 1153, 2100]",
-                "Utilities [22]",
-                "Construction [23]",
-                "Manufacturing [31-33]",
-                "Wholesale and retail trade [41, 44-45]",
-                "Transportation and warehousing [48-49]",
-                "Finance, insurance, real estate, rental and leasing [52-53]",
-                "Professional, scientific and technical services [54]",
-                "Business, building and other support services [55-56]",
-                "Educational services [61]",
-                "Health care and social assistance [62]",
-                "Information, culture and recreation [51, 71]",
-                "Accommodation and food services [72]",
-                "Other services (except public administration) [81]",
-                "Public administration [91]")    
-
-industry_change <- employment_by_industry_tidy %>% 
-  filter(naics %in% industries,
-         date %in% c(max(date) - months(12), max(date))
-  ) %>%
-  mutate(
-    year_change = value - lag(value),
-    year_change_percent = value / lag(value) - 1
-  ) %>%
-  filter(date == max(date)) %>% 
-  mutate(industry = str_extract(naics, ".+?(?=\\[)")) %>%
+  select(industry, sex, age_group, feb_change) %>% 
   ungroup() %>% 
-  select(industry, value, month_change,
-         month_change_percent, year_change_percent) 
+  pivot_wider(names_from = c(sex, age_group),
+              values_from = feb_change)
+
+  gt(industry_df,
+     rowname_col = "industry") %>% 
+  tab_header(
+    title = "Change in B.C. Unemployment Rate by Industry, Age & Gender",
+    subtitle = paste("February to", report_month, report_year)
+  ) %>% 
+   tab_spanner(
+    label = "15 to 24 Years",
+    columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
+  ) %>% 
+   tab_spanner(
+    label = "25 to 54 Years",
+    columns = vars(`Both sexes_25 to 54 years`, `Females_25 to 54 years`, `Males_25 to 54 years`)
+  ) %>% 
+   tab_spanner(
+    label = "55 Years & Over",
+    columns = vars(`Both sexes_55 years and over`, `Females_55 years and over`, `Males_55 years and over`)
+  )  %>% 
+    tab_source_note(
+    source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
+  ) %>% 
+    cols_label(
+    `Both sexes_15 to 24 years` = "Both Genders",
+    `Females_15 to 24 years` = "Females",
+    `Males_15 to 24 years` = "Males",
+    `Both sexes_25 to 54 years` = "Both Genders",
+    `Females_25 to 54 years` = "Females",
+    `Males_25 to 54 years` = "Males",
+    `Both sexes_55 years and over` = "Both Genders",
+    `Females_55 years and over` = "Females",
+    `Males_55 years and over` = "Males"
+  ) %>% 
+     fmt_percent(
+    columns = vars(cols),
+    decimals = 1
+  )
+  # text_transform(
+  #   locations = cells_body(
+  #     columns = vars(cols),
+  #     rows = industry > 0),
+  #   fn = function(x) paste(x, up_arrow)
+  # ) 
 
 ```
 
