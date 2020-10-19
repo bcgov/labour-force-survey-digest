@@ -840,7 +840,7 @@ Row 2 {data-height=240}
 ```{r}
 gt_lfs <- function(tbl) {
   tbl %>% 
-    ungroup() %>%
+  ungroup() %>%
   select(value, labour_force_characteristics, month_change, year_change) %>%
   pivot_longer(cols = c(-labour_force_characteristics)) %>%
   mutate(name_label = case_when(
@@ -988,6 +988,18 @@ Row 4
 ### Women Number of Jobs  in B.C. (Aged 25 Years & Over) {.value-box}
 
 ```{r}
+year_change_employment_bc_female <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064827",
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+
 recent_month_employment_bc_female <- lfc_province_tidy %>%
   filter(
     vector == "v2064827",
@@ -995,12 +1007,12 @@ recent_month_employment_bc_female <- lfc_province_tidy %>%
 
 valueBox(
   value = paste0("Women: ",
-                 recent_month_employment_bc_female %>%
-    pull(month_change) %>%
+                 year_change_employment_bc_female %>%
+    pull(year_change) %>%
     signs(format = comma,
           add_plusses = TRUE)),
   # icon = "fa-users-cog",
-  caption = paste("Month-Over-Month Change in Jobs for Women in B.C. for", report_month, report_year, "(Ages 25 Years & Over)")
+  caption = paste("Year-Over-Year Change in Jobs for Women in B.C. for", report_month, report_year, "(Ages 25 Years & Over)")
 )
 ```
 
@@ -1012,14 +1024,25 @@ recent_month_employment_bc_male <- lfc_province_tidy %>%
   filter(vector == "v2064818",
     date == max(date))
 
+year_change_employment_bc_male <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064818",
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
 valueBox(
   value = paste0("Men: ",
-                 recent_month_employment_bc_male %>%
-    pull(month_change) %>%
+                 year_change_employment_bc_male %>%
+    pull(year_change) %>%
     signs(format = comma,
           add_plusses = TRUE)),
   # icon = "fa-users-cog",
-  caption = paste("Month-Over-Month Change in Jobs for Men in B.C. for", report_month, report_year, "(Ages 25 Years & Over)")
+  caption = paste("Year-Over-Year Change in Jobs for Men in B.C. for", report_month, report_year, "(Ages 25 Years & Over)")
 )
 ```
 
@@ -1031,16 +1054,7 @@ Row 5 {data-height=200}
 ### Change in Number of Jobs for Women in B.C.
 
 ```{r}
-year_change_employment_bc_female <- lfc_province_tidy %>%
-  filter(
-    vector == "v2064827",
-    date %in% c(max(date) - months(12), max(date))
-  ) %>%
-  mutate(
-    year_change = value - lag(value),
-    year_change_percent = value / lag(value) - 1
-  ) %>%
-  filter(date == max(date))
+
 
 year_change_employment_bc_female %>% 
   gt_lfs() %>% 
@@ -1059,16 +1073,7 @@ year_change_employment_bc_female %>%
 ### Change in Number of Jobs for Men in B.C. 
 
 ```{r}
-year_change_employment_bc_male <- lfc_province_tidy %>%
-  filter(
-    vector == "v2064818",
-    date %in% c(max(date) - months(12), max(date))
-  ) %>%
-  mutate(
-    year_change = value - lag(value),
-    year_change_percent = value / lag(value) - 1
-  ) %>%
-  filter(date == max(date))
+
 
 year_change_employment_bc_male %>% 
   gt_lfs() %>% 
@@ -1356,48 +1361,6 @@ Row 1
 ### Number of Full-time Jobs in B.C. {.value-box}
 
 ```{r}
-
-valueBox(
-  value = paste0("Full-time: ",
-                 lfc_province_tidy %>%
-  filter(
-    vector == "v2064702",
-    date == max(date)
-  ) %>%
-    pull(month_change) %>%
-    signs(format = comma,
-          add_plusses = TRUE)),
-  # icon = "fa-users-cog",
-  caption = paste("Month-Over-Month Change in Number of Full-time Jobs in B.C. for", report_month, report_year)
-)
-```
-
-
-### Number of Part-Time Jobs in B.C. {.value-box}
-
-```{r}
-valueBox(
-  value = paste0("Part-time: ",
-                lfc_province_tidy %>%
-  filter(
-    vector == "v2064703",
-    date == max(date)
-  ) %>%
-    pull(month_change) %>%
-    signs(format = comma,
-          add_plusses = TRUE)),
-  # icon = "fa-users-cog",
-  caption = paste("Month-Over-Month Change in Number of Part-time Jobs in B.C. for", report_month, report_year)
-)
-```
-
-
-
-Row 2 {data-height=240}
-------------------------------------------------------------------
-
-### Change in Number of Full-time Jobs in B.C. 
-```{r}
 year_change_employment_bc_ft <- lfc_province_tidy %>%
   filter(
     vector == "v2064702",
@@ -1408,6 +1371,54 @@ year_change_employment_bc_ft <- lfc_province_tidy %>%
     year_change_percent = value / lag(value) - 1
   ) %>%
   filter(date == max(date))
+
+
+
+
+valueBox(
+  value = paste0("Full-time: ",
+                 year_change_employment_bc_ft %>% 
+    pull(year_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  # icon = "fa-users-cog",
+  caption = paste("Year-Over-Year Change in Number of Full-time Jobs in B.C. for", report_month, report_year)
+)
+```
+
+
+### Number of Part-Time Jobs in B.C. {.value-box}
+
+```{r}
+year_change_employment_bc_pt <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064703",
+    date %in% c(max(date) - months(12), max(date))
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+valueBox(
+  value = paste0("Full-time: ",
+                 year_change_employment_bc_pt %>% 
+    pull(year_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  # icon = "fa-users-cog",
+  caption = paste("Year-Over-Year Change in Number of Full-time Jobs in B.C. for", report_month, report_year)
+)
+```
+
+
+
+Row 2 {data-height=240}
+------------------------------------------------------------------
+
+### Change in Number of Full-time Jobs in B.C. 
+```{r}
 
 year_change_employment_bc_ft %>% 
   gt_lfs() %>% 
@@ -1424,17 +1435,6 @@ year_change_employment_bc_ft %>%
  
 ### Change in Number of Part-Time Jobs in B.C.
 ```{r}
-year_change_employment_bc_pt <- lfc_province_tidy %>%
-  filter(
-    vector == "v2064703",
-    date %in% c(max(date) - months(12), max(date))
-  ) %>%
-  mutate(
-    year_change = value - lag(value),
-    year_change_percent = value / lag(value) - 1
-  ) %>%
-  filter(date == max(date))
-
 year_change_employment_bc_pt %>% 
   gt_lfs() %>% 
   fmt_number("value", decimals = 0) %>% 
@@ -2081,43 +2081,8 @@ ggplotly_lfs(
 ```
 
 
+
 Row 4
------------------------------------------------------------------------
-
-### Goods-Producing Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
-
-
-```{r}
-valueBox(
-  value = paste0("Goods-producing: ",
-                 employment_by_industry_tidy %>% 
-  filter(vector == "v2057794",
-         date == max(date)) %>% 
-    pull(month_change) %>%
-    signs(format = comma,
-          add_plusses = TRUE)),
-  caption = paste("Month-Over-Month Change in Number of Goods-producing Jobs in B.C. for", report_month, report_year)
-)
-```
-
-
-### Services-Producing Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
-
-```{r}
-valueBox(
-  value = paste0("Services-producing: ",
-                 employment_by_industry_tidy %>% 
-  filter(vector == "v2057800",
-         date == max(date)) %>% 
-    pull(month_change) %>%
-    signs(format = comma,
-          add_plusses = TRUE)),
-  caption = paste("Month-Over-Month Change in Number of Services-producing Jobs in B.C. for", report_month, report_year)
-)
-```
-
-
-Row 5
 ---------------------------------------------------------------------------
 
 ### Goods-Producing Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
@@ -2178,7 +2143,7 @@ valueBox(
 ```
 
 
-Row 6
+Row 5
 -----------------------------------------------------------------------
 
 ###  Changes in Number of Jobs in B.C. by Industry for `r paste(report_month, report_year)`
