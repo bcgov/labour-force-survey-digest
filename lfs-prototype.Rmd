@@ -996,10 +996,11 @@ recent_month_employment_bc_female <- lfc_province_tidy %>%
 valueBox(
   value = paste0("Women: ",
                  recent_month_employment_bc_female %>%
-    pull(value) %>%
-    signs(format = comma)),
+    pull(month_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
   # icon = "fa-users-cog",
-  caption = paste("Number of Jobs for Women in B.C. for", report_month, report_year, "(Ages 25 Years & Over)")
+  caption = paste("Month-Over-Month Change in Jobs for Women in B.C. for", report_month, report_year, "(Ages 25 Years & Over)")
 )
 ```
 
@@ -1014,10 +1015,11 @@ recent_month_employment_bc_male <- lfc_province_tidy %>%
 valueBox(
   value = paste0("Men: ",
                  recent_month_employment_bc_male %>%
-    pull(value) %>%
-    signs(format = comma)),
+    pull(month_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
   # icon = "fa-users-cog",
-  caption = paste("Number of Jobs for Men in B.C. for", report_month, report_year, "(Ages 25 Years & Over)")
+  caption = paste("Month-Over-Month Change in Jobs for Men in B.C. for", report_month, report_year, "(Ages 25 Years & Over)")
 )
 ```
 
@@ -1362,34 +1364,39 @@ valueBox(
     vector == "v2064702",
     date == max(date)
   ) %>%
-    pull(value) %>%
-    signs(format = comma)),
+    pull(month_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
   # icon = "fa-users-cog",
-  caption = paste("Number of Full-time Jobs in B.C. for", report_month, report_year)
+  caption = paste("Month-Over-Month Change in Number of Full-time Jobs in B.C. for", report_month, report_year)
 )
 ```
 
-### Month-Over-Month Change in Number of Full-time Jobs in B.C. {.value-box}
+
+### Number of Part-Time Jobs in B.C. {.value-box}
 
 ```{r}
 valueBox(
-  value = lfc_province_tidy %>%
+  value = paste0("Part-time: ",
+                lfc_province_tidy %>%
   filter(
-    vector == "v2064702",
+    vector == "v2064703",
     date == max(date)
   ) %>%
     pull(month_change) %>%
-    signs(
-      format = comma,
-      add_plusses = TRUE
-    ),
+    signs(format = comma,
+          add_plusses = TRUE)),
   # icon = "fa-users-cog",
-  caption = "Month-Over-Month Change in Number of Full-time Jobs in B.C."
+  caption = paste("Month-Over-Month Change in Number of Part-time Jobs in B.C. for", report_month, report_year)
 )
 ```
 
-### Year-Over-Year Change in Number of Full-time Jobs in B.C. {.value-box}
 
+
+Row 2 {data-height=240}
+------------------------------------------------------------------
+
+### Change in Number of Full-time Jobs in B.C. 
 ```{r}
 year_change_employment_bc_ft <- lfc_province_tidy %>%
   filter(
@@ -1813,7 +1820,8 @@ Industry
 Row 1
 ------------------------------------------------------------------
 
-### Private Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
+
+### Public Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
 
 ```{r}
 month_employment_bc_jobtype <- employment_by_class_tidy %>%
@@ -1831,6 +1839,24 @@ month_employment_bc_jobtype <- employment_by_class_tidy %>%
                                   "Self-employed" = "Self-employed"))
 
 valueBox(
+  value = paste0("Public Sector: ",
+                 month_employment_bc_jobtype %>%
+                   filter(class_of_worker == "Public Sector") %>% 
+    pull(month_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = paste("Month-Over-Month Change in Number of Public Sector Jobs in B.C. for", report_month, report_year)
+)
+```
+
+
+
+### Private Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
+
+```{r}
+
+
+valueBox(
   value = paste0("Private Sector: ",
                  month_employment_bc_jobtype %>%
                    filter(class_of_worker == "Private Sector") %>% 
@@ -1841,20 +1867,6 @@ valueBox(
 )
 ```
 
-
-### Public Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
-
-```{r}
-valueBox(
-  value = paste0("Public Sector: ",
-                 month_employment_bc_jobtype %>%
-                   filter(class_of_worker == "Public Sector") %>% 
-    pull(month_change) %>%
-    signs(format = comma,
-          add_plusses = TRUE)),
-  caption = paste("Month-Over-Month Change in Number of Public Sector Jobs in B.C. for", report_month, report_year)
-)
-```
 
 
 ### Self-employed Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
