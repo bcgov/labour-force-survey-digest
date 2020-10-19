@@ -833,7 +833,7 @@ valueBox(
 )
 ```
 
-Row 2 {data-height=200}
+Row 2 {data-height=240}
 ----------------------------------------------------------------
 ```{r}
 gt_lfs <- function(tbl) {
