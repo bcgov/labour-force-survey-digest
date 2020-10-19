@@ -101,8 +101,6 @@ report_prov_date <- format(max(lfc_province_tidy$date), "%B %Y")
 ## Some html objects for tables
 up_arrow <- "<span style=\"color:#472D7BFF\">&#9650;</span>"
 down_arrow <- "<span style=\"color:#27AD81FF\">&#9660;</span>"
-
-
 ```
 
 
@@ -879,7 +877,6 @@ gt_lfs <- function(tbl) {
 ### Change in Recent B.C. Unemployment Rate for Women
 
 ```{r}
-
 ##year over year change unemployment rate female
 year_change_unemployment_bc_female <- lfc_province_tidy %>%
   filter(vector %in% c("v2064831"),
@@ -898,7 +895,6 @@ year_change_unemployment_bc_female %>%
     ),
     fn = function(x) ifelse(x > 0, paste(x, up_arrow), paste(x, down_arrow))
   ) 
-
 ```
 
 ### Change in Recent B.C. Unemployment Rate for Men
@@ -1873,8 +1869,6 @@ valueBox(
 ### Private Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
 
 ```{r}
-
-
 valueBox(
   value = paste0("Private: ",
                  year_employment_bc_jobtype %>%
@@ -2436,7 +2430,7 @@ gt(feb_change_employment_bc_gender) %>%
 
 
 
-Row 3 {data-height=1200}
+Row 3 {data-height=1250}
 ------------------------------------------------------------------------
 
 ### Change in B.C. Industry Unemployment Rates by Age & Gender Since February 2020 
