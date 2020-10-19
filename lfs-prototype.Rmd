@@ -120,7 +120,7 @@ Labour Force Survey Summary for British Columbia:
  - [Demographics]
  - [Job Type]
  - [Industry]
- - [COVID-19 Recovery]
+ - [COVID-19]
 
 <br>
 
@@ -2275,8 +2275,598 @@ plot_grid(p1, p2, p3, p4,
 
 
 
-COVID-19 Recovery
+COVID-19
 ======================================================================
+
+Row 1
+-------------------------------------------------------------------------
+
+### Month-Over-February Change in B.C. Unemployment Rate {.value-box}
+
+```{r}
+##year over year change unemployment rate
+feb_change_unemployment_rate_bc <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064705",
+    date %in% c(max(date), "2020-02-01")
+  ) %>%
+  mutate(year_change = value - lag(value)) %>%
+  filter(date == max(date))
+
+valueBox(
+  value = feb_change_unemployment_rate_bc %>%
+    pull(year_change) %>%
+    signs(
+      format = percent,
+      add_plusses = TRUE,
+      accuracy = 0.1
+    ),
+  # icon = "fa-users-cog",
+  caption = paste("Change in B.C. Unemployment Rate Since February 2020")
+)
+```
+
+### Month-Over-February Change in Number of Jobs in B.C. {.value-box}
+
+```{r}
+feb_change_employment_bc <- lfc_province_tidy %>%
+  filter(
+    vector == "v2064701",
+    date %in% c(max(date), "2020-02-01")
+  ) %>%
+  mutate(
+    year_change = value - lag(value),
+    year_change_percent = value / lag(value) - 1
+  ) %>%
+  filter(date == max(date))
+
+# year over year change employment
+valueBox(
+  value = feb_change_employment_bc %>%
+    pull(year_change) %>%
+    signs(
+      format = comma,
+      add_plusses = TRUE
+    ),
+  # icon = "fa-users-cog",
+  caption = paste("Change in Number of Jobs in B.C. Since February 2020")
+)
+```
+
+
+Row 2 {data-height=250}
+-------------------------------------------------------------------------
+
+### Change in B.C. Unemployment Rate by Age & Gender Since February 2020
+
+```{r}
+feb_change_unemployment_bc_gender <- lfc_province_tidy %>%
+  filter(
+   date %in% c(max(date), "2020-02-01"),
+    geo == "British Columbia",
+    labour_force_characteristics %in% c("Unemployment rate"),
+    age_group %in% c(
+      # "25 years and over"
+                     "15 to 24 years",
+                     "25 to 54 years",
+                     "55 years and over"
+                     ),
+    sex != "Both sexes"
+  ) %>%
+  mutate(feb_change = value - lag(value)) %>%
+  filter(date == max(date)) %>% 
+  ungroup() %>% 
+  select(sex, age_group, feb_change) %>% 
+    pivot_wider(names_from = sex,
+                values_from = feb_change)
+
+
+  gt(feb_change_unemployment_bc_gender) %>%
+  fmt_percent("Males", decimals = 1) %>% 
+    fmt_percent("Females", decimals = 1) %>% 
+  #    tab_header(
+  #   title = "Change in B.C. Unemployment Rate by Age & Gender",
+  #   subtitle = paste("February to", report_month, report_year)
+  # ) %>% 
+    cols_label(
+    Females = "Women",
+    Males = "Men",
+    age_group = "Age"
+  ) %>%
+  text_transform(
+  locations = cells_body(columns = "Males",
+                         rows = Males > 0),
+  fn = function(x)
+    paste(x, up_arrow)
+) %>%
+  text_transform(
+    locations = cells_body(columns = "Males",
+                           rows = Males < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  ) %>%
+text_transform(
+  locations = cells_body(columns = "Females",
+                         rows = Females > 0),
+  fn = function(x)
+    paste(x, up_arrow)
+) %>%
+  text_transform(
+    locations = cells_body(columns = "Females",
+                           rows = Females < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  )
+```
+
+
+### Change in Number of Jobs in B.C. by Job Type & Gender Since February 2020
+
+```{r}
+feb_change_employment_bc_gender <- lfc_province_tidy %>%
+  filter(
+    date %in% c(max(date), "2020-02-01"),
+    geo == "British Columbia",
+    labour_force_characteristics %in% c("Full-time employment",
+                                        "Part-time employment",
+                                        "Employment"),
+    sex != "Both sexes",
+    age_group == "15 years and over"
+  ) %>%
+  mutate(feb_change = value - lag(value)) %>%
+  filter(date == max(date)) %>% 
+  ungroup() %>% 
+  select(sex, labour_force_characteristics, feb_change) %>% 
+    pivot_wider(names_from = sex,
+                values_from = feb_change)
+
+
+gt(feb_change_employment_bc_gender) %>%
+    cols_label(
+    Females = "Women",
+    Males = "Men",
+    labour_force_characteristics = ""
+  ) %>%
+  text_transform(
+  locations = cells_body(columns = "Males",
+                         rows = Males > 0),
+  fn = function(x)
+    paste(x, up_arrow)
+) %>%
+  text_transform(
+    locations = cells_body(columns = "Males",
+                           rows = Males < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  ) %>%
+text_transform(
+  locations = cells_body(columns = "Females",
+                         rows = Females > 0),
+  fn = function(x)
+    paste(x, up_arrow)
+) %>%
+  text_transform(
+    locations = cells_body(columns = "Females",
+                           rows = Females < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  )
+
+```
+
+
+
+Row 3 {data-height=1000}
+------------------------------------------------------------------------
+
+### Change in B.C. Industry Unemployment Rates by Age & Gender Since February 2020 
+
+```{r}
+nested_naics <- c("Forestry and logging and support activities for forestry [113, 1153]",
+                  "Fishing, hunting and trapping [114]","Mining, quarrying, and oil and gas extraction [21, 2100]",
+                  "Durables [321, 327, 331-339]",
+                  "Non-durables [311-316, 322-326]",
+                  "Wholesale trade [41]",
+                  "Retail trade [44-45]",
+                  "Finance and insurance [52]",
+                  "Real estate and rental and leasing [53]")
+
+
+cols <- c("Both sexes_15 to 24 years",
+    "Females_15 to 24 years",
+    "Males_15 to 24 years",
+    "Both sexes_25 to 54 years",
+    "Females_25 to 54 years",
+    "Males_25 to 54 years",
+    "Both sexes_55 years and over",
+    "Females_55 years and over",
+    "Males_55 years and over")
+```
+
+
+```{r}
+industry_unemployrt_long <- lfs_industry_unadjusted_tidy %>%
+  filter(
+    labour_force_characteristics == "Unemployment rate",
+    age_group != "15 years and over",
+    date %in% c(max(date), "2020-02-01"),
+    !naics %in% nested_naics) %>%
+  group_by(vector) %>% 
+  mutate(
+    feb_change = value - lag(value)
+  ) %>%
+  filter(date == max(date)) %>% 
+  mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
+  ungroup() %>% 
+  select(industry, sex, age_group, feb_change) %>% 
+  unite(gender_age, c(sex, age_group)) 
+
+industry_unemployrt <- industry_unemployrt_long %>% 
+  pivot_wider(names_from = gender_age,
+              values_from = feb_change)
+
+gt(industry_unemployrt,
+     rowname_col = "industry") %>% 
+  # tab_header(
+  #   title = "Change in B.C. Unemployment Rate by Industry, Age & Gender",
+  #   subtitle = paste("February to", report_month, report_year)
+  # ) %>% 
+   tab_spanner(
+    label = "15 to 24 Years",
+    columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
+  ) %>% 
+   tab_spanner(
+    label = "25 to 54 Years",
+    columns = vars(`Both sexes_25 to 54 years`, `Females_25 to 54 years`, `Males_25 to 54 years`)
+  ) %>% 
+   tab_spanner(
+    label = "55 Years & Over",
+    columns = vars(`Both sexes_55 years and over`, `Females_55 years and over`, `Males_55 years and over`)
+  )  %>% 
+    tab_source_note(
+    source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
+  ) %>% 
+    cols_label(
+    `Both sexes_15 to 24 years` = "Both Genders",
+    `Females_15 to 24 years` = "Females",
+    `Males_15 to 24 years` = "Males",
+    `Both sexes_25 to 54 years` = "Both Genders",
+    `Females_25 to 54 years` = "Females",
+    `Males_25 to 54 years` = "Males",
+    `Both sexes_55 years and over` = "Both Genders",
+    `Females_55 years and over` = "Females",
+    `Males_55 years and over` = "Males"
+  ) %>% 
+    fmt_percent(
+    columns = vars(cols),
+    decimals = 1
+  ) %>% 
+      fmt_missing(
+    columns = 2:10,
+    missing_text = "x"
+  ) %>%
+  # text_transform(
+  #   locations = cells_body(
+  #     columns = unique(industry_unemployrt_long$gender_age),
+  #   ),
+  #   fn = function(x) ifelse(x > 0, paste(x, up_arrow), paste(x, down_arrow))
+  # )
+  # data_color(
+  #   columns = vars(cols),
+  #   colors = scales::col_numeric(
+  #     palette = RColorBrewer::brewer.pal(6, "YlOrRd"),
+  #     # palette = scales::col_numeric(c("red", "white", "blue"),
+  #     #                               domain = c(-1, 1),
+  #     domain = NULL,
+  #     na.color = "grey90",
+  #     reverse = FALSE,
+  # alpha = .6))
+text_transform(
+  locations = cells_body(columns = "Both sexes_15 to 24 years",
+                         rows = `Both sexes_15 to 24 years` > 0),
+  fn = function(x)
+    paste(x, up_arrow)
+) %>%
+  text_transform(
+    locations = cells_body(columns = "Both sexes_15 to 24 years",
+                           rows = `Both sexes_15 to 24 years` < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Females_15 to 24 years",
+                           rows = `Females_15 to 24 years` > 0),
+    fn = function(x)
+      paste(x, up_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Females_15 to 24 years",
+                           rows = `Females_15 to 24 years` < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Males_15 to 24 years",
+                           rows = `Males_15 to 24 years` > 0),
+    fn = function(x)
+      paste(x, up_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Males_15 to 24 years",
+                           rows = `Males_15 to 24 years` < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Both sexes_25 to 54 years",
+                           rows = `Both sexes_25 to 54 years` > 0),
+    fn = function(x)
+      paste(x, up_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Both sexes_25 to 54 years",
+                           rows = `Both sexes_25 to 54 years` < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Females_25 to 54 years",
+                           rows = `Females_25 to 54 years` > 0),
+    fn = function(x)
+      paste(x, up_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Females_25 to 54 years",
+                           rows = `Females_25 to 54 years` < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Males_25 to 54 years",
+                           rows = `Males_25 to 54 years` > 0),
+    fn = function(x)
+      paste(x, up_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Males_25 to 54 years",
+                           rows = `Males_25 to 54 years` < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Both sexes_55 years and over",
+                           rows = `Both sexes_55 years and over` > 0),
+    fn = function(x)
+      paste(x, up_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Both sexes_55 years and over",
+                           rows = `Both sexes_55 years and over` < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Females_55 years and over",
+                           rows = `Females_55 years and over` > 0),
+    fn = function(x)
+      paste(x, up_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Females_55 years and over",
+                           rows = `Females_55 years and over` < 0),
+    fn = function(x)
+      paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Males_55 years and over",
+                           rows = `Males_55 years and over` > 0),
+    fn = function(x)
+      paste(x, up_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(columns = "Males_55 years and over",
+                           rows = `Males_55 years and over` < 0),
+    fn = function(x)
+      paste(x, down_arrow
+      )
+  )
+```
+
+
+Row 4 {data-height=1000}
+-------------------------------------------------------------------------
+
+### Change in Number of Industry Jobs in B.C. by Age & Gender Since February 2020 
+
+```{r}
+industry_employ_long <- lfs_industry_unadjusted_tidy %>%
+  filter(
+    labour_force_characteristics == "Employment",
+    age_group != "15 years and over",
+    date %in% c(max(date), "2020-02-01"),
+    !naics %in% nested_naics) %>%
+  group_by(vector) %>% 
+  mutate(
+    feb_change = value - lag(value)
+  ) %>%
+  filter(date == max(date)) %>% 
+  mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
+  ungroup() %>% 
+  select(industry, sex, age_group, feb_change) %>% 
+  unite(gender_age, c(sex, age_group)) 
+
+industry_employ <- industry_employ_long %>% 
+  pivot_wider(names_from = gender_age,
+              values_from = feb_change)
+
+gt(industry_employ,
+     rowname_col = "industry") %>% 
+  # tab_header(
+  #   title = "Change in Number of Jobs in B.C. by Industry, Age & Gender",
+  #   subtitle = paste("February to", report_month, report_year)
+  # ) %>% 
+   tab_spanner(
+    label = "15 to 24 Years",
+    columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
+  ) %>% 
+   tab_spanner(
+    label = "25 to 54 Years",
+    columns = vars(`Both sexes_25 to 54 years`, `Females_25 to 54 years`, `Males_25 to 54 years`)
+  ) %>% 
+   tab_spanner(
+    label = "55 Years & Over",
+    columns = vars(`Both sexes_55 years and over`, `Females_55 years and over`, `Males_55 years and over`)
+  )  %>% 
+    tab_source_note(
+    source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
+  ) %>% 
+    cols_label(
+    `Both sexes_15 to 24 years` = "Both Genders",
+    `Females_15 to 24 years` = "Females",
+    `Males_15 to 24 years` = "Males",
+    `Both sexes_25 to 54 years` = "Both Genders",
+    `Females_25 to 54 years` = "Females",
+    `Males_25 to 54 years` = "Males",
+    `Both sexes_55 years and over` = "Both Genders",
+    `Females_55 years and over` = "Females",
+    `Males_55 years and over` = "Males"
+  ) %>% 
+  #   fmt_percent(
+  #   columns = vars(cols),
+  #   decimals = 1
+  # ) %>% 
+      fmt_missing(
+    columns = 2:10,
+    missing_text = "x"
+  ) %>%
+  # data_color(
+  #   columns = vars(cols),
+  #   colors = scales::col_numeric(
+  #     palette = RColorBrewer::brewer.pal(6, "YlOrRd"),
+  #     # palette = scales::col_numeric(c("red", "white", "blue"),
+  #     #                               domain = c(-1, 1),
+  #     domain = NULL,
+  #     na.color = "grey90",
+  #     reverse = FALSE,
+  # alpha = .6))
+  text_transform(
+    locations = cells_body(
+      columns = "Both sexes_15 to 24 years",
+      rows = `Both sexes_15 to 24 years` > 0),
+    fn = function(x) paste(x, up_arrow)
+  ) %>%
+    text_transform(
+    locations = cells_body(
+      columns = "Both sexes_15 to 24 years",
+      rows = `Both sexes_15 to 24 years` < 0),
+    fn = function(x) paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(
+      columns = "Females_15 to 24 years",
+      rows = `Females_15 to 24 years` > 0),
+    fn = function(x) paste(x, up_arrow)
+  ) %>%
+    text_transform(
+    locations = cells_body(
+      columns = "Females_15 to 24 years",
+      rows = `Females_15 to 24 years` < 0),
+    fn = function(x) paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(
+      columns = "Males_15 to 24 years",
+      rows = `Males_15 to 24 years` > 0),
+    fn = function(x) paste(x, up_arrow)
+  ) %>%
+    text_transform(
+    locations = cells_body(
+      columns = "Males_15 to 24 years",
+      rows = `Males_15 to 24 years` < 0),
+    fn = function(x) paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(
+      columns = "Both sexes_25 to 54 years",
+      rows = `Both sexes_25 to 54 years` > 0),
+    fn = function(x) paste(x, up_arrow)
+  ) %>%
+    text_transform(
+    locations = cells_body(
+      columns = "Both sexes_25 to 54 years",
+      rows = `Both sexes_25 to 54 years` < 0),
+    fn = function(x) paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(
+      columns = "Females_25 to 54 years",
+      rows = `Females_25 to 54 years` > 0),
+    fn = function(x) paste(x, up_arrow)
+  ) %>%
+    text_transform(
+    locations = cells_body(
+      columns = "Females_25 to 54 years",
+      rows = `Females_25 to 54 years` < 0),
+    fn = function(x) paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(
+      columns = "Males_25 to 54 years",
+      rows = `Males_25 to 54 years` > 0),
+    fn = function(x) paste(x, up_arrow)
+  ) %>%
+    text_transform(
+    locations = cells_body(
+      columns = "Males_25 to 54 years",
+      rows = `Males_25 to 54 years` < 0),
+    fn = function(x) paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(
+      columns = "Both sexes_55 years and over",
+      rows = `Both sexes_55 years and over` > 0),
+    fn = function(x) paste(x, up_arrow)
+  ) %>%
+    text_transform(
+    locations = cells_body(
+      columns = "Both sexes_55 years and over",
+      rows = `Both sexes_55 years and over` < 0),
+    fn = function(x) paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(
+      columns = "Females_55 years and over",
+      rows = `Females_55 years and over` > 0),
+    fn = function(x) paste(x, up_arrow)
+  ) %>%
+    text_transform(
+    locations = cells_body(
+      columns = "Females_55 years and over",
+      rows = `Females_55 years and over` < 0),
+    fn = function(x) paste(x, down_arrow)
+  ) %>%
+  text_transform(
+    locations = cells_body(
+      columns = "Males_55 years and over",
+      rows = `Males_55 years and over` > 0),
+    fn = function(x) paste(x, up_arrow)
+  ) %>%
+    text_transform(
+    locations = cells_body(
+      columns = "Males_55 years and over",
+      rows = `Males_55 years and over` < 0),
+    fn = function(x) paste(x, down_arrow)
+  )
+
+  # data_color(
+  #   columns = vars(cols),
+  #   colors = scales::col_numeric(
+  #     palette = viridis::viridis(4),
+  #     reverse = TRUE,
+  #     na.color = "grey90",
+  #     domain = NULL),
+  # alpha = .6)
+```
 
 
 About {data-orientation=columns}
