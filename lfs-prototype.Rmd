@@ -2017,7 +2017,7 @@ ggplotly_lfs(
             accuracy = 0.1
       )
     ))) +
-  geom_col(alpha = 0.6) +
+  geom_col(alpha = 0.6, position = "dodge2") +
   labs(x = NULL,
        y = NULL) +
   scale_y_continuous(expand = c(0, 0),
