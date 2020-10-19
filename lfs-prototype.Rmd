@@ -1838,60 +1838,6 @@ month_employment_bc_jobtype <- employment_by_class_tidy %>%
                                   "Private sector employees" = "Private Sector",
                                   "Self-employed" = "Self-employed"))
 
-valueBox(
-  value = paste0("Public Sector: ",
-                 month_employment_bc_jobtype %>%
-                   filter(class_of_worker == "Public Sector") %>% 
-    pull(month_change) %>%
-    signs(format = comma,
-          add_plusses = TRUE)),
-  caption = paste("Month-Over-Month Change in Number of Public Sector Jobs in B.C. for", report_month, report_year)
-)
-```
-
-
-
-### Private Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
-
-```{r}
-
-
-valueBox(
-  value = paste0("Private Sector: ",
-                 month_employment_bc_jobtype %>%
-                   filter(class_of_worker == "Private Sector") %>% 
-    pull(month_change) %>%
-    signs(format = comma,
-          add_plusses = TRUE)),
-  caption = paste("Month-Over-Month Change in Number of Private Sector Jobs in B.C. for", report_month, report_year)
-)
-```
-
-
-
-### Self-employed Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
-
-```{r}
-valueBox(
-  value = paste0("Self-employed: ",
-                 month_employment_bc_jobtype %>%
-                   filter(class_of_worker == "Self-employed") %>% 
-    pull(month_change) %>%
-    signs(format = comma,
-          add_plusses = TRUE)),
-  caption = paste("Month-Over-Month Change in Number of Self-employed Jobs in B.C. for", report_month, report_year)
-)
-```
-
-
-
-Row 2 {data-height=240}
------------------------------------------------------------------------------
-
-### Change in Number of Jobs in B.C.
-
-
-```{r}
 year_employment_bc_jobtype <- employment_by_class_tidy %>%
   filter(
     class_of_worker %in% c(
@@ -1913,6 +1859,62 @@ year_employment_bc_jobtype <- employment_by_class_tidy %>%
     year_change_percent = value / lag(value) - 1
   ) %>%
   filter(date == max(date))
+
+valueBox(
+  value = paste0("Public Sector: ",
+                 year_employment_bc_jobtype %>%
+                   filter(class_of_worker == "Public Sector") %>% 
+    pull(year_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = paste("Year-Over-Year Change in Number of Public Sector Jobs in B.C. for", report_month, report_year)
+)
+```
+
+
+
+### Private Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
+
+```{r}
+
+
+valueBox(
+  value = paste0("Private Sector: ",
+                 year_employment_bc_jobtype %>%
+                   filter(class_of_worker == "Private Sector") %>% 
+    pull(year_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = paste("Year-Over-Year Change in Number of Private Sector Jobs in B.C. for", report_month, report_year)
+)
+```
+
+
+
+### Self-employed Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
+
+```{r}
+valueBox(
+  value = paste0("Self-employed: ",
+                 year_employment_bc_jobtype %>%
+                   filter(class_of_worker == "Self-employed") %>% 
+    pull(year_change) %>%
+    signs(format = comma,
+          add_plusses = TRUE)),
+  caption = paste("Year-Over-Year Change in Number of Self-employed Jobs in B.C. for", report_month, report_year)
+)
+```
+
+
+
+Row 2 {data-height=240}
+-----------------------------------------------------------------------------
+
+### Change in Number of Jobs in B.C.
+
+
+```{r}
+
 
 year_employment_bc_jobtype %>% 
   ungroup() %>%
