@@ -2340,7 +2340,7 @@ gt(feb_change_employment_bc_gender) %>%
   )
 ```
 
-Row 3 {data-height=1300}
+Row 3 {data-height=1250}
 ------------------------------------------------------------------------
 
 ### Change in B.C. Industry Unemployment Rates by Age & Gender Since February 2020 
@@ -2389,12 +2389,13 @@ industry_unemployrt <- industry_unemployrt_long %>%
   pivot_wider(names_from = gender_age,
               values_from = feb_change)
 
+max_scale_perc <- pmax(abs(min(industry_unemployrt_long$feb_change, na.rm = TRUE)),
+                  max(industry_unemployrt_long$feb_change, na.rm = TRUE))
+                                                                     
+scale_range_perc <- c(-max_scale_perc, max_scale_perc)
+
 gt(industry_unemployrt,
      rowname_col = "industry") %>% 
-  # tab_header(
-  #   title = "Change in B.C. Unemployment Rate by Industry, Age & Gender",
-  #   subtitle = paste("February to", report_month, report_year)
-  # ) %>% 
    tab_spanner(
     label = "15 to 24 Years",
     columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
@@ -2425,17 +2426,31 @@ gt(industry_unemployrt,
     columns = 2:10,
     missing_text = "x"
   ) %>%
-   fmt(
+  fmt_percent(
     columns = vars(cols),
-    fns = function(x) {
-    case_when(x == 0 ~ percent(x, accuracy = .1),
-              x > 0 ~ paste(percent(x, accuracy = .1), up_arrow), 
-              x < 0 ~ paste(percent(x, accuracy = .1), down_arrow))
-    }
-  )
+    decimals = 1
+  ) %>% 
+   data_color(
+    columns = vars(cols),
+    colors = scales::col_numeric(
+      palette = "PRGn", #divergent palette
+      domain = scale_range_perc,
+      na.color = "grey90",
+      reverse = TRUE), 
+    alpha = .6
+    ) 
+# %>% 
+#    fmt(
+#     columns = vars(cols),
+#     fns = function(x) {
+#     case_when(x == 0 ~ percent(x, accuracy = .1),
+#               x > 0 ~ paste(percent(x, accuracy = .1), up_arrow), 
+#               x < 0 ~ paste(percent(x, accuracy = .1), down_arrow))
+#     }
+#   )
 ```
 
-Row 4 {data-height=1300}
+Row 4 {data-height=1250}
 -------------------------------------------------------------------------
 
 ### Change in Number of Industry Jobs in B.C. by Age & Gender Since February 2020 
@@ -2461,12 +2476,13 @@ industry_employ <- industry_employ_long %>%
   pivot_wider(names_from = gender_age,
               values_from = feb_change)
 
+max_scale <- pmax(abs(min(industry_employ_long$feb_change, na.rm = TRUE)),
+                  max(industry_employ_long$feb_change, na.rm = TRUE))
+
+scale_range <- c(-max_scale, max_scale)
+
 gt(industry_employ,
      rowname_col = "industry") %>% 
-  # tab_header(
-  #   title = "Change in Number of Jobs in B.C. by Industry, Age & Gender",
-  #   subtitle = paste("February to", report_month, report_year)
-  # ) %>% 
    tab_spanner(
     label = "15 to 24 Years",
     columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
@@ -2497,12 +2513,26 @@ gt(industry_employ,
     columns = 2:10,
     missing_text = "x"
   ) %>%
-   fmt(
+  data_color(
     columns = vars(cols),
-    fns = function(x) {
-    ifelse(x > 0, (paste(comma(x), up_arrow)), paste(comma(x), down_arrow))
-    }
+    colors = scales::col_numeric(
+      palette = "PRGn", #divergent palette
+      domain = c(scale_range),
+      na.color = "grey90",
+      reverse = FALSE), 
+    alpha = .6
+    ) %>% 
+   fmt_number(
+    columns = vars(cols),
+    decimals = 0,
+    sep_mark = ","
   )
+  #  fmt(
+  #   columns = vars(cols),
+  #   fns = function(x) {
+  #   ifelse(x > 0, (paste(comma(x), up_arrow)), paste(comma(x), down_arrow))
+  #   }
+  # )
 ```
 
 About {data-orientation=columns}
