@@ -55,7 +55,6 @@ report_year <- lfc_province_tidy %>%
 ##previous report year
 previous_year <- report_year - 1
 
-
 ##common chart themes
 theme_bar <- theme(
   axis.line = element_line(colour = "grey70", size = .1),
@@ -103,10 +102,8 @@ up_arrow <- "<span style=\"color:#472D7BFF\">&#9650;</span>"
 down_arrow <- "<span style=\"color:#27AD81FF\">&#9660;</span>"
 ```
 
-
 Sidebar {.sidebar data-width=200}
 =======================================================================
-
 
 ### `r paste(report_month, report_year)`
 
@@ -133,7 +130,6 @@ Learn more [About] the Statistics Canada Labour Force Survey.
 
 Highlights
 ======================================================================
-
 
 Row 1
 ----------------------------------------------------------------------
@@ -193,7 +189,6 @@ valueBox(
   caption = paste("Year-Over-Year Change in B.C. Unemployment Rate")
 )
 ```
-
 
 Row 2
 ----------------------------------------------------------------------
@@ -263,7 +258,7 @@ ggplotly_lfs(
   ) +
   labs(x = NULL, y = NULL) +
   scale_y_continuous(labels = percent,
-                     breaks = breaks_pretty(n = 6)) +
+                     breaks = breaks_pretty(n = 5)) +
   theme_minimal() +
   theme_vert
 )
@@ -332,7 +327,6 @@ lfc_region_tidy %>%
     )
 ```
 
-
 Row 3
 ---------------------------------------------------------------------------
 
@@ -396,7 +390,6 @@ valueBox(
   caption = paste("Year-Over-Year Change in Number of Jobs in B.C.")
 )
 ```
-
 
 Row 4
 ---------------------------------------------------------------------
@@ -464,7 +457,7 @@ ggplotly_lfs(
         labels = comma,
         breaks = breaks_pretty(n = 8)
       ) +
-      scale_x_date(breaks = breaks_pretty(n = 8)) +
+      scale_x_date(breaks = breaks_pretty(n = 5)) +
       theme_minimal() +
       theme_vert
   }
@@ -543,7 +536,6 @@ valueBox(
 )
 ```
 
-
 ### Month-Over-Month Change in Canada Unemployment Rate {.value-box}
 
 ```{r}
@@ -580,12 +572,10 @@ valueBox(
 )
 ```
 
-
 Row 6
 ---------------------------------------------------------------------------
 
 ### Unemployment Rate for `r paste(report_month, report_year)` by Province
-
 
 ```{r, fig.width=7, fig.height=5, eval=TRUE}
 unemploy_rt_provinces <- lfc_province_tidy %>%
@@ -688,7 +678,6 @@ unemploy_rt_provinces_report_year <-  lfc_province_tidy %>%
  mutate(fill_col = ifelse(geo == "British Columbia", "bc", "other")) %>% 
   left_join(prov_acronyms)
 
-
 p <- unemploy_rt_provinces_report_year %>% 
  ggplot(aes(
     x = date,
@@ -725,7 +714,7 @@ p <- unemploy_rt_provinces_report_year %>%
   scale_colour_manual(guide = FALSE,
                       values = c(bc = "#440154FF",
                                other = main_colour)) +
-  scale_x_date(breaks = breaks_pretty(n = 8)) +
+  scale_x_date(breaks = breaks_pretty(n = 5)) +
   scale_size(range= c(6, 1)) +
   theme_minimal() +
   theme_vert +
@@ -789,13 +778,11 @@ valueBox(value = year_change_employment_can %>%
          caption = paste("Year-Over-Year Change in Number of Jobs in Canada"))
 ```
 
-
 Demographics
 =========================================================================
 
 Row 1
 ----------------------------------------------------------------------------
-
 
 ### Women B.C. Unemployment Rate (Aged 25 Years & Over) {.value-box}
 
@@ -873,7 +860,6 @@ gt_lfs <- function(tbl) {
 }
 ```
 
-
 ### Change in Recent B.C. Unemployment Rate for Women
 
 ```{r}
@@ -920,7 +906,6 @@ year_change_unemployment_bc_male %>%
     fn = function(x) ifelse(x > 0, paste(x, up_arrow), paste(x, down_arrow))
   )
 ```
-
 
 Row 3
 -----------------------------------------------------------------------
@@ -971,7 +956,7 @@ lfc_province_tidy %>%
   scale_colour_manual(guide = FALSE,
                   values = c(preyears = "grey50",
                                thisyear = main_colour)) +
-  scale_x_date(breaks = breaks_pretty(n = 6)) +
+  scale_x_date(breaks = breaks_pretty(n = 5)) +
   theme_minimal() +
   theme_facet +
   theme(legend.position = "none")
@@ -1042,16 +1027,12 @@ valueBox(
 )
 ```
 
-
-
 Row 5 {data-height=250}
 ----------------------------------------------------------------------
 
 ### Change in Number of Jobs for Women in B.C.
 
 ```{r}
-
-
 year_change_employment_bc_female %>% 
   gt_lfs() %>% 
   fmt_number("value", decimals = 0) %>% 
@@ -1062,15 +1043,11 @@ year_change_employment_bc_female %>%
     ),
     fn = function(x) ifelse(x > 0, paste(x, up_arrow), paste(x, down_arrow))
   ) 
-
 ```
-
 
 ### Change in Number of Jobs for Men in B.C. 
 
 ```{r}
-
-
 year_change_employment_bc_male %>% 
   gt_lfs() %>% 
   fmt_number("value", decimals = 0) %>% 
@@ -1082,7 +1059,6 @@ year_change_employment_bc_male %>%
     fn = function(x) ifelse(x > 0, paste(x, up_arrow), paste(x, down_arrow))
   ) 
 ```
-
 
 Row 6
 ----------------------------------------------------------------------------
@@ -1143,7 +1119,7 @@ ggplotly_lfs(
        y = NULL) +
   scale_y_continuous(labels = comma,
                      breaks = breaks_pretty(8)) +
-  scale_x_date(breaks = breaks_pretty(n = 8)) +
+  scale_x_date(breaks = breaks_pretty(n = 5)) +
   theme_minimal() +
   theme_facet
 # theme(strip.text.y = element_text(angle = 0))
@@ -1151,10 +1127,8 @@ ggplotly_lfs(
 )
 ```
 
-
 Row 7
 -----------------------------------------------------------------------------
-
 
 ### Youth B.C. Unemployment Rate (Ages 15 to 25 Years) {.value-box}
 
@@ -1172,9 +1146,6 @@ valueBox(
 )
 ```
 
-	
-
-
 ### Month-Over-Month Change in Number of Jobs for Youth in B.C. (Ages 15 to 24 Years) {.value-box}
 
 ```{r}
@@ -1189,7 +1160,6 @@ valueBox(
   caption = "Month-Over-Month Change in Number of Jobs for Youth in B.C."
 )
 ```
-
 
 ### Year-Over-Year Change in Number of Jobs for Youth in B.C. (Ages 15 to 24 Years) {.value-box}
 
@@ -1217,7 +1187,6 @@ valueBox(
   caption = paste("Year-Over-Year Change in Number of Jobs for Youth in B.C.")
 )
 ```
-
 
 Row 8
 -----------------------------------------------------------------------------
@@ -1277,7 +1246,6 @@ lfc_province_tidy %>%
     y = -0.2,
     xanchor = "center"
   ))
-
 ```
 
 ### Month-Over-Month Change in Number of Jobs in B.C. for Youth by Gender in `r report_year` (Ages 15 to 24 Years)
@@ -1350,7 +1318,6 @@ ggplotly_lfs(
 Job Type
 ===================================================================
 
-
 Row 1
 ------------------------------------------------------------------
 
@@ -1379,7 +1346,6 @@ valueBox(
 )
 ```
 
-
 ### Number of Part-Time Jobs in B.C. {.value-box}
 
 ```{r}
@@ -1405,14 +1371,11 @@ valueBox(
 )
 ```
 
-
-
 Row 2 {data-height=270}
 ------------------------------------------------------------------
 
 ### Change in Number of Full-time Jobs in B.C. 
 ```{r}
-
 year_change_employment_bc_ft %>% 
   gt_lfs() %>% 
   fmt_number("value", decimals = 0) %>% 
@@ -1423,10 +1386,10 @@ year_change_employment_bc_ft %>%
     ),
     fn = function(x) ifelse(x > 0, paste(x, up_arrow), paste(x, down_arrow))
   ) 
-  
 ```
  
 ### Change in Number of Part-Time Jobs in B.C.
+
 ```{r}
 year_change_employment_bc_pt %>% 
   gt_lfs() %>% 
@@ -1439,9 +1402,6 @@ year_change_employment_bc_pt %>%
     fn = function(x) ifelse(x > 0, paste(x, up_arrow), paste(x, down_arrow))
   ) 
 ```
-
-
-
 
 Row 3
 ---------------------------------------------------------------------
@@ -1513,13 +1473,12 @@ ggplotly_lfs(
        y = NULL) +
   scale_y_continuous(labels = comma,
                      breaks = breaks_pretty(n = 8)) +
-  scale_x_date(breaks = breaks_pretty(n = 8)) +
+  scale_x_date(breaks = breaks_pretty(n = 5)) +
   theme_minimal() +
   theme_facet +
   theme(panel.spacing = unit(1, "lines"))
 })
 ```
-
 
 Row 4
 ------------------------------------------------------------------------------
@@ -1556,7 +1515,6 @@ valueBox(
 )
 ```
 
-
 ### Women Part-time Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
 
 ```{r}
@@ -1588,8 +1546,6 @@ valueBox(
   caption = paste("Year-Over-Year Change in Number of Part-time Jobs for Women (15 Years and Over) in B.C.")
 )
 ```
-
-
 
 Row 5
 ------------------------------------------------------------------------------
@@ -1649,7 +1605,7 @@ facet_grid(. ~ age_group) +
        y = NULL) +
   scale_y_continuous(labels = comma,
                      breaks = breaks_pretty(n = 8)) +
-  scale_x_date(breaks = breaks_pretty(n = 8)) +
+  scale_x_date(breaks = breaks_pretty(n = 5)) +
    scale_fill_viridis_d(name = NULL) +
   theme_minimal() +
   theme_facet +
@@ -1698,7 +1654,6 @@ valueBox(
 )
 ```
 
-
 ### Men Part-time Year-Over-Year Change in Number of Jobs (15 Years and Over) in B.C. {.value-box}
 
 ```{r}
@@ -1730,8 +1685,6 @@ valueBox(
   caption = paste("Year-Over-Year Change in Number of Part-time Jobs for Men (15 Years and Over) in B.C.")
 )
 ```
-
-
 
 Row 7
 ------------------------------------------------------------------------------
@@ -1791,7 +1744,7 @@ facet_grid(. ~ age_group) +
        y = NULL) +
   scale_y_continuous(labels = comma,
                      breaks = breaks_pretty(n = 8)) +
-  scale_x_date(breaks = breaks_pretty(n = 8)) +
+  scale_x_date(breaks = breaks_pretty(n = 5)) +
    scale_fill_viridis_d(name = NULL) +
   theme_minimal() +
   theme_facet +
@@ -1805,14 +1758,11 @@ facet_grid(. ~ age_group) +
   ))
 ```
 
-
 Industry
 ====================================================================
 
-
 Row 1
 ------------------------------------------------------------------
-
 
 ### Public Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
 
@@ -1864,8 +1814,6 @@ valueBox(
 )
 ```
 
-
-
 ### Private Sector Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
 
 ```{r}
@@ -1880,9 +1828,7 @@ valueBox(
 )
 ```
 
-
-
-```{r, eval=FALSE, include=FALSE}
+```{r, include=FALSE}
 ### Self-employed Month-Over-Month Change in Number of Jobs in B.C. {.value-box}
 
 valueBox(
@@ -1896,13 +1842,10 @@ valueBox(
 )
 ```
 
-
-
 Row 2 {data-height=240}
 -----------------------------------------------------------------------------
 
-### Change in Number of Jobs in B.C.
-
+### Change in Number of Jobs in B.C. for `r paste(report_month, report_year)`
 
 ```{r}
 year_employment_bc_jobtype %>% 
@@ -1944,9 +1887,7 @@ year_employment_bc_jobtype %>%
     columns = vars(name)
   ) %>% 
   cols_width(everything() ~ px(250))
-
 ```
-
 
 Row 3
 ----------------------------------------------------------------
@@ -2002,7 +1943,7 @@ ggplotly_lfs(
   scale_y_continuous(expand = c(0, 0),
                      labels = comma,
                      breaks = breaks_pretty(n = 6)) +
-  scale_x_date(breaks = breaks_pretty(n = 8)) +
+  scale_x_date(breaks = breaks_pretty(n = 5)) +
   scale_fill_viridis_d(name = NULL) +
   theme_minimal() +
   theme_vert +
@@ -2015,7 +1956,6 @@ ggplotly_lfs(
     xanchor = "center"
   ))
 ```
-
 
 ### Month-Over-Month Change in Number of Goods & Services-producing Jobs in B.C. for `r report_year` 
 
@@ -2058,7 +1998,7 @@ ggplotly_lfs(
        y = NULL) +
   scale_y_continuous(labels = comma,
                      breaks = breaks_pretty(n = 6)) +
-  scale_x_date(breaks = breaks_pretty(n = 8)) +
+  scale_x_date(breaks = breaks_pretty(n = 5)) +
   scale_fill_viridis_d(name = NULL) +
   theme_minimal() +
   theme_vert
@@ -2070,8 +2010,6 @@ ggplotly_lfs(
     xanchor = "center"
   ))
 ```
-
-
 
 Row 4
 ---------------------------------------------------------------------------
@@ -2104,7 +2042,6 @@ valueBox(
 )
 ```
 
-
 ### Services-Producing Sector Year-Over-Year Change in Number of Jobs in B.C. {.value-box}
 
 ```{r}
@@ -2132,7 +2069,6 @@ valueBox(
   caption = "Year-Over-Year Change in Number of of Services-producing Jobs in B.C."
 )
 ```
-
 
 Row 5
 -----------------------------------------------------------------------
@@ -2264,8 +2200,6 @@ plot_grid(p1, p2, p3, p4,
                    rel_widths = c(2.5, 1, 1,1))
 ```
 
-
-
 COVID-19
 ======================================================================
 
@@ -2323,7 +2257,6 @@ valueBox(
   caption = paste("Change in Number of Jobs in B.C. Since February 2020")
 )
 ```
-
 
 Row 2 {data-height=250}
 -------------------------------------------------------------------------
@@ -2390,7 +2323,6 @@ text_transform(
   )
 ```
 
-
 ### Change in Number of Jobs in B.C. by Job Type & Gender Since February 2020
 
 ```{r}
@@ -2425,12 +2357,9 @@ gt(feb_change_employment_bc_gender) %>%
     ifelse(x > 0, (paste(comma(x), up_arrow)), paste(comma(x), down_arrow))
     }
   )
-
 ```
 
-
-
-Row 3 {data-height=1250}
+Row 3 {data-height=1300}
 ------------------------------------------------------------------------
 
 ### Change in B.C. Industry Unemployment Rates by Age & Gender Since February 2020 
@@ -2523,7 +2452,6 @@ gt(industry_unemployrt,
   )
 ```
 
-
 Row 4 {data-height=1300}
 -------------------------------------------------------------------------
 
@@ -2594,17 +2522,13 @@ gt(industry_employ,
   )
 ```
 
-
 About {data-orientation=columns}
 ======================================================================
-
 
 Column
 -----------------------------------------------------------------------
 
 Data are sourced from the [Statistics Canada Labour Force Survey (LFS)](https://www.statcan.gc.ca/eng/survey/household/3701), a monthly survey which measures the current state of the Canadian labour market. 
-  
-Statistics Canada data are released under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/eng/reference/licence).
   
 Statistics Canada Labour Force Survey Tables: 
 
@@ -2613,13 +2537,17 @@ Statistics Canada Labour Force Survey Tables:
  - [Statistics Canada Table **14-10-0288-01**: Employment by class of worker, monthly, seasonally adjusted and unadjusted, last 5 months](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410028801)
   - [Statistics Canada Table **14-10-0355-02**: Employment by industry, monthly, seasonally adjusted](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410035502)
    - [Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)
- 
+
  <!--
  - [Statistics Canada Table **14-10-0127-01**: Reason for not looking for work, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410012701&pickMembers%5B0%5D=1.11&pickMembers%5B1%5D=3.1&pickMembers%5B2%5D=4.1) 
  -->
  
 B.C. Data Catalogue:
+
  - [Current Census Economic Regions](https://catalogue.data.gov.bc.ca/dataset/1aebc451-a41c-496f-8b18-6f414cde93b7)
+
+Statistics Canada data are released under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/eng/reference/licence).
+
 
 This report is built with the [`flexdashboard` R package](https://rmarkdown.rstudio.com/flexdashboard/), sourcing the Statistics Canada Labour Force Survey data using the [`cansim` R package](https://mountainmath.github.io/cansim/index.html), the Canadian provincial and territorial boundaries geospatial data using the [`cancensus` R package](https://mountainmath.github.io/cancensus/index.html) and the British Columbia economic region boundaries geospatial data using the [`bcdata` R package](https://bcgov.github.io/bcdata/).
   
