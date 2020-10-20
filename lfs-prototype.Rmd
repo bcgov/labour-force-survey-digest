@@ -229,11 +229,11 @@ ggplotly_lfs(
     aes(
       x = date,
       y = value,
-      text = paste(
-        "Date:",
+      text = paste0(
+        "Date: ",
         date,
         "<br>",
-        "Unemployment Rate:",
+        "Unemployment Rate: ",
         signs(value,
               format = percent,
               accuracy = 0.1)
