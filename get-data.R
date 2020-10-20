@@ -211,12 +211,12 @@ employment_by_industry_tidy <- employment_by_industry_raw %>%
           data_type == "Seasonally adjusted",
           date >  Sys.Date() - months(14)) %>%
   select(
-    "date",
-    "geo",
-    "naics" = "north_american_industry_classification_system_naics",
-    "statistics",
-    "vector",
-    "value"
+    date,
+    geo,
+    naics = north_american_industry_classification_system_naics,
+    statistics,
+    vector,
+    value
   ) %>%
   group_by(vector) %>%
   mutate(
@@ -231,14 +231,14 @@ lfs_industry_unadjusted_tidy <- lfs_industry_unadjusted_raw %>%
    filter(geo == "British Columbia",
            date >  Sys.Date() - months(14)) %>%
   select(
-    "date",
-    "geo",
-    "labour_force_characteristics",
-    "naics" = "north_american_industry_classification_system_naics",
-    "sex",
-    "age_group",
-    "vector",
-    "value"
+    date,
+    geo,
+    labour_force_characteristics,
+    naics = north_american_industry_classification_system_naics,
+    sex,
+    age_group,
+    vector,
+    value
   ) %>%
   group_by(vector) %>%
   mutate(
