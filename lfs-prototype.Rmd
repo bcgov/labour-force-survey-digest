@@ -2284,42 +2284,23 @@ feb_change_unemployment_bc_gender <- lfc_province_tidy %>%
     pivot_wider(names_from = sex,
                 values_from = feb_change)
 
+cols_mf <- c("Males", "Females")
 
   gt(feb_change_unemployment_bc_gender) %>%
   fmt_percent("Males", decimals = 1) %>% 
     fmt_percent("Females", decimals = 1) %>% 
-  #    tab_header(
-  #   title = "Change in B.C. Unemployment Rate by Age & Gender",
-  #   subtitle = paste("February to", report_month, report_year)
-  # ) %>% 
     cols_label(
     Females = "Women",
     Males = "Men",
     age_group = "Age"
-  ) %>%
-  text_transform(
-  locations = cells_body(columns = "Males",
-                         rows = Males > 0),
-  fn = function(x)
-    paste(x, up_arrow)
-) %>%
-  text_transform(
-    locations = cells_body(columns = "Males",
-                           rows = Males < 0),
-    fn = function(x)
-      paste(x, down_arrow)
-  ) %>%
-text_transform(
-  locations = cells_body(columns = "Females",
-                         rows = Females > 0),
-  fn = function(x)
-    paste(x, up_arrow)
-) %>%
-  text_transform(
-    locations = cells_body(columns = "Females",
-                           rows = Females < 0),
-    fn = function(x)
-      paste(x, down_arrow)
+    ) %>%
+    fmt(
+    columns = vars(cols_mf),
+    fns = function(x) {
+    case_when(x == 0 ~ percent(x, accuracy = .1),
+              x > 0 ~ paste(percent(x, accuracy = .1), up_arrow), 
+              x < 0 ~ paste(percent(x, accuracy = .1), down_arrow))
+    }
   )
 ```
 
@@ -2440,14 +2421,16 @@ gt(industry_unemployrt,
     `Females_55 years and over` = "Females",
     `Males_55 years and over` = "Males"
   ) %>% 
-      fmt_missing(
+    fmt_missing(
     columns = 2:10,
     missing_text = "x"
   ) %>%
    fmt(
     columns = vars(cols),
     fns = function(x) {
-    ifelse(x > 0, (paste(percent(x, accuracy = .1), up_arrow)), paste(percent(x, accuracy = .1), down_arrow))
+    case_when(x == 0 ~ percent(x, accuracy = .1),
+              x > 0 ~ paste(percent(x, accuracy = .1), up_arrow), 
+              x < 0 ~ paste(percent(x, accuracy = .1), down_arrow))
     }
   )
 ```
