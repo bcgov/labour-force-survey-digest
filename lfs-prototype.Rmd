@@ -1886,7 +1886,7 @@ year_employment_bc_jobtype %>%
   cols_hide(
     columns = vars(name)
   ) %>% 
-  cols_width(everything() ~ px(250))
+  cols_width(everything() ~ px(180))
 ```
 
 Row 3
@@ -2340,7 +2340,7 @@ gt(feb_change_employment_bc_gender) %>%
   )
 ```
 
-Row 3 {data-height=1250}
+Row 3 {data-height=1210}
 ------------------------------------------------------------------------
 
 ### Change in B.C. Industry Unemployment Rates by Age & Gender Since February 2020 
