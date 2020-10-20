@@ -2546,7 +2546,7 @@ B.C. Data Catalogue:
 
  - [Current Census Economic Regions](https://catalogue.data.gov.bc.ca/dataset/1aebc451-a41c-496f-8b18-6f414cde93b7)
 
-Statistics Canada data are released under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/eng/reference/licence).
+All data are released under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/eng/reference/licence).
 
 
 This report is built with the [`flexdashboard` R package](https://rmarkdown.rstudio.com/flexdashboard/), sourcing the Statistics Canada Labour Force Survey data using the [`cansim` R package](https://mountainmath.github.io/cansim/index.html), the Canadian provincial and territorial boundaries geospatial data using the [`cancensus` R package](https://mountainmath.github.io/cancensus/index.html) and the British Columbia economic region boundaries geospatial data using the [`bcdata` R package](https://bcgov.github.io/bcdata/).
