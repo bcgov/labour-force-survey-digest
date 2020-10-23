@@ -909,7 +909,7 @@ year_change_unemployment_bc_male %>%
 Row 3
 -----------------------------------------------------------------------
 
-### Monthly B.C. Unemployment Rates by Gender Since 2000 (Ages 25 Years & Over)
+### Monthly B.C. Unemployment Rates for Women & Men Since 2000 (Ages 25 Years & Over)
 
 ```{r, fig.width=7, fig.height=5}
 ggplotly_lfs(
@@ -1062,7 +1062,7 @@ year_change_employment_bc_male %>%
 Row 6
 ----------------------------------------------------------------------------
 
-### Month-Over-Month Change in Number of Jobs in B.C. by Gender for `r report_year` (Ages 25 Years & Over)
+### Month-Over-Month Change in Number of Jobs for Women & Men in B.C. for `r report_year` (Ages 25 Years & Over)
 
 ```{r, fig.width=7, fig.height=5}
 ggplotly_lfs(
@@ -1190,7 +1190,7 @@ valueBox(
 Row 8
 -----------------------------------------------------------------------------
 
-### Monthly B.C. Unemployment Rates by Age & Gender for `r report_year`
+### Monthly B.C. Unemployment Rates by Age for Women & Men for `r report_year`
 
 ```{r, fig.width=7, fig.height=5}
 ggplotly_lfs(
@@ -1247,7 +1247,7 @@ lfc_province_tidy %>%
   ))
 ```
 
-### Month-Over-Month Change in Number of Jobs in B.C. for Youth by Gender in `r report_year` (Ages 15 to 24 Years)
+### Month-Over-Month Change in Number of Jobs for Youth Women & Youth Men in B.C. for `r report_year` (Ages 15 to 24 Years)
 
 ```{r, fig.width=7, fig.height=5}
 
@@ -2260,7 +2260,7 @@ valueBox(
 Row 2 {data-height=250}
 -------------------------------------------------------------------------
 
-### Change in B.C. Unemployment Rate by Age & Gender Since February 2020
+### Change in B.C. Unemployment Rate by Age for Women & Men Since February 2020
 
 ```{r}
 feb_change_unemployment_bc_gender <- lfc_province_tidy %>%
@@ -2303,7 +2303,7 @@ cols_mf <- c("Males", "Females")
   )
 ```
 
-### Change in Number of Jobs in B.C. by Job Type & Gender Since February 2020
+### Change in Number of Jobs in B.C. by Job Type for Women & Men Since February 2020
 
 ```{r}
 feb_change_employment_bc_gender <- lfc_province_tidy %>%
@@ -2542,7 +2542,7 @@ Column
 
 Data are sourced from the [Statistics Canada Labour Force Survey (LFS)](https://www.statcan.gc.ca/eng/survey/household/3701), a monthly survey which measures the current state of the Canadian labour market. 
 
-Presented labour force characteristic time series data are based on [monhtly, seasonally adjusted values](https://www.statcan.gc.ca/eng/dai/btd/sad-faq/sec1) unless otherwise indicated in the dashboard.
+Labour force characteristic time series data are based on [monhtly, seasonally adjusted values](https://www.statcan.gc.ca/eng/dai/btd/sad-faq/sec1) unless otherwise indicated in the dashboard.
   
 Statistics Canada Labour Force Survey Tables: 
 
