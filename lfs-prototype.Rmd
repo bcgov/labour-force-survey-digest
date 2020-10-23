@@ -2371,6 +2371,10 @@ scale_range_perc <- c(-max_scale_perc, max_scale_perc)
 
 gt(industry_unemployrt,
      rowname_col = "industry") %>% 
+  tab_header(
+    title = "Change in Unemployment Rate Since February 2020", 
+    subtitle = "Based on monthly, seasonally unadjusted estimates"
+  ) %>% 
    tab_spanner(
     label = "15 to 24 Years",
     columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
@@ -2383,6 +2387,9 @@ gt(industry_unemployrt,
     label = "55 Years & Over",
     columns = vars(`Both sexes_55 years and over`, `Females_55 years and over`, `Males_55 years and over`)
   )  %>% 
+  tab_source_note(
+    source_note = "Note: seasonal or calendar effects that influence unemployment rates are not accounted for when using monthly, seasonally unadjusted unemployment rate estimates."
+  ) %>% 
     tab_source_note(
     source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
   ) %>% 
@@ -2458,6 +2465,10 @@ scale_range <- c(-max_scale, max_scale)
 
 gt(industry_employ,
      rowname_col = "industry") %>% 
+   tab_header(
+    title = "Change in Number of Jobs Since February 2020", 
+    subtitle = "Based on monthly, seasonally unadjusted estimates"
+  ) %>% 
    tab_spanner(
     label = "15 to 24 Years",
     columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
@@ -2470,6 +2481,9 @@ gt(industry_employ,
     label = "55 Years & Over",
     columns = vars(`Both sexes_55 years and over`, `Females_55 years and over`, `Males_55 years and over`)
   )  %>% 
+   tab_source_note(
+    source_note = "Note: seasonal or calendar effects that influence employment are not accounted for when using monthly, seasonally unadjusted employment estimates."
+  ) %>% 
     tab_source_note(
     source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
   ) %>% 
