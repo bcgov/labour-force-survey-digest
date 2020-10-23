@@ -1803,7 +1803,7 @@ year_employment_bc_jobtype <- employment_by_class_tidy %>%
   filter(date == max(date))
 
 valueBox(
-  value = paste0("Public: ",
+  value = paste0("Public Sector: ",
                  year_employment_bc_jobtype %>%
                    filter(class_of_worker == "Public Sector") %>% 
     pull(year_change) %>%
@@ -1817,7 +1817,7 @@ valueBox(
 
 ```{r}
 valueBox(
-  value = paste0("Private: ",
+  value = paste0("Private Sector: ",
                  year_employment_bc_jobtype %>%
                    filter(class_of_worker == "Private Sector") %>% 
     pull(year_change) %>%
