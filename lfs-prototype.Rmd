@@ -2098,7 +2098,7 @@ valueBox(
 Row 5
 -----------------------------------------------------------------------
 
-###  Changes in Number of Jobs in B.C. by Industry for `r paste(report_month, report_year)` {.no-mobile}
+###  Changes in Number of Jobs in B.C. by Industry for `r paste(report_month, report_year)` 
 
 ```{r, fig.width=12, fig.height=7}
 industries <- c("Agriculture [111-112, 1100, 1151-1152]",
@@ -2369,7 +2369,7 @@ gt(feb_change_employment_bc_sex) %>%
 Row 3 {data-height=1210}
 ------------------------------------------------------------------------
 
-### Change in Number of Industry Jobs in B.C. by Age for Women & Men Since February 2020 {.no-mobile}
+### Change in Number of Industry Jobs in B.C. by Age for Women & Men Since February 2020
 
 ```{r}
 nested_naics <- c("Forestry and logging and support activities for forestry [113, 1153]",
@@ -2483,7 +2483,7 @@ gt(industry_employ,
 Row 4 {data-height=1250}
 -------------------------------------------------------------------------
 
-### Percentage Point Change in B.C. Industry Unemployment Rates by Age for Women & Men Since February 2020 {.no-mobile}
+### Percentage Point Change in B.C. Industry Unemployment Rates by Age for Women & Men Since February 2020 
 
 ```{r}
 industry_unemployrt_long <- lfs_industry_unadjusted_tidy %>%
