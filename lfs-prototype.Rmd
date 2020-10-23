@@ -2073,7 +2073,7 @@ valueBox(
 Row 5
 -----------------------------------------------------------------------
 
-###  Changes in Number of Jobs in B.C. by Industry for `r paste(report_month, report_year)`
+###  Changes in Number of Jobs in B.C. by Industry for `r paste(report_month, report_year)` {.no-mobile}
 
 ```{r, fig.width=12, fig.height=7}
 industries <- c("Agriculture [111-112, 1100, 1151-1152]",
@@ -2343,7 +2343,7 @@ gt(feb_change_employment_bc_gender) %>%
 Row 3 {data-height=1210}
 ------------------------------------------------------------------------
 
-### Change in B.C. Industry Unemployment Rates by Age & Gender Since February 2020 
+### Change in B.C. Industry Unemployment Rates by Age & Gender Since February 2020 {.no-mobile}
 
 ```{r}
 nested_naics <- c("Forestry and logging and support activities for forestry [113, 1153]",
@@ -2453,7 +2453,7 @@ gt(industry_unemployrt,
 Row 4 {data-height=1250}
 -------------------------------------------------------------------------
 
-### Change in Number of Industry Jobs in B.C. by Age & Gender Since February 2020 
+### Change in Number of Industry Jobs in B.C. by Age & Gender Since February 2020 {.no-mobile}
 
 ```{r}
 industry_employ_long <- lfs_industry_unadjusted_tidy %>%
@@ -2542,6 +2542,8 @@ Column
 -----------------------------------------------------------------------
 
 Data are sourced from the [Statistics Canada Labour Force Survey (LFS)](https://www.statcan.gc.ca/eng/survey/household/3701), a monthly survey which measures the current state of the Canadian labour market. 
+
+Presented labour force characteristic time series data are based on [monhtly, seasonally adjusted alues](https://www.statcan.gc.ca/eng/dai/btd/sad-faq/sec1) unless otherwise indicated in the dashboard.
   
 Statistics Canada Labour Force Survey Tables: 
 
