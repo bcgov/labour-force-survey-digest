@@ -147,7 +147,8 @@ recent_month_unemployment_rate_bc <- lfc_province_tidy %>%
 valueBox(
   value = recent_month_unemployment_rate_bc %>%
     pull(value) %>%
-    signs(format = percent, accuracy = 0.1),
+    signs(format = percent,
+          accuracy = 0.1),
   # icon = "fa-users-cog",
   caption = paste("B.C. Unemployment Rate for", report_month, report_year)
 )
@@ -159,9 +160,10 @@ valueBox(
 valueBox(
   value = recent_month_unemployment_rate_bc %>%
     pull(month_change) %>%
-    signs(format = percent, accuracy = 0.1),
-  # icon = "fa-users-cog",
-  caption = "Month-Over-Month Change in B.C. Unemployment Rate"
+    signs(format = percent,
+          accuracy = 0.1,
+          suffix = ""),
+  caption = "Month-Over-Month % Point Change in B.C. Unemployment Rate"
 )
 ```
 
@@ -183,10 +185,11 @@ valueBox(
     signs(
       format = percent,
       add_plusses = TRUE,
-      accuracy = 0.1
+      accuracy = 0.1,
+      suffix = ""
     ),
   # icon = "fa-users-cog",
-  caption = paste("Year-Over-Year Change in B.C. Unemployment Rate")
+  caption = paste("Year-Over-Year % Point Change in B.C. Unemployment Rate")
 )
 ```
 
@@ -514,9 +517,11 @@ valueBox(
 valueBox(
   value = month_unemployment_rate_can %>%
     pull(month_change) %>%
-    signs(format = percent, accuracy = 0.1),
+    signs(format = percent,
+          accuracy = 0.1,
+          suffix = ""),
   # icon = "fa-users-cog",
-  caption = paste("Month-Over-Month Change in Canada Unemployment Rate")
+  caption = paste("Month-Over-Month % Point Change in Canada Unemployment Rate")
 )
 ```
 
@@ -536,10 +541,11 @@ valueBox(
     signs(
       format = percent,
       add_plusses = TRUE,
-      accuracy = 0.1
+      accuracy = 0.1,
+      suffix = ""
     ),
   # icon = "fa-users-cog",
-  caption = paste("Year-Over-Year Change in Canada Unemployment Rate")
+  caption = paste("Year-Over-Year % Point Change in Canada Unemployment Rate")
 )
 ```
 
@@ -829,6 +835,42 @@ gt_lfs <- function(tbl) {
     vars(value) ~ px(350)
   )
 }
+
+gt_lfs_uer <- function(tbl) {
+  tbl %>% 
+  ungroup() %>%
+  select(value, labour_force_characteristics, month_change, year_change) %>%
+  pivot_longer(cols = c(-labour_force_characteristics)) %>%
+  mutate(name_label = case_when(
+    name == "value" ~ toTitleCase(labour_force_characteristics),
+    name == "month_change" ~ "Month-Over-Month % Point Change",
+    name == "year_change" ~ "Year-Over-Year % Point Change",
+    TRUE ~ "there is a problem"
+  ), .after = name) %>% 
+  gt() %>%
+  tab_style(
+    style = cell_text(
+      size = px(13),
+      color = "#999",
+      transform = "uppercase"
+    ), locations = cells_column_labels(everything())
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(
+      rows = name == "value")
+  ) %>% 
+  cols_label(
+    value = report_prov_date,
+    name_label = ""
+  ) %>%
+  cols_hide(
+    columns = vars(name, labour_force_characteristics)
+  ) %>% 
+  cols_width(
+    vars(value) ~ px(350)
+  )
+}
 ```
 
 ### Change in Recent B.C. Unemployment Rate for Women
@@ -843,15 +885,19 @@ year_change_unemployment_bc_female <- lfc_province_tidy %>%
   filter(date == max(date))
 
 year_change_unemployment_bc_female %>%
-  gt_lfs() %>% 
-  fmt_percent("value", decimals = 1) %>% 
-  text_transform(
-    locations = cells_body(
-      columns = "value",
-      rows = name != "value"
-    ),
-    fn = function(x) ifelse(x > 0, paste(x, up_arrow), paste(x, down_arrow))
-  ) 
+  gt_lfs_uer() %>% 
+  fmt_percent(rows = name == "value",
+              "value",
+              decimals = 1) %>% 
+    fmt(
+    columns = vars("value"),
+    rows = name != "value",
+    fns = function(x) {
+    case_when(x == 0 ~ percent(x, accuracy = .1),
+              x > 0 ~ paste(percent(x, accuracy = .1, suffix = ""), up_arrow),
+              x < 0 ~ paste(percent(x, accuracy = .1, suffix = ""), down_arrow))
+    }
+  )
 ```
 
 ### Change in Recent B.C. Unemployment Rate for Men
@@ -867,14 +913,18 @@ year_change_unemployment_bc_male <- lfc_province_tidy %>%
 
 
 year_change_unemployment_bc_male %>% 
-  gt_lfs() %>% 
-  fmt_percent("value", decimals = 1) %>% 
-  text_transform(
-    locations = cells_body(
-      columns = "value",
-      rows = name != "value"
-    ),
-    fn = function(x) ifelse(x > 0, paste(x, up_arrow), paste(x, down_arrow))
+  gt_lfs_uer() %>% 
+  fmt_percent(rows = name == "value",
+              "value",
+              decimals = 1) %>% 
+    fmt(
+    columns = vars("value"),
+    rows = name != "value",
+    fns = function(x) {
+    case_when(x == 0 ~ percent(x, accuracy = .1),
+              x > 0 ~ paste(percent(x, accuracy = .1, suffix = ""), up_arrow),
+              x < 0 ~ paste(percent(x, accuracy = .1, suffix = ""), down_arrow))
+    }
   )
 ```
 
@@ -2199,10 +2249,11 @@ valueBox(
     signs(
       format = percent,
       add_plusses = TRUE,
-      accuracy = 0.1
+      accuracy = 0.1,
+      suffix = ""
     ),
   # icon = "fa-users-cog",
-  caption = paste("Change in B.C. Unemployment Rate Since February 2020")
+  caption = paste("% Point Change in B.C. Unemployment Rate Since February 2020")
 )
 ```
 
@@ -2236,7 +2287,7 @@ valueBox(
 Row 2 {data-height=250}
 -------------------------------------------------------------------------
 
-### Change in B.C. Unemployment Rate by Age for Women & Men Since February 2020
+### Percentage Point Change in B.C. Unemployment Rate by Age for Women & Men Since February 2020
 
 ```{r}
 feb_change_unemployment_bc_sex <- lfc_province_tidy %>%
@@ -2272,9 +2323,9 @@ cols_mf <- c("Males", "Females")
     fmt(
     columns = vars(cols_mf),
     fns = function(x) {
-    case_when(x == 0 ~ percent(x, accuracy = .1),
-              x > 0 ~ paste(percent(x, accuracy = .1), up_arrow), 
-              x < 0 ~ paste(percent(x, accuracy = .1), down_arrow))
+    case_when(x == 0 ~ percent(x, accuracy = .1, suffix=""),
+              x > 0 ~ paste(percent(x, accuracy = .1, suffix=""), up_arrow), 
+              x < 0 ~ paste(percent(x, accuracy = .1, suffix=""), down_arrow))
     }
   )
 ```
@@ -2318,7 +2369,7 @@ gt(feb_change_employment_bc_sex) %>%
 Row 3 {data-height=1210}
 ------------------------------------------------------------------------
 
-### Change in B.C. Industry Unemployment Rates by Age for Women & Men Since February 2020 {.no-mobile}
+### Change in Number of Industry Jobs in B.C. by Age for Women & Men Since February 2020 {.no-mobile}
 
 ```{r}
 nested_naics <- c("Forestry and logging and support activities for forestry [113, 1153]",
@@ -2341,101 +2392,6 @@ cols <- c("Both sexes_15 to 24 years",
     "Females_55 years and over",
     "Males_55 years and over")
 ```
-
-
-```{r}
-industry_unemployrt_long <- lfs_industry_unadjusted_tidy %>%
-  filter(
-    labour_force_characteristics == "Unemployment rate",
-    age_group != "15 years and over",
-    date %in% c(max(date), "2020-02-01"),
-    !naics %in% nested_naics) %>%
-  group_by(vector) %>% 
-  mutate(
-    feb_change = value - lag(value)
-  ) %>%
-  filter(date == max(date)) %>% 
-  mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
-  ungroup() %>% 
-  select(industry, sex, age_group, feb_change) %>% 
-  unite(sex_age, c(sex, age_group)) 
-
-industry_unemployrt <- industry_unemployrt_long %>% 
-  pivot_wider(names_from = sex_age,
-              values_from = feb_change)
-
-max_scale_perc <- pmax(abs(min(industry_unemployrt_long$feb_change, na.rm = TRUE)),
-                  max(industry_unemployrt_long$feb_change, na.rm = TRUE))
-                                                                     
-scale_range_perc <- c(-max_scale_perc, max_scale_perc)
-
-gt(industry_unemployrt,
-     rowname_col = "industry") %>% 
-  tab_header(
-    title = "Change in Unemployment Rate Since February 2020", 
-    subtitle = "Based on monthly, seasonally unadjusted estimates"
-  ) %>% 
-   tab_spanner(
-    label = "15 to 24 Years",
-    columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
-  ) %>% 
-   tab_spanner(
-    label = "25 to 54 Years",
-    columns = vars(`Both sexes_25 to 54 years`, `Females_25 to 54 years`, `Males_25 to 54 years`)
-  ) %>% 
-   tab_spanner(
-    label = "55 Years & Over",
-    columns = vars(`Both sexes_55 years and over`, `Females_55 years and over`, `Males_55 years and over`)
-  )  %>% 
-  tab_source_note(
-    source_note = "Note: seasonal or calendar effects that influence unemployment rates are not accounted for when using monthly, seasonally unadjusted unemployment rate estimates."
-  ) %>% 
-    tab_source_note(
-    source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
-  ) %>% 
-    cols_label(
-    `Both sexes_15 to 24 years` = "All",
-    `Females_15 to 24 years` = "Females",
-    `Males_15 to 24 years` = "Males",
-    `Both sexes_25 to 54 years` = "All",
-    `Females_25 to 54 years` = "Females",
-    `Males_25 to 54 years` = "Males",
-    `Both sexes_55 years and over` = "All",
-    `Females_55 years and over` = "Females",
-    `Males_55 years and over` = "Males"
-  ) %>% 
-    fmt_missing(
-    columns = 2:10,
-    missing_text = "x"
-  ) %>%
-  fmt_percent(
-    columns = vars(cols),
-    decimals = 1
-  ) %>% 
-   data_color(
-    columns = vars(cols),
-    colors = scales::col_numeric(
-      palette = "PRGn", #divergent palette
-      domain = scale_range_perc,
-      na.color = "grey90",
-      reverse = TRUE), 
-    alpha = .6
-    ) 
-# %>% 
-#    fmt(
-#     columns = vars(cols),
-#     fns = function(x) {
-#     case_when(x == 0 ~ percent(x, accuracy = .1),
-#               x > 0 ~ paste(percent(x, accuracy = .1), up_arrow), 
-#               x < 0 ~ paste(percent(x, accuracy = .1), down_arrow))
-#     }
-#   )
-```
-
-Row 4 {data-height=1250}
--------------------------------------------------------------------------
-
-### Change in Number of Industry Jobs in B.C. by Age for Women & Men Since February 2020 {.no-mobile}
 
 ```{r}
 industry_employ_long <- lfs_industry_unadjusted_tidy %>%
@@ -2523,6 +2479,100 @@ gt(industry_employ,
   #   }
   # )
 ```
+
+Row 4 {data-height=1250}
+-------------------------------------------------------------------------
+
+### Percentage Point Change in B.C. Industry Unemployment Rates by Age for Women & Men Since February 2020 {.no-mobile}
+
+```{r}
+industry_unemployrt_long <- lfs_industry_unadjusted_tidy %>%
+  filter(
+    labour_force_characteristics == "Unemployment rate",
+    age_group != "15 years and over",
+    date %in% c(max(date), "2020-02-01"),
+    !naics %in% nested_naics) %>%
+  group_by(vector) %>% 
+  mutate(
+    feb_change = value - lag(value)
+  ) %>%
+  filter(date == max(date)) %>% 
+  mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
+  ungroup() %>% 
+  select(industry, sex, age_group, feb_change) %>% 
+  unite(sex_age, c(sex, age_group)) 
+
+industry_unemployrt <- industry_unemployrt_long %>% 
+  pivot_wider(names_from = sex_age,
+              values_from = feb_change)
+
+max_scale_perc <- pmax(abs(min(industry_unemployrt_long$feb_change, na.rm = TRUE)),
+                  max(industry_unemployrt_long$feb_change, na.rm = TRUE))
+                                                                     
+scale_range_perc <- c(-max_scale_perc, max_scale_perc)
+
+gt(industry_unemployrt,
+     rowname_col = "industry") %>% 
+  tab_header(
+    title = "Percentage Point Change in Unemployment Rate Since February 2020", 
+    subtitle = "Based on monthly, seasonally unadjusted estimates"
+  ) %>% 
+   tab_spanner(
+    label = "15 to 24 Years",
+    columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
+  ) %>% 
+   tab_spanner(
+    label = "25 to 54 Years",
+    columns = vars(`Both sexes_25 to 54 years`, `Females_25 to 54 years`, `Males_25 to 54 years`)
+  ) %>% 
+   tab_spanner(
+    label = "55 Years & Over",
+    columns = vars(`Both sexes_55 years and over`, `Females_55 years and over`, `Males_55 years and over`)
+  )  %>% 
+  tab_source_note(
+    source_note = "Note: seasonal or calendar effects that influence unemployment rates are not accounted for when using monthly, seasonally unadjusted unemployment rate estimates."
+  ) %>% 
+    tab_source_note(
+    source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
+  ) %>% 
+    cols_label(
+    `Both sexes_15 to 24 years` = "All",
+    `Females_15 to 24 years` = "Females",
+    `Males_15 to 24 years` = "Males",
+    `Both sexes_25 to 54 years` = "All",
+    `Females_25 to 54 years` = "Females",
+    `Males_25 to 54 years` = "Males",
+    `Both sexes_55 years and over` = "All",
+    `Females_55 years and over` = "Females",
+    `Males_55 years and over` = "Males"
+  ) %>% 
+   data_color(
+    columns = vars(cols),
+    colors = scales::col_numeric(
+      palette = "PRGn", #divergent palette
+      domain = scale_range_perc,
+      na.color = "grey90",
+      reverse = TRUE), 
+    alpha = .6
+    ) %>% 
+   fmt(
+    columns = vars(cols),
+    fns = function(x) {
+      case_when(is.na(x) ~ "x",
+    TRUE ~ paste(percent(x, accuracy = .1, suffix = "")))
+    }
+  )
+# %>% 
+#    fmt(
+#     columns = vars(cols),
+#     fns = function(x) {
+#     case_when(x == 0 ~ percent(x, accuracy = .1),
+#               x > 0 ~ paste(percent(x, accuracy = .1), up_arrow), 
+#               x < 0 ~ paste(percent(x, accuracy = .1), down_arrow))
+#     }
+#   )
+```
+
 
 About {data-orientation=columns}
 ======================================================================
