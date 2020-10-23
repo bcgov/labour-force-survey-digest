@@ -86,8 +86,8 @@ theme_facet <- theme_vert +
 main_colour <- "#1d91c0"
 
 ##labels
-gender_labels <-  c("Males" = "Men",
-                    "Females" = "Women")
+facet_sex_labels <-  c("Males" = "Men",
+                       "Females" = "Women")
 
 ##custom ggplotly
 ggplotly_lfs <- function(...) {
@@ -196,21 +196,20 @@ Row 2
 ### Monthly B.C. Unemployment Rates Since 2000 
 
 ```{r, fig.width=7, fig.height=5}
-unemployrt_pre_thisyear <- lfc_province_tidy %>%
+unemployrt <- lfc_province_tidy %>%
   filter(vector == "v2064705",
-         date > "1999-12-31" & date < paste0(report_year, "-01-01"))
-
-unemployrt_thisyear <- lfc_province_tidy %>%
-  filter(vector == "v2064705",
-         date >= paste0(report_year, "-01-01"))
+         date > "1999-12-31") %>% 
+         mutate(timeseries = case_when(date >= paste0(report_year, "-01-01") ~ "current_year",
+                              TRUE ~ "previous_years"))
 
 ggplotly_lfs(
-  ggplot() +
-  geom_point(
-    data = unemployrt_thisyear,
+  ggplot(data = unemployrt,
     aes(
       x = date,
-      y = value,
+      y = value, 
+      colour = timeseries)) +
+  geom_point(
+    aes(
       text = paste0(
         "Date: ",
         date,
@@ -221,46 +220,19 @@ ggplotly_lfs(
               accuracy = 0.1)
       )
     ),
-    colour = main_colour,
     alpha = 0.8
   ) +
-  geom_point(
-    data = unemployrt_pre_thisyear,
-    aes(
-      x = date,
-      y = value,
-      text = paste0(
-        "Date: ",
-        date,
-        "<br>",
-        "Unemployment Rate: ",
-        signs(value,
-              format = percent,
-              accuracy = 0.1)
-      )
-    ),
-    colour = "grey50",
-    alpha = 0.8
-  ) +
-  geom_line(
-    data = unemployrt_thisyear,
-    aes(x = date,
-        y = value),
-    colour = main_colour,
-    alpha = 0.8
-  ) +
-  geom_line(
-    data = unemployrt_pre_thisyear,
-    aes(x = date,
-        y = value),
-    colour = "grey50",
-    alpha = 0.8
-  ) +
+  geom_line(alpha = 0.8) +
   labs(x = NULL, y = NULL) +
   scale_y_continuous(labels = percent,
-                     breaks = breaks_pretty(n = 5)) +
+                     breaks = breaks_pretty(n = 5),
+                     ) +
+  scale_colour_manual(guide = FALSE,
+                      values = c(previous_years = "grey50",
+                                 current_year = main_colour)) +
   theme_minimal() +
-  theme_vert
+  theme_vert +
+  theme(legend.position = "none")
 )
 ```
 
@@ -925,8 +897,11 @@ lfc_province_tidy %>%
                      ),
     sex != "Both sexes"
   ) %>% 
-  mutate(highlight = case_when(date >= paste0(report_year, "-01-01") ~ "thisyear",
-                               TRUE ~ "preyears")) %>% 
+  mutate(highlight = case_when(date >= paste0(report_year, "-01-01") ~ "current_year",
+                               TRUE ~ "previous_years"),
+         hover_labels = case_when(sex == "Males" ~ "Men",
+                                  sex == "Females" ~ "Women",
+                                  TRUE ~ sex)) %>% 
   ggplot(aes(
     x = date,
     y = value,
@@ -936,8 +911,8 @@ lfc_province_tidy %>%
       "Date: ",
       date,
       "<br>",
-      "Age Group: ",
-      age_group,
+      "Group: ",
+      paste(hover_labels, age_group),
       "<br>",
       "Unemployment Rate: ",
       signs(value,
@@ -947,14 +922,14 @@ lfc_province_tidy %>%
     alpha = 0.6) +
   geom_line(alpha = 0.8) +
   facet_wrap(facets = vars(sex),
-             labeller = as_labeller(gender_labels)) +
+             labeller = as_labeller(facet_sex_labels)) +
   labs(x = NULL,
        y = NULL) +
   scale_y_continuous(labels = percent,
                      breaks = breaks_pretty(n = 6)) +
   scale_colour_manual(guide = FALSE,
-                  values = c(preyears = "grey50",
-                               thisyear = main_colour)) +
+                  values = c(previous_years = "grey50",
+                            current_year = main_colour)) +
   scale_x_date(breaks = breaks_pretty(n = 5)) +
   theme_minimal() +
   theme_facet +
@@ -1101,7 +1076,7 @@ ggplotly_lfs(
   geom_col(fill = main_colour,
            alpha = 0.6) +
   facet_wrap(~sex,
-             labeller = as_labeller(gender_labels)) +
+             labeller = as_labeller(facet_sex_labels)) +
   geom_text(
     aes(
       label = signs(
@@ -1206,6 +1181,10 @@ lfc_province_tidy %>%
                      ),
     sex != "Both sexes"
   ) %>% 
+  mutate(hover_labels = case_when(sex == "Males" ~ "Men",
+                                  sex == "Females" ~ "Women",
+                                  TRUE ~ sex)
+         ) %>% 
   ggplot(aes(
     x = date,
     y = value,
@@ -1215,11 +1194,8 @@ lfc_province_tidy %>%
       "Date: ",
       date,
       "<br>",
-      "Gender: ",
-      sex,
-      "<br>",
-      "Age Group: ",
-      age_group,
+      "Group: ",
+      paste(hover_labels, age_group),
       "<br>",
       "Unemployment Rate: ",
       signs(value,
@@ -1229,7 +1205,7 @@ lfc_province_tidy %>%
     alpha = 0.6) +
   geom_line(alpha = 0.8) +
   facet_wrap(facets = vars(sex),
-             labeller = as_labeller(gender_labels)) +
+             labeller = as_labeller(facet_sex_labels)) +
   labs(x = NULL,
        y = NULL) +
   scale_y_continuous(labels = percent,
@@ -1247,12 +1223,12 @@ lfc_province_tidy %>%
   ))
 ```
 
-### Month-Over-Month Change in Number of Jobs for Youth Women & Youth Men in B.C. for `r report_year` (Ages 15 to 24 Years)
+### Month-Over-Month Change in Number of Jobs for Women & Men Youth in B.C. for `r report_year` (Ages 15 to 24 Years)
 
 ```{r, fig.width=7, fig.height=5}
 
 ##labels
-gender_labels_youth <-  c("Males" = "Youth: Men",
+youth_sex_labels <-  c("Males" = "Youth: Men",
                           "Females" = "Youth: Women")
 ggplotly_lfs(
   lfc_province_tidy %>%
@@ -1290,7 +1266,7 @@ ggplotly_lfs(
   geom_col(fill = main_colour,
            alpha = 0.6) +
   facet_wrap(facets = vars(sex),
-             labeller = as_labeller(gender_labels_youth)) +
+             labeller = as_labeller(youth_sex_labels)) +
   geom_text(
     aes(
       label = signs(
@@ -2263,7 +2239,7 @@ Row 2 {data-height=250}
 ### Change in B.C. Unemployment Rate by Age for Women & Men Since February 2020
 
 ```{r}
-feb_change_unemployment_bc_gender <- lfc_province_tidy %>%
+feb_change_unemployment_bc_sex <- lfc_province_tidy %>%
   filter(
    date %in% c(max(date), "2020-02-01"),
     geo == "British Columbia",
@@ -2285,7 +2261,7 @@ feb_change_unemployment_bc_gender <- lfc_province_tidy %>%
 
 cols_mf <- c("Males", "Females")
 
-  gt(feb_change_unemployment_bc_gender) %>%
+  gt(feb_change_unemployment_bc_sex) %>%
   fmt_percent("Males", decimals = 1) %>% 
     fmt_percent("Females", decimals = 1) %>% 
     cols_label(
@@ -2306,7 +2282,7 @@ cols_mf <- c("Males", "Females")
 ### Change in Number of Jobs in B.C. by Job Type for Women & Men Since February 2020
 
 ```{r}
-feb_change_employment_bc_gender <- lfc_province_tidy %>%
+feb_change_employment_bc_sex <- lfc_province_tidy %>%
   filter(
     date %in% c(max(date), "2020-02-01"),
     geo == "British Columbia",
@@ -2325,7 +2301,7 @@ feb_change_employment_bc_gender <- lfc_province_tidy %>%
 
 cols_mf <- c("Males", "Females")
 
-gt(feb_change_employment_bc_gender) %>%
+gt(feb_change_employment_bc_sex) %>%
     cols_label(
     Females = "Women",
     Males = "Men",
@@ -2342,7 +2318,7 @@ gt(feb_change_employment_bc_gender) %>%
 Row 3 {data-height=1210}
 ------------------------------------------------------------------------
 
-### Change in B.C. Industry Unemployment Rates by Age & Gender Since February 2020 {.no-mobile}
+### Change in B.C. Industry Unemployment Rates by Age for Women & Men Since February 2020 {.no-mobile}
 
 ```{r}
 nested_naics <- c("Forestry and logging and support activities for forestry [113, 1153]",
@@ -2382,10 +2358,10 @@ industry_unemployrt_long <- lfs_industry_unadjusted_tidy %>%
   mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
   ungroup() %>% 
   select(industry, sex, age_group, feb_change) %>% 
-  unite(gender_age, c(sex, age_group)) 
+  unite(sex_age, c(sex, age_group)) 
 
 industry_unemployrt <- industry_unemployrt_long %>% 
-  pivot_wider(names_from = gender_age,
+  pivot_wider(names_from = sex_age,
               values_from = feb_change)
 
 max_scale_perc <- pmax(abs(min(industry_unemployrt_long$feb_change, na.rm = TRUE)),
@@ -2411,13 +2387,13 @@ gt(industry_unemployrt,
     source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
   ) %>% 
     cols_label(
-    `Both sexes_15 to 24 years` = "Both Genders",
+    `Both sexes_15 to 24 years` = "All",
     `Females_15 to 24 years` = "Females",
     `Males_15 to 24 years` = "Males",
-    `Both sexes_25 to 54 years` = "Both Genders",
+    `Both sexes_25 to 54 years` = "All",
     `Females_25 to 54 years` = "Females",
     `Males_25 to 54 years` = "Males",
-    `Both sexes_55 years and over` = "Both Genders",
+    `Both sexes_55 years and over` = "All",
     `Females_55 years and over` = "Females",
     `Males_55 years and over` = "Males"
   ) %>% 
@@ -2452,7 +2428,7 @@ gt(industry_unemployrt,
 Row 4 {data-height=1250}
 -------------------------------------------------------------------------
 
-### Change in Number of Industry Jobs in B.C. by Age & Gender Since February 2020 {.no-mobile}
+### Change in Number of Industry Jobs in B.C. by Age for Women & Men Since February 2020 {.no-mobile}
 
 ```{r}
 industry_employ_long <- lfs_industry_unadjusted_tidy %>%
@@ -2469,10 +2445,10 @@ industry_employ_long <- lfs_industry_unadjusted_tidy %>%
   mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
   ungroup() %>% 
   select(industry, sex, age_group, feb_change) %>% 
-  unite(gender_age, c(sex, age_group)) 
+  unite(sex_age, c(sex, age_group)) 
 
 industry_employ <- industry_employ_long %>% 
-  pivot_wider(names_from = gender_age,
+  pivot_wider(names_from = sex_age,
               values_from = feb_change)
 
 max_scale <- pmax(abs(min(industry_employ_long$feb_change, na.rm = TRUE)),
@@ -2498,13 +2474,13 @@ gt(industry_employ,
     source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
   ) %>% 
     cols_label(
-    `Both sexes_15 to 24 years` = "Both Genders",
+    `Both sexes_15 to 24 years` = "All",
     `Females_15 to 24 years` = "Females",
     `Males_15 to 24 years` = "Males",
-    `Both sexes_25 to 54 years` = "Both Genders",
+    `Both sexes_25 to 54 years` = "All",
     `Females_25 to 54 years` = "Females",
     `Males_25 to 54 years` = "Males",
-    `Both sexes_55 years and over` = "Both Genders",
+    `Both sexes_55 years and over` = "All",
     `Females_55 years and over` = "Females",
     `Males_55 years and over` = "Males"
   ) %>% 
