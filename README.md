@@ -1,5 +1,5 @@
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)![img](https://img.shields.io/badge/Lifecycle-Experimental-339999)
-
+![img](https://img.shields.io/badge/Lifecycle-Experimental-339999)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## labour-force-survey-digest
 
