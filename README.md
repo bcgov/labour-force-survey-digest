@@ -1,7 +1,6 @@
 [![img](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-
 ## labour-force-survey-digest
 
 A mvp/prototype implementation of a summary dashboard for some key [Statistics Canada Labour Force Survey](https://www.statcan.gc.ca/eng/survey/household/3701) measures&mdash;Statistics Canada's Labour Force Survey is a monthly survey which measures the current state of the Canadian labour market. 

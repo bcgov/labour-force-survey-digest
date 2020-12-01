@@ -1,0 +1,509 @@
+---
+title: "Scratch Board"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: yeti
+    orientation: rows
+    vertical_layout: scroll
+    social: menu
+    source_code: https://github.com/bcgov/labour-force-survey-digest
+---
+
+<!--
+Copyright 2020 Province of British Columbia
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and limitations under the License.
+-->
+
+```{r setup, include=FALSE, cache=TRUE}
+##load libraries in setup.R
+source("../setup.R")
+
+##source data
+##source("get-data.R")
+lfc_province_tidy <- readRDS("../tmp/lfc_province_tidy.rds")
+lfc_region_tidy <- readRDS("../tmp/lfc_region_tidy.rds")
+employment_by_class_tidy <- readRDS("../tmp/employment_by_class_tidy.rds")
+can_provinces <- readRDS("../tmp/can_provinces.rds")
+employment_by_industry_tidy <- readRDS("../tmp/employment_by_industry_tidy.rds")
+lfs_industry_unadjusted_tidy <- readRDS("../tmp/lfs_industry_unadjusted_tidy.rds")
+
+##report month
+report_month <- lfc_province_tidy %>%
+  filter(vector == "v2064705",
+         date == max(date)) %>%
+  pull(date) %>%
+  month(label = TRUE, abbr = FALSE)
+
+##report year
+report_year <- lfc_province_tidy %>%
+  filter(vector == "v2064705",
+         date == max(date)) %>%
+  pull(date) %>%
+  year()
+
+##previous report year
+previous_year <- report_year - 1
+
+##common chart themes
+theme_bar <- theme(
+  axis.line = element_line(colour = "grey70", size = .1),
+  axis.text = element_text(size = 9),
+  legend.text = element_text(size = 11, colour = "grey20")
+)
+
+theme_vert <- theme_bar +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank()
+  )
+
+theme_horiz <- theme_bar +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+
+theme_facet <- theme_vert +
+  theme(
+    axis.text.y = element_text(size = 9),
+    axis.text.x = element_text(size = 8),
+    strip.text = element_text(size = 11, colour = "grey20"),
+    legend.text = element_text(size = 11, colour = "grey20")
+  )
+
+##colours
+main_colour <- "#1d91c0"
+
+##labels
+gender_labels <-  c("Males" = "Men",
+                    "Females" = "Women")
+
+##custom ggplotly
+ggplotly_lfs <- function(...) {
+  ggplotly(..., tooltip = c("text"))
+}
+
+## A formatted date
+report_prov_date <- format(max(lfc_province_tidy$date), "%B %Y")
+
+## Some html objects for tables
+up_arrow <- "<span style=\"color:#472D7BFF\">&#9650;</span>"
+down_arrow <- "<span style=\"color:#27AD81FF\">&#9660;</span>"
+```
+
+February Comparison
+======================================================================
+
+Row
+-------------------------------------------------------------------------
+
+### Change in B.C. Unemployment Rate by Age & Gender Since February 2020
+
+```{r}
+feb_change_unemployment_bc_gender <- lfc_province_tidy %>%
+  filter(
+   date %in% c(max(date), "2020-02-01"),
+    geo == "British Columbia",
+    labour_force_characteristics %in% c("Unemployment rate"),
+    age_group %in% c(
+      # "25 years and over"
+                     "15 to 24 years",
+                     "25 to 54 years",
+                     "55 years and over"
+                     ),
+    sex != "Both sexes"
+  ) %>%
+  mutate(feb_change = value - lag(value)) %>%
+  filter(date == max(date)) %>% 
+  ungroup() %>% 
+  select(sex, age_group, feb_change) %>% 
+    pivot_wider(names_from = sex,
+                values_from = feb_change)
+
+cols_mf <- c("Males", "Females")
+
+  gt(feb_change_unemployment_bc_gender) %>%
+    cols_label(
+    Females = "Women",
+    Males = "Men",
+    age_group = "Age"
+  ) %>%
+    fmt(
+    columns = vars(cols_mf),
+    fns = function(x) {
+    case_when(x == 0 ~ percent(x, accuracy = .1),
+              x > 0 ~ paste(percent(x, accuracy = .1), up_arrow), 
+              x < 0 ~ paste(percent(x, accuracy = .1), down_arrow))
+    }
+  )
+```
+
+
+### Change in Number of Jobs in B.C. by Job Type & Gender Since February 2020
+
+```{r}
+feb_change_employment_bc_gender <- lfc_province_tidy %>%
+  filter(
+    date %in% c(max(date), "2020-02-01"),
+    geo == "British Columbia",
+    labour_force_characteristics %in% c("Full-time employment",
+                                        "Part-time employment",
+                                        "Employment"),
+    sex != "Both sexes",
+    age_group == "15 years and over"
+  ) %>%
+  mutate(feb_change = value - lag(value)) %>%
+  filter(date == max(date)) %>% 
+  ungroup() %>% 
+  select(sex, labour_force_characteristics, feb_change) %>% 
+    pivot_wider(names_from = sex,
+                values_from = feb_change)
+
+cols_mf <- c("Males", "Females")
+
+gt(feb_change_employment_bc_gender) %>%
+    cols_label(
+    Females = "Women",
+    Males = "Men",
+    labour_force_characteristics = ""
+  ) %>%
+    fmt(
+    columns = vars(cols_mf),
+    fns = function(x) {
+    ifelse(x > 0, (paste(comma(x), up_arrow)), paste(comma(x), down_arrow))
+    }
+  )
+```
+
+
+Row {data-height=1250}
+------------------------------------------------------------------------
+
+### Change in B.C. Industry Unemployment Rates by Age & Gender Since February 2020 
+
+```{r}
+nested_naics <- c("Forestry and logging and support activities for forestry [113, 1153]",
+                  "Fishing, hunting and trapping [114]","Mining, quarrying, and oil and gas extraction [21, 2100]",
+                  "Durables [321, 327, 331-339]",
+                  "Non-durables [311-316, 322-326]",
+                  "Wholesale trade [41]",
+                  "Retail trade [44-45]",
+                  "Finance and insurance [52]",
+                  "Real estate and rental and leasing [53]")
+
+
+cols <- c("Both sexes_15 to 24 years",
+    "Females_15 to 24 years",
+    "Males_15 to 24 years",
+    "Both sexes_25 to 54 years",
+    "Females_25 to 54 years",
+    "Males_25 to 54 years",
+    "Both sexes_55 years and over",
+    "Females_55 years and over",
+    "Males_55 years and over")
+
+industry_unemployrt_long <- lfs_industry_unadjusted_tidy %>%
+  filter(
+    labour_force_characteristics == "Unemployment rate",
+    age_group != "15 years and over",
+    date %in% c(max(date), "2020-02-01"),
+    !naics %in% nested_naics) %>%
+  group_by(vector) %>% 
+  mutate(
+    feb_change = value - lag(value)
+  ) %>%
+  filter(date == max(date)) %>% 
+  mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
+  ungroup() %>% 
+  select(industry, sex, age_group, feb_change) %>% 
+  unite(gender_age, c(sex, age_group)) 
+
+industry_unemployrt <- industry_unemployrt_long %>% 
+  pivot_wider(names_from = gender_age,
+              values_from = feb_change)
+
+gt(industry_unemployrt,
+     rowname_col = "industry") %>%
+   tab_spanner(
+    label = "15 to 24 Years",
+    columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
+  ) %>%
+   tab_spanner(
+    label = "25 to 54 Years",
+    columns = vars(`Both sexes_25 to 54 years`, `Females_25 to 54 years`, `Males_25 to 54 years`)
+  ) %>%
+   tab_spanner(
+    label = "55 Years & Over",
+    columns = vars(`Both sexes_55 years and over`, `Females_55 years and over`, `Males_55 years and over`)
+  )  %>%
+    tab_source_note(
+    source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
+  ) %>%
+    cols_label(
+    `Both sexes_15 to 24 years` = "Both Genders",
+    `Females_15 to 24 years` = "Females",
+    `Males_15 to 24 years` = "Males",
+    `Both sexes_25 to 54 years` = "Both Genders",
+    `Females_25 to 54 years` = "Females",
+    `Males_25 to 54 years` = "Males",
+    `Both sexes_55 years and over` = "Both Genders",
+    `Females_55 years and over` = "Females",
+    `Males_55 years and over` = "Males"
+  ) %>%
+    fmt_missing(
+    columns = 2:10,
+    missing_text = "x"
+  ) %>%
+   fmt(
+    columns = vars(cols),
+    fns = function(x) {
+    case_when(x == 0 ~ percent(x, accuracy = .1),
+              x > 0 ~ paste(percent(x, accuracy = .1), up_arrow),
+              x < 0 ~ paste(percent(x, accuracy = .1), down_arrow))
+    }
+  )
+
+  # data_color(
+  #   columns = vars(cols),
+  #   colors = scales::col_numeric(
+  #     palette = RColorBrewer::brewer.pal(6, "YlOrRd"),
+  #     # palette = scales::col_numeric(c("red", "white", "blue"),
+  #     #                               domain = c(-1, 1),
+  #     domain = NULL,
+  #     na.color = "grey90",
+  #     reverse = FALSE,
+  # alpha = .6))
+
+# reactable::reactable(industry_unemployrt,
+#                      pagination = FALSE,
+#                      searchable = FALSE,
+#                      width = '100%')
+```
+
+
+Row  {data-height=1250}
+-------------------------------------------------------------------------
+
+### Change in Number of Industry Jobs in B.C. by Age & Gender Since February 2020 
+
+```{r}
+industry_employ_long <- lfs_industry_unadjusted_tidy %>%
+  filter(
+    labour_force_characteristics == "Employment",
+    age_group != "15 years and over",
+    date %in% c(max(date), "2020-02-01"),
+    !naics %in% nested_naics) %>%
+  group_by(vector) %>% 
+  mutate(
+    feb_change = value - lag(value)
+  ) %>%
+  filter(date == max(date)) %>% 
+  mutate(industry = str_extract(naics, "^[^\\[]+")) %>%
+  ungroup() %>% 
+  select(industry, sex, age_group, feb_change) %>% 
+  unite(gender_age, c(sex, age_group)) 
+
+industry_employ <- industry_employ_long %>% 
+  pivot_wider(names_from = gender_age,
+              values_from = feb_change)
+
+max_scale <- pmax(floor(abs(min(industry_employ_long$feb_change, na.rm = TRUE))),
+                  floor(max(industry_employ_long$feb_change, na.rm = TRUE))
+)
+                                                                     
+scale_range <- c(-max_scale, max_scale)
+
+gt(industry_employ,
+     rowname_col = "industry") %>%
+   tab_spanner(
+    label = "15 to 24 Years",
+    columns = vars(`Both sexes_15 to 24 years`, `Females_15 to 24 years`,`Males_15 to 24 years`)
+  ) %>%
+   tab_spanner(
+    label = "25 to 54 Years",
+    columns = vars(`Both sexes_25 to 54 years`, `Females_25 to 54 years`, `Males_25 to 54 years`)
+  ) %>%
+   tab_spanner(
+    label = "55 Years & Over",
+    columns = vars(`Both sexes_55 years and over`, `Females_55 years and over`, `Males_55 years and over`)
+  )  %>%
+    tab_source_note(
+    source_note = md("[Statistics Canada Table **14-10-0022-01**: Labour force characteristics by industry, monthly, unadjusted for seasonality](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002201)")
+  ) %>%
+    cols_label(
+    `Both sexes_15 to 24 years` = "Both Genders",
+    `Females_15 to 24 years` = "Females",
+    `Males_15 to 24 years` = "Males",
+    `Both sexes_25 to 54 years` = "Both Genders",
+    `Females_25 to 54 years` = "Females",
+    `Males_25 to 54 years` = "Males",
+    `Both sexes_55 years and over` = "Both Genders",
+    `Females_55 years and over` = "Females",
+    `Males_55 years and over` = "Males"
+  ) %>%
+    fmt_missing(
+    columns = 2:10,
+    missing_text = "x"
+  ) %>% 
+  data_color(
+    columns = vars(cols),
+    colors = scales::col_numeric(
+      # palette = RColorBrewer::brewer.pal(6, "YlOrRd"),
+      # palette = viridis::viridis(6),
+      palette = "PRGn", #divergent palette
+      # palette = "RdBu", #divergent palette
+      # palette = scales::col_numeric(c("red", "white", "blue"),
+      #                               domain = c(-1, 1)),
+      domain = c(scale_range),
+      na.color = "grey90",
+      reverse = FALSE), 
+    alpha = .6
+    ) 
+
+# %>%
+#   tab_source_note(html('<pre><span style="background-color: #762A83;"
+#                        >        </span>Increase in Number of Jobs</pre>'))
+
+# %>%
+#    fmt(
+#     columns = vars(cols),
+#     fns = function(x) {
+#     ifelse(x > 0, (paste(comma(x), up_arrow)), paste(comma(x), down_arrow))
+#     }
+#   )
+
+# reactable::reactable(industry_employ,
+#                      pagination = FALSE,
+#                      searchable = FALSE,
+#                      width = '100%')
+```
+
+
+
+Crosstalk
+==========================================================================
+
+Row
+-------------------------------------------------------------------------
+
+## Crosstalk Attempt
+
+```{r, include=FALSE}
+# library(crosstalk)
+# library(reactable)
+# library(htmltools)
+# 
+# df_tab <- lfc_province_tidy %>%
+#   filter(
+#     labour_force_characteristics == "Unemployment rate",
+#     sex == "Both sexes",
+#     age_group == "15 years and over",
+#     date >= paste0(report_year, "-01-01"),
+#     geo != "Canada")
+
+# df <- can_provinces %>% 
+#    left_join(df_tab, by = c("name"= "geo"))
+
+
+# df_shared <- SharedData$new(df)
+# 
+# bscols(
+# 
+# ggplotly_lfs(ggplot(data = df_shared,
+#         aes(
+#     x = date,
+#     y = value,
+#     group = name,
+#     colour = name
+#   )) +
+#   geom_line() +
+#   geom_point(aes(text = paste(
+#       "Province:",
+#       name,
+#       "<br>",
+#       "Date:",
+#       date,
+#       "<br>",
+#       "Unemployment Rate:",
+#       signs(value,
+#             format = percent,
+#             accuracy = 0.1)
+#     )),
+#     alpha = 0.6) +
+#  
+#   labs(x = NULL,
+#        y = NULL) +
+#   scale_y_continuous(labels = percent,
+#                      breaks = breaks_pretty(n = 6)) +
+#   scale_colour_viridis_d(name = NULL) +
+#   scale_x_date(breaks = breaks_pretty(n = 6)) +
+#   theme_minimal() +
+#   theme_vert_bar
+# )
+# 
+# # ggplotly_lfs(ggplot(data = df_shared) + 
+# #       geom_sf(aes(fill = df$value),
+# #               # text = paste0(report_month," ",report_year,"\n",
+# #               #               name,"\n","Unemployment Rate: ",
+# #               #               signs(df$value[date ==max(date), ],
+# #             format = percent,
+# #             accuracy = 0.1)
+# #     ))
+# # ) +
+# #    labs(x = NULL, y = NULL) +
+# #   scale_fill_viridis(
+# #     name = paste(report_month,
+# #                  report_year,
+# #                  "\nUnemployment\nRate"),
+# #     direction = -1,
+# #     begin = 0.3,
+# #     end = 1,
+# #     labels = percent_format(accuracy = 1),
+# #     breaks = breaks_pretty(n = 5),
+# #     na.value="white"
+# #   ) +
+# #   theme_minimal() +
+# #   theme(
+# #     legend.title = element_text(size = 11, 
+# #                                 colour = "grey20"),
+# #     legend.text = element_text(size = 10,
+# #                                colour = "grey20"),
+# #     plot.caption = element_text(
+# #       size = 8,
+# #       colour = "grey60",
+# #       face = "italic",
+# #       hjust = 1.3
+# #     ),
+# #     panel.grid.major = element_line(colour = "transparent"),
+# #     axis.text = element_blank()
+# #   )
+# 
+# p <- reactable(df,
+#                   columns = list(
+#                       name = colDef(name = "Province"),
+#                       labour_force_characteristics = colDef(name = "Metric"),
+#                       value = colDef(name = "foo"),
+#                       month_change = colDef(name = "foo2"),
+#                       month_change_percent= colDef(name = "foo3")),
+#           width = 700,
+# height = "100%",
+# # pagination = FALSE,
+# showPageSizeOptions = TRUE,
+# # pageSizeOptions = c(10, 20, 50),
+# defaultPageSize = 10,
+# minRows = 10,
+# highlight = TRUE,
+# striped = TRUE)
+# p
+# )
+```
+

@@ -6,6 +6,7 @@
 *.pdf
 *.log
 .DS_Store
-*.html
 lfs-prototype_cache/
 lfs-prototype_files/
+scratch/scratch-board_cache
+scratch-board.html
